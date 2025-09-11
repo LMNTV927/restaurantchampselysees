@@ -19,11 +19,64 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
 
 export function DataSection() {
   const [selectedMonth, setSelectedMonth] = useState("2024-11");
   const { channels, kpis, loading } = useRealtimeChannelsData();
+
+  // Configuration pour les graphiques
+  const chartConfig = {
+    clics: {
+      label: "Clics",
+      color: "hsl(var(--primary))",
+    },
+    reservations: {
+      label: "Réservations",
+      color: "hsl(var(--secondary))",
+    },
+    couverts: {
+      label: "Couverts",
+      color: "hsl(var(--accent))",
+    },
+  };
+
+  // Couleurs pour le graphique en secteurs
+  const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
+
+  // Préparer les données pour les graphiques
+  const barChartData = channels.map(channel => ({
+    name: channel.name.length > 15 ? channel.name.substring(0, 15) + '...' : channel.name,
+    clics: channel.clicks,
+    reservations: channel.reservations,
+  }));
+
+  // Simuler des données temporelles pour le graphique linéaire (progression des couverts)
+  const lineChartData = channels.map((channel, index) => ({
+    name: channel.name.length > 10 ? channel.name.substring(0, 10) + '...' : channel.name,
+    couverts: channel.covers,
+    cumulé: channels.slice(0, index + 1).reduce((acc, c) => acc + c.covers, 0),
+  }));
 
   const months = [
     { value: "2024-11", label: "Novembre 2024" },
@@ -145,41 +198,132 @@ export function DataSection() {
         </motion.div>
       </motion.div>
 
-      {/* Charts Placeholder */}
+      {/* Charts Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
+        {/* Graphique en barres - Clics vs Réservations */}
         <Card className="premium-card p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-playfair font-semibold">Clics vs Réservations</h3>
-            <Calendar className="h-5 w-5 text-muted-foreground" />
+            <BarChart3 className="h-5 w-5 text-primary" />
           </div>
-          <div className="h-64 flex items-center justify-center bg-muted/10 rounded-xl">
-            <div className="text-center space-y-2">
-              <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto" />
-              <p className="text-sm text-muted-foreground">
-                Graphique à implémenter avec Recharts
-              </p>
-            </div>
-          </div>
+          <ChartContainer config={chartConfig} className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Bar dataKey="clics" fill="var(--color-clics)" radius={4} />
+                <Bar dataKey="reservations" fill="var(--color-reservations)" radius={4} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
         </Card>
 
+        {/* Graphique en ligne - Couverts par Canal */}
         <Card className="premium-card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-playfair font-semibold">Couverts Cumulés</h3>
-            <TrendingUp className="h-5 w-5 text-muted-foreground" />
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-playfair font-semibold">Couverts par Canal</h3>
+            <TrendingUp className="h-5 w-5 text-primary" />
           </div>
-          <div className="h-64 flex items-center justify-center bg-muted/10 rounded-xl">
-            <div className="text-center space-y-2">
-              <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto" />
-              <p className="text-sm text-muted-foreground">
-                Graphique ligne à implémenter
-              </p>
-            </div>
+          <ChartContainer config={chartConfig} className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Line 
+                  type="monotone" 
+                  dataKey="couverts" 
+                  stroke="var(--color-couverts)" 
+                  strokeWidth={3}
+                  dot={{ fill: "var(--color-couverts)", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "var(--color-couverts)", strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </Card>
+      </motion.div>
+
+      {/* Graphique en secteurs - Distribution des Réservations */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <Card className="premium-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-playfair font-semibold">Répartition des Réservations par Canal</h3>
+            <Target className="h-5 w-5 text-primary" />
           </div>
+          <ChartContainer config={chartConfig} className="h-80 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={channels.filter(c => c.reservations > 0)}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value, percent }) => 
+                    `${name}: ${value} (${(percent * 100).toFixed(1)}%)`
+                  }
+                  outerRadius={120}
+                  fill="#8884d8"
+                  dataKey="reservations"
+                  nameKey="name"
+                >
+                  {channels.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <ChartTooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3">
+                          <p className="font-semibold">{data.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Réservations: <span className="font-medium text-foreground">{data.reservations}</span>
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Couverts: <span className="font-medium text-foreground">{data.covers}</span>
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
         </Card>
       </motion.div>
 
