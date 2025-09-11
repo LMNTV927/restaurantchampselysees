@@ -139,9 +139,6 @@ export function BookingPage() {
             <p className="text-white/80 text-lg">
               Prince Palace Restaurant
             </p>
-            <p className="text-white/60 text-sm mt-1">
-              via {channel.name}
-            </p>
           </div>
 
           <BookingForm 

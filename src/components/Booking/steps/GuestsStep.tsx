@@ -10,7 +10,7 @@ interface GuestsStepProps {
 
 export function GuestsStep({ data, onUpdate }: GuestsStepProps) {
   const handleGuestsChange = (change: number) => {
-    const newCount = Math.max(1, Math.min(12, data.guestsCount + change));
+    const newCount = Math.max(1, data.guestsCount + change);
     onUpdate({ guestsCount: newCount });
   };
 
@@ -52,7 +52,6 @@ export function GuestsStep({ data, onUpdate }: GuestsStepProps) {
           variant="outline"
           size="icon"
           onClick={() => handleGuestsChange(1)}
-          disabled={data.guestsCount >= 12}
           className="h-12 w-12 rounded-full"
         >
           <Plus className="h-5 w-5" />
@@ -63,9 +62,9 @@ export function GuestsStep({ data, onUpdate }: GuestsStepProps) {
         {data.guestsCount === 1 ? '1 personne' : `${data.guestsCount} personnes`}
       </p>
       
-      {data.guestsCount >= 8 && (
-        <p className="mt-2 text-sm text-warning">
-          Pour les groupes de 8 personnes et plus, nous vous recommandons de nous contacter directement.
+      {data.guestsCount >= 10 && (
+        <p className="mt-2 text-sm text-primary">
+          Pour les groupes de 10 personnes et plus, une personne vous contactera pour finaliser les détails de votre réservation.
         </p>
       )}
     </div>

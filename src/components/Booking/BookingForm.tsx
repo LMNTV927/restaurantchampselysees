@@ -17,6 +17,7 @@ export interface BookingData {
   guestsCount: number;
   customerName: string;
   customerPhone: string;
+  customerEmail?: string;
   notes?: string;
 }
 
@@ -43,6 +44,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
     guestsCount: 2,
     customerName: '',
     customerPhone: '',
+    customerEmail: '',
     notes: '',
   });
 
@@ -94,6 +96,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
           guests_count: bookingData.guestsCount,
           customer_name: bookingData.customerName,
           customer_phone: bookingData.customerPhone,
+          customer_email: bookingData.customerEmail || null,
           notes: bookingData.notes || null,
         });
 

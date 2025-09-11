@@ -55,6 +55,20 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
         </div>
         
         <div>
+          <Label htmlFor="email" className="text-sm font-medium text-foreground">
+            Adresse email (optionnel)
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="votre@email.com"
+            value={data.customerEmail || ''}
+            onChange={(e) => onUpdate({ customerEmail: e.target.value })}
+            className="premium-input mt-1"
+          />
+        </div>
+        
+        <div>
           <Label htmlFor="notes" className="text-sm font-medium text-foreground">
             Notes particulières (optionnel)
           </Label>

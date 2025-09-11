@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { CheckCircle, Calendar, Clock, Users, Phone } from 'lucide-react';
+import { CheckCircle, Calendar, Clock, Users, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { BookingData } from '../BookingForm';
@@ -59,13 +59,22 @@ export function SuccessStep({ bookingData }: SuccessStepProps) {
             <Phone className="w-4 h-4 text-success" />
             <span className="text-muted-foreground">{bookingData.customerPhone}</span>
           </div>
+          
+          {bookingData.customerEmail && (
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-success" />
+              <span className="text-muted-foreground">{bookingData.customerEmail}</span>
+            </div>
+          )}
         </div>
       </div>
       
       <div className="text-sm text-muted-foreground space-y-2">
-        <p>
-          📞 Nous vous appellerons prochainement pour confirmer votre réservation.
-        </p>
+        {bookingData.guestsCount >= 10 && (
+          <p>
+            📞 Nous vous appellerons prochainement pour confirmer votre réservation.
+          </p>
+        )}
         <p>
           📍 Prince Palace Restaurant, à bientôt !
         </p>

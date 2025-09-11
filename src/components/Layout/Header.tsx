@@ -35,7 +35,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           >
             <div className="w-10 h-10 rounded-xl overflow-hidden">
               <img 
-                src="/lovable-uploads/b8aeef3c-4470-46b7-8512-6d1c253dacba.png" 
+                src="/lovable-uploads/b4abf981-67f3-42b1-a961-957c38d1b70b.png" 
                 alt="Prince Palace Logo" 
                 className="w-full h-full object-cover"
               />
