@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ThemeProvider } from "next-themes";
 import { Header } from "@/components/Layout/Header";
+import { DashboardSection } from "@/components/Dashboard/DashboardSection";
 import { LinksSection } from "@/components/Links/LinksSection";
 import { ReservationsSection } from "@/components/Reservations/ReservationsSection";
 import { DataSection } from "@/components/Data/DataSection";
 
 function IndexContent() {
-  const [activeTab, setActiveTab] = useState("links");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   // Set dark mode by default
   useEffect(() => {
@@ -16,6 +17,8 @@ function IndexContent() {
 
   const renderActiveSection = () => {
     switch (activeTab) {
+      case "dashboard":
+        return <DashboardSection />;
       case "links":
         return <LinksSection />;
       case "reservations":
@@ -23,7 +26,7 @@ function IndexContent() {
       case "data":
         return <DataSection />;
       default:
-        return <LinksSection />;
+        return <DashboardSection />;
     }
   };
 

@@ -9,6 +9,7 @@ interface HeaderProps {
 }
 
 const tabs = [
+  { id: "dashboard", label: "Dashboard" },
   { id: "links", label: "Liens" },
   { id: "reservations", label: "Réservations" },
   { id: "data", label: "Données" },
