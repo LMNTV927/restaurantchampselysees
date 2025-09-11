@@ -165,16 +165,17 @@ export function LinksSection() {
           description: "Impossible de créer le canal de réservation",
           variant: "destructive",
         });
-        return;
+        throw error; // Throw error so dialog can catch it
       }
 
       toast({
         title: "Succès",
-        description: "Canal de réservation créé avec succès",
+        description: `Canal "${data.channel}" créé avec succès ! 🎉`,
       });
 
       setShowCreateDialog(false);
       fetchChannelsAndStats(); // Refresh the data
+      
     } catch (error) {
       console.error('Unexpected error:', error);
       toast({
@@ -182,6 +183,7 @@ export function LinksSection() {
         description: "Une erreur inattendue s'est produite",
         variant: "destructive",
       });
+      throw error; // Re-throw so dialog can handle it
     }
   };
 

@@ -38,20 +38,26 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
 
     setIsGenerating(true);
     
-    // Simulate generation delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    onSubmit({ channel: channel.trim() });
-    
-    // Reset form
-    setChannel("");
-    setIsGenerating(false);
-    
-    // Success animation and toast
-    toast({
-      title: "Canal créé avec succès ! ✨",
-      description: `Le canal "${channel}" a été créé avec son lien de réservation`,
-    });
+    try {
+      // Store channel name before resetting
+      const channelName = channel.trim();
+      
+      // Call the parent function
+      await onSubmit({ channel: channelName });
+      
+      // Reset form only after successful submission
+      setChannel("");
+      
+    } catch (error) {
+      console.error('Error creating channel:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le canal de réservation",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleOpenChange = (newOpen: boolean) => {
