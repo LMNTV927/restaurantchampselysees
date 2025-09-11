@@ -19,52 +19,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-// Mock data
-const mockMonthlyKPIs = {
-  totalClicks: 12847,
-  totalReservations: 487,
-  totalCovers: 1341,
-  conversion: 16.8,
-};
-
-const mockChannelData = [
-  {
-    channel: "Instagram Bio",
-    clicks: 4205,
-    reservations: 187,
-    covers: 524,
-    conversion: 18.7,
-    link: "/r/insta-bio"
-  },
-  {
-    channel: "Facebook Page", 
-    clicks: 3892,
-    reservations: 143,
-    covers: 398,
-    conversion: 14.6,
-    link: "/r/fb-page"
-  },
-  {
-    channel: "Google My Business",
-    clicks: 2750,
-    reservations: 97,
-    covers: 259,
-    conversion: 17.1,
-    link: "/r/gmb"
-  },
-  {
-    channel: "Site web",
-    clicks: 2000,
-    reservations: 60,
-    covers: 160,
-    conversion: 12.0,
-    link: "/r/website"
-  }
-];
+import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
 
 export function DataSection() {
   const [selectedMonth, setSelectedMonth] = useState("2024-11");
+  const { channels, kpis, loading } = useRealtimeChannelsData();
 
   const months = [
     { value: "2024-11", label: "Novembre 2024" },
@@ -73,11 +32,11 @@ export function DataSection() {
   ];
 
   const handleExportCSV = () => {
-    // Mock CSV export
+    // Real CSV export with current data
     const csvContent = "data:text/csv;charset=utf-8," + 
       "Canal,Clics,Réservations,Couverts,Conversion\n" +
-      mockChannelData.map(row => 
-        `${row.channel},${row.clicks},${row.reservations},${row.covers},${row.conversion}%`
+      channels.map(channel => 
+        `${channel.name},${channel.clicks},${channel.reservations},${channel.covers},${channel.conversion.toFixed(1)}%`
       ).join("\n");
     
     const encodedUri = encodeURI(csvContent);
@@ -150,34 +109,38 @@ export function DataSection() {
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Clics Totaux"
-            value={mockMonthlyKPIs.totalClicks}
+            value={kpis.totalClicks}
             icon={BarChart3}
             trend={{ value: 18.5, isPositive: true }}
+            loading={loading}
           />
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Réservations"
-            value={mockMonthlyKPIs.totalReservations}
+            value={kpis.totalReservations}
             icon={Target}
             trend={{ value: 14.2, isPositive: true }}
+            loading={loading}
           />
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Couverts"
-            value={mockMonthlyKPIs.totalCovers}
+            value={kpis.totalCovers}
             icon={Users}
             trend={{ value: 22.1, isPositive: true }}
+            loading={loading}
           />
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Conversion"
-            value={mockMonthlyKPIs.conversion}
+            value={kpis.conversion}
             suffix="%"
             icon={TrendingUp}
             trend={{ value: 4.7, isPositive: true }}
+            loading={loading}
           />
         </motion.div>
       </motion.div>
@@ -247,32 +210,32 @@ export function DataSection() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockChannelData.map((row, index) => (
+                {channels.map((channel, index) => (
                   <motion.tr
-                    key={row.channel}
+                    key={channel.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                     className="hover:bg-muted/30 transition-colors"
                   >
-                    <TableCell className="font-medium">{row.channel}</TableCell>
+                    <TableCell className="font-medium">{channel.name}</TableCell>
                     <TableCell className="text-center font-semibold">
-                      {row.clicks.toLocaleString()}
+                      {channel.clicks.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-center font-semibold">
-                      {row.reservations.toLocaleString()}
+                      {channel.reservations.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-center font-semibold">
-                      {row.covers.toLocaleString()}
+                      {channel.covers.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="font-semibold text-primary">
-                        {row.conversion.toFixed(1)}%
+                        {channel.conversion.toFixed(1)}%
                       </span>
                     </TableCell>
                     <TableCell>
                       <code className="px-2 py-1 bg-muted/50 rounded text-sm font-mono">
-                        {row.link}
+                        {channel.shortUrl}
                       </code>
                     </TableCell>
                   </motion.tr>

@@ -5,72 +5,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/UI/StatusBadge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-
-// Mock data pour le dashboard
-const mockDashboardData = {
-  todayKPIs: {
-    reservations: 24,
-    covers: 67,
-    occupancy: 78.5,
-    revenue: 3247
-  },
-  weeklyTrend: [
-    { day: "Lun", reservations: 18, covers: 45 },
-    { day: "Mar", reservations: 22, covers: 58 },
-    { day: "Mer", reservations: 20, covers: 52 },
-    { day: "Jeu", reservations: 26, covers: 71 },
-    { day: "Ven", reservations: 32, covers: 89 },
-    { day: "Sam", reservations: 28, covers: 76 },
-    { day: "Dim", reservations: 24, covers: 67 }
-  ],
-  recentActivity: [
-    {
-      id: 1,
-      type: "reservation",
-      message: "Nouvelle réservation via Instagram Bio",
-      customer: "Marie Dubois",
-      time: "Il y a 2 minutes",
-      status: "confirmed" as const
-    },
-    {
-      id: 2,
-      type: "click",
-      message: "5 nouveaux clics sur le lien Google My Business",
-      time: "Il y a 5 minutes"
-    },
-    {
-      id: 3,
-      type: "show",
-      message: "Pierre Martin marqué comme présent",
-      time: "Il y a 8 minutes",
-      status: "show" as const
-    },
-    {
-      id: 4,
-      type: "reservation",
-      message: "Réservation modifiée pour 6 personnes",
-      customer: "Sophie Laurent",
-      time: "Il y a 15 minutes",
-      status: "confirmed" as const
-    }
-  ],
-  alerts: [
-    {
-      id: 1,
-      type: "warning",
-      message: "Pic d'affluence prévu ce soir (32 réservations)",
-      priority: "high"
-    },
-    {
-      id: 2,
-      type: "info",
-      message: "3 réservations en attente de confirmation",
-      priority: "medium"
-    }
-  ]
-};
+import { useRealtimeDashboard } from "@/hooks/useRealtimeDashboard";
 
 export function DashboardSection() {
+  const { dashboardData, loading } = useRealtimeDashboard();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -89,14 +27,14 @@ export function DashboardSection() {
       </div>
 
       {/* Alertes */}
-      {mockDashboardData.alerts.length > 0 && (
+      {dashboardData.alerts.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid gap-4"
         >
-          {mockDashboardData.alerts.map((alert) => (
+          {dashboardData.alerts.map((alert) => (
             <Card key={alert.id} className="premium-card border-l-4 border-l-primary">
               <div className="p-4 flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 text-primary" />
@@ -132,35 +70,39 @@ export function DashboardSection() {
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Réservations Aujourd'hui"
-            value={mockDashboardData.todayKPIs.reservations}
+            value={dashboardData.todayKPIs.reservations}
             icon={Calendar}
             trend={{ value: 5.2, isPositive: true }}
+            loading={loading}
           />
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Couverts Aujourd'hui"
-            value={mockDashboardData.todayKPIs.covers}
+            value={dashboardData.todayKPIs.covers}
             icon={Users}
             trend={{ value: 12.8, isPositive: true }}
+            loading={loading}
           />
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Taux d'Occupation"
-            value={mockDashboardData.todayKPIs.occupancy}
+            value={dashboardData.todayKPIs.occupancy}
             suffix="%"
             icon={MapPin}
             trend={{ value: 3.4, isPositive: true }}
+            loading={loading}
           />
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Revenus du Jour"
-            value={mockDashboardData.todayKPIs.revenue}
+            value={dashboardData.todayKPIs.revenue}
             suffix="€"
             icon={TrendingUp}
             trend={{ value: 8.7, isPositive: true }}
+            loading={loading}
           />
         </motion.div>
       </motion.div>
@@ -178,9 +120,9 @@ export function DashboardSection() {
               <h3 className="text-lg font-playfair font-semibold mb-4">
                 Réservations de la Semaine
               </h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={mockDashboardData.weeklyTrend}>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={dashboardData.weeklyTrend}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis 
                       dataKey="day" 
@@ -220,9 +162,9 @@ export function DashboardSection() {
               <h3 className="text-lg font-playfair font-semibold mb-4">
                 Couverts de la Semaine
               </h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={mockDashboardData.weeklyTrend}>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={dashboardData.weeklyTrend}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis 
                       dataKey="day" 
@@ -269,7 +211,7 @@ export function DashboardSection() {
           </div>
           
           <div className="p-6 space-y-4">
-            {mockDashboardData.recentActivity.map((activity, index) => (
+            {dashboardData.recentActivity.map((activity, index) => (
               <motion.div
                 key={activity.id}
                 initial={{ opacity: 0, x: -20 }}
