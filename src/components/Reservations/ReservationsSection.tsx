@@ -143,7 +143,6 @@ export function ReservationsSection() {
           <KPICard
             title="Aujourd'hui"
             value={kpis.todayReservations}
-            suffix=" rés."
             icon={Calendar}
             trend={{ value: 5.2, isPositive: true }}
             loading={loading}
@@ -162,7 +161,6 @@ export function ReservationsSection() {
           <KPICard
             title="Réservations à venir"
             value={kpis.upcomingReservations}
-            suffix=" rés."
             icon={Clock}
             loading={loading}
           />
