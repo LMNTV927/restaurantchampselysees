@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/Booking/BookingForm";
 import { ImageCarousel } from "@/components/Booking/ImageCarousel";
-import princePalaceLogo from "@/assets/prince-palace-logo.png";
+const princePalaceLogo = "/lovable-uploads/ce9ac516-0580-4c36-b708-89f1a0a13c29.png";
 import dish1 from "@/assets/dish-1.jpg";
 import dish2 from "@/assets/dish-2.jpg";
 import dish3 from "@/assets/dish-3.jpg";
