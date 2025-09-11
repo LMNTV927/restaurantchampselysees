@@ -14,13 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      channel_stats: {
+        Row: {
+          channel_id: string
+          clicks: number
+          created_at: string
+          date: string
+          id: string
+          reservations: number
+          total_covers: number
+          updated_at: string
+        }
+        Insert: {
+          channel_id: string
+          clicks?: number
+          created_at?: string
+          date?: string
+          id?: string
+          reservations?: number
+          total_covers?: number
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string
+          clicks?: number
+          created_at?: string
+          date?: string
+          id?: string
+          reservations?: number
+          total_covers?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_stats_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channels: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reservations: {
+        Row: {
+          channel_id: string
+          created_at: string
+          customer_name: string
+          customer_phone: string
+          guests_count: number
+          id: string
+          notes: string | null
+          reservation_date: string
+          reservation_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          customer_name: string
+          customer_phone: string
+          guests_count: number
+          id?: string
+          notes?: string | null
+          reservation_date: string
+          reservation_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string
+          guests_count?: number
+          id?: string
+          notes?: string | null
+          reservation_date?: string
+          reservation_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_channel_clicks: {
+        Args: { channel_slug: string }
+        Returns: undefined
+      }
+      increment_channel_reservation: {
+        Args: { channel_slug: string; covers_count: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
