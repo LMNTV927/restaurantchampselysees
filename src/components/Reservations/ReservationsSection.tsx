@@ -6,8 +6,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/UI/StatusBadge";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data
+type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
+
+interface Reservation {
+  id: string;
+  customer: { firstName: string; lastName: string; phone: string };
+  startAt: Date;
+  partySize: number;
+  occasion: string;
+  notes: string;
+  status: ReservationStatus;
+  source: string | null;
+}
+
 const mockKPIs = {
   todayReservations: 24,
   todayCovers: 67,
@@ -15,7 +29,7 @@ const mockKPIs = {
   occupancyRate: 78.5,
 };
 
-const mockReservations = [
+const mockReservations: Reservation[] = [
   {
     id: "1",
     customer: { firstName: "Marie", lastName: "Dubois", phone: "+33 6•••••34" },
@@ -23,7 +37,7 @@ const mockReservations = [
     partySize: 4,
     occasion: "Anniversaire",
     notes: "Table près de la fenêtre si possible",
-    status: "confirmed" as const,
+    status: "confirmed" as ReservationStatus,
     source: "Instagram Bio"
   },
   {
@@ -33,7 +47,7 @@ const mockReservations = [
     partySize: 2,
     occasion: "Dîner romantique",
     notes: "",
-    status: "show" as const,
+    status: "show" as ReservationStatus,
     source: "Google My Business"
   },
   {
@@ -43,13 +57,35 @@ const mockReservations = [
     partySize: 6,
     occasion: "Dîner d'affaires",
     notes: "Demande une facture",
-    status: "confirmed" as const,
+    status: "confirmed" as ReservationStatus,
     source: null
   }
 ];
 
 export function ReservationsSection() {
   const [selectedFilter, setSelectedFilter] = useState("today");
+  const [reservations, setReservations] = useState<Reservation[]>(mockReservations);
+  const { toast } = useToast();
+
+  const updateReservationStatus = (reservationId: string, newStatus: ReservationStatus) => {
+    setReservations(prev => prev.map(reservation => 
+      reservation.id === reservationId 
+        ? { ...reservation, status: newStatus }
+        : reservation
+    ));
+
+    const statusLabels = {
+      confirmed: "Confirmé",
+      show: "Présent",
+      no_show: "Absent", 
+      cancelled: "Annulé"
+    };
+
+    toast({
+      title: "Statut mis à jour",
+      description: `Réservation marquée comme "${statusLabels[newStatus]}"`,
+    });
+  };
 
   const filters = [
     { id: "today", label: "Aujourd'hui" },
@@ -163,12 +199,12 @@ export function ReservationsSection() {
           <div className="p-6 border-b border-border/50">
             <h3 className="text-lg font-playfair font-semibold">Réservations du jour</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {mockReservations.length} réservations • {mockReservations.reduce((sum, r) => sum + r.partySize, 0)} couverts
+              {reservations.length} réservations • {reservations.reduce((sum, r) => sum + r.partySize, 0)} couverts
             </p>
           </div>
           
           <div className="p-6 space-y-4">
-            {mockReservations.map((reservation, index) => (
+            {reservations.map((reservation, index) => (
               <motion.div
                 key={reservation.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -215,14 +251,29 @@ export function ReservationsSection() {
                 </div>
                 
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="outline" size="sm" className="premium-button">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="premium-button"
+                    onClick={() => updateReservationStatus(reservation.id, "show")}
+                  >
                     Show
                   </Button>
-                  <Button variant="outline" size="sm" className="premium-button">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="premium-button"
+                    onClick={() => updateReservationStatus(reservation.id, "no_show")}
+                  >
                     No-show
                   </Button>
-                  <Button variant="outline" size="sm" className="premium-button">
-                    Éditer
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="premium-button"
+                    onClick={() => updateReservationStatus(reservation.id, "cancelled")}
+                  >
+                    Annuler
                   </Button>
                 </div>
               </motion.div>
