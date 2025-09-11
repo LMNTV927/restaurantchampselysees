@@ -16,22 +16,21 @@ import { useToast } from "@/hooks/use-toast";
 interface CreateLinkDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: { channel: string; redirectUrl: string }) => void;
+  onSubmit: (data: { channel: string }) => void;
 }
 
 export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDialogProps) {
   const [channel, setChannel] = useState("");
-  const [redirectUrl, setRedirectUrl] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!channel.trim() || !redirectUrl.trim()) {
+    if (!channel.trim()) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs",
+        description: "Veuillez saisir le nom du canal",
         variant: "destructive",
       });
       return;
@@ -42,17 +41,16 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
     // Simulate generation delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    onSubmit({ channel: channel.trim(), redirectUrl: redirectUrl.trim() });
+    onSubmit({ channel: channel.trim() });
     
     // Reset form
     setChannel("");
-    setRedirectUrl("");
     setIsGenerating(false);
     
     // Success animation and toast
     toast({
-      title: "Lien créé avec succès ! ✨",
-      description: `Le lien pour "${channel}" a été généré`,
+      title: "Canal créé avec succès ! ✨",
+      description: `Le canal "${channel}" a été créé avec son lien de réservation`,
     });
   };
 
@@ -61,7 +59,6 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
       onOpenChange(newOpen);
       if (!newOpen) {
         setChannel("");
-        setRedirectUrl("");
       }
     }
   };
@@ -80,7 +77,7 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
             Nouveau lien de tracking
           </DialogTitle>
           <DialogDescription>
-            Créez un lien court personnalisé pour suivre vos conversions par canal
+            Créez un nouveau canal de réservation avec son lien de tracking automatique
           </DialogDescription>
         </DialogHeader>
 
@@ -93,30 +90,12 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
               id="channel"
               value={channel}
               onChange={(e) => setChannel(e.target.value)}
-              placeholder="ex: Instagram Bio, Facebook Page..."
+              placeholder="ex: Instagram Bio, Facebook Page, Google Ads..."
               className="premium-input"
               disabled={isGenerating}
             />
             <p className="text-xs text-muted-foreground">
-              Ce nom vous aidera à identifier le canal dans vos statistiques
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="redirectUrl" className="text-sm font-medium">
-              URL de redirection
-            </Label>
-            <Input
-              id="redirectUrl"
-              type="url"
-              value={redirectUrl}
-              onChange={(e) => setRedirectUrl(e.target.value)}
-              placeholder="https://votre-site.com/reservations"
-              className="premium-input"
-              disabled={isGenerating}
-            />
-            <p className="text-xs text-muted-foreground">
-              L'URL vers laquelle les visiteurs seront redirigés
+              Un lien de réservation sera automatiquement généré pour ce canal
             </p>
           </div>
 
@@ -146,7 +125,7 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
               ) : (
                 <Sparkles className="mr-2 h-4 w-4" />
               )}
-              {isGenerating ? "Génération..." : "Générer le lien"}
+              {isGenerating ? "Génération..." : "Créer le canal"}
             </Button>
           </div>
         </form>
