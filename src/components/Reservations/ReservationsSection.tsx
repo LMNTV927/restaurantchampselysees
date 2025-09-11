@@ -206,6 +206,9 @@ export function ReservationsSection() {
                       {reservation.startAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                     <p className="text-xs text-muted-foreground">
+                      {reservation.startAt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
                       {reservation.partySize} pers.
                     </p>
                   </div>
