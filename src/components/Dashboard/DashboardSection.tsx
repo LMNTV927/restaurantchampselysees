@@ -54,7 +54,7 @@ export function DashboardSection() {
 
       {/* KPI Cards */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
         variants={{
           hidden: { opacity: 0 },
           show: {
@@ -92,16 +92,6 @@ export function DashboardSection() {
             suffix="%"
             icon={MapPin}
             trend={{ value: 3.4, isPositive: true }}
-            loading={loading}
-          />
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-          <KPICard
-            title="Revenus du Jour"
-            value={dashboardData.todayKPIs.revenue}
-            suffix="€"
-            icon={TrendingUp}
-            trend={{ value: 8.7, isPositive: true }}
             loading={loading}
           />
         </motion.div>
