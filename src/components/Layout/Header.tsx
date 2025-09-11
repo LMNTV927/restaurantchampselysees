@@ -33,11 +33,11 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="p-2 bg-gradient-gold rounded-xl shadow-gold">
+            <div className="w-10 h-10 rounded-xl overflow-hidden">
               <img 
-                src="/lovable-uploads/309a673e-7b34-4a54-9681-ea0d1c62a8fd.png" 
+                src="/lovable-uploads/b8aeef3c-4470-46b7-8512-6d1c253dacba.png" 
                 alt="Prince Palace Logo" 
-                className="h-6 w-6 object-contain"
+                className="w-full h-full object-cover"
               />
             </div>
             <div>
