@@ -160,7 +160,7 @@ export function ReservationsSection() {
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="À Venir"
+            title="Réservations à venir"
             value={kpis.upcomingReservations}
             suffix=" rés."
             icon={Clock}
