@@ -14,10 +14,10 @@ import { toast } from '@/hooks/use-toast';
 export interface BookingData {
   date: Date | null;
   time: string;
-  guestsCount: number;
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
+  guests: number;
+  name: string;
+  phone: string;
+  email?: string;
   notes?: string;
 }
 
@@ -41,10 +41,10 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
   const [bookingData, setBookingData] = useState<BookingData>({
     date: null,
     time: '',
-    guestsCount: 2,
-    customerName: '',
-    customerPhone: '',
-    customerEmail: '',
+    guests: 2,
+    name: '',
+    phone: '',
+    email: '',
     notes: '',
   });
 
@@ -59,9 +59,9 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
       case 1:
         return bookingData.time !== '';
       case 2:
-        return bookingData.guestsCount > 0;
+        return bookingData.guests > 0;
       case 3:
-        return bookingData.customerName.trim() !== '' && bookingData.customerPhone.trim() !== '';
+        return bookingData.name.trim() !== '' && bookingData.phone.trim() !== '';
       case 4:
         return true;
       default:
@@ -94,17 +94,36 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
         .eq('id', channelId)
         .single();
 
+      // Validate required fields
+      if (!bookingData.name || !bookingData.phone || !bookingData.date || !bookingData.time || !bookingData.guests) {
+        throw new Error('Tous les champs obligatoires doivent être remplis');
+      }
+
+      // Validate email format if provided
+      if (bookingData.email && bookingData.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(bookingData.email)) {
+          throw new Error('Format d\'email invalide');
+        }
+      }
+
+      // Validate phone format (basic)
+      const phoneRegex = /^[0-9+\-\s()]+$/;
+      if (!phoneRegex.test(bookingData.phone)) {
+        throw new Error('Format de téléphone invalide');
+      }
+
       const { error } = await supabase
         .from('reservations')
         .insert({
           channel_id: channelId,
           reservation_date: bookingData.date!.toISOString().split('T')[0],
           reservation_time: bookingData.time,
-          guests_count: bookingData.guestsCount,
-          customer_name: bookingData.customerName,
-          customer_phone: bookingData.customerPhone,
-          customer_email: bookingData.customerEmail || null,
-          notes: bookingData.notes || null,
+          guests_count: bookingData.guests,
+          customer_name: bookingData.name.trim(),
+          customer_phone: bookingData.phone.trim(),
+          customer_email: bookingData.email?.toLowerCase().trim() || null,
+          notes: bookingData.notes?.trim() || null,
         });
 
       if (error) {
@@ -118,11 +137,11 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
       }
 
       // Send confirmation email if email is provided
-      if (bookingData.customerEmail && bookingData.customerEmail.trim()) {
+      if (bookingData.email && bookingData.email.trim()) {
         try {
           const emailData = {
-            customerName: bookingData.customerName,
-            customerEmail: bookingData.customerEmail,
+            customerName: bookingData.name,
+            customerEmail: bookingData.email,
             restaurantName: channelData?.name || 'Restaurant',
             reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
               weekday: 'long',
@@ -131,8 +150,8 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
               day: 'numeric'
             }),
             reservationTime: bookingData.time,
-            guestsCount: bookingData.guestsCount,
-            customerPhone: bookingData.customerPhone,
+            guestsCount: bookingData.guests,
+            customerPhone: bookingData.phone,
             notes: bookingData.notes,
           };
 
@@ -155,7 +174,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
       onSuccess(bookingData);
       toast({
         title: "Réservation confirmée!",
-        description: bookingData.customerEmail 
+        description: bookingData.email 
           ? "Votre table a été réservée avec succès. Un email de confirmation vous a été envoyé."
           : "Votre table a été réservée avec succès.",
       });

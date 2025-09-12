@@ -29,7 +29,7 @@ export function SuccessStep({ bookingData }: SuccessStepProps) {
       </h2>
       
       <p className="text-muted-foreground mb-8">
-        Merci {bookingData.customerName}, votre table a été réservée avec succès.
+        Merci {bookingData.name}, votre table a été réservée avec succès.
       </p>
       
       <div className="bg-success/10 border border-success/20 rounded-lg p-6 mb-6">
@@ -51,26 +51,26 @@ export function SuccessStep({ bookingData }: SuccessStepProps) {
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-success" />
             <span className="text-muted-foreground">
-              {bookingData.guestsCount} {bookingData.guestsCount === 1 ? 'personne' : 'personnes'}
+              {bookingData.guests} {bookingData.guests === 1 ? 'personne' : 'personnes'}
             </span>
           </div>
           
           <div className="flex items-center gap-2">
             <Phone className="w-4 h-4 text-success" />
-            <span className="text-muted-foreground">{bookingData.customerPhone}</span>
+            <span className="text-muted-foreground">{bookingData.phone}</span>
           </div>
           
-          {bookingData.customerEmail && (
+          {bookingData.email && (
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-success" />
-              <span className="text-muted-foreground">{bookingData.customerEmail}</span>
+              <span className="text-muted-foreground">{bookingData.email}</span>
             </div>
           )}
         </div>
       </div>
       
       <div className="text-sm text-muted-foreground space-y-2">
-        {bookingData.guestsCount >= 10 && (
+        {bookingData.guests >= 10 && (
           <p>
             📞 Nous vous appellerons prochainement pour confirmer votre réservation.
           </p>
