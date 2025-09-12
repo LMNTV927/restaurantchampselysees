@@ -29,8 +29,8 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
             id="name"
             type="text"
             placeholder="Votre nom et prénom"
-            value={data.name}
-            onChange={(e) => onUpdate({ name: e.target.value })}
+            value={data.customerName}
+            onChange={(e) => onUpdate({ customerName: e.target.value })}
             className="premium-input mt-1"
             required
           />
@@ -44,8 +44,8 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
             id="phone"
             type="tel"
             placeholder="+33 6 12 34 56 78"
-            value={data.phone}
-            onChange={(e) => onUpdate({ phone: e.target.value })}
+            value={data.customerPhone}
+            onChange={(e) => onUpdate({ customerPhone: e.target.value })}
             className="premium-input mt-1"
             required
           />
@@ -62,8 +62,8 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
             id="email"
             type="email"
             placeholder="votre@email.com"
-            value={data.email || ''}
-            onChange={(e) => onUpdate({ email: e.target.value })}
+            value={data.customerEmail || ''}
+            onChange={(e) => onUpdate({ customerEmail: e.target.value })}
             className="premium-input mt-1"
           />
         </div>

@@ -44,7 +44,7 @@ export function SummaryStep({ data }: SummaryStepProps) {
           <div>
             <p className="font-medium text-foreground">Nombre de convives</p>
             <p className="text-sm text-muted-foreground">
-              {data.guests} {data.guests === 1 ? 'personne' : 'personnes'}
+              {data.guestsCount} {data.guestsCount === 1 ? 'personne' : 'personnes'}
             </p>
           </div>
         </div>
@@ -53,7 +53,7 @@ export function SummaryStep({ data }: SummaryStepProps) {
           <User className="w-5 h-5 text-primary" />
           <div>
             <p className="font-medium text-foreground">Nom</p>
-            <p className="text-sm text-muted-foreground">{data.name || 'Non défini'}</p>
+            <p className="text-sm text-muted-foreground">{data.customerName || 'Non défini'}</p>
           </div>
         </div>
         
@@ -61,7 +61,7 @@ export function SummaryStep({ data }: SummaryStepProps) {
           <Phone className="w-5 h-5 text-primary" />
           <div>
             <p className="font-medium text-foreground">Téléphone</p>
-            <p className="text-sm text-muted-foreground">{data.phone || 'Non défini'}</p>
+            <p className="text-sm text-muted-foreground">{data.customerPhone || 'Non défini'}</p>
           </div>
         </div>
         

@@ -10,8 +10,8 @@ interface GuestsStepProps {
 
 export function GuestsStep({ data, onUpdate }: GuestsStepProps) {
   const handleGuestsChange = (change: number) => {
-    const newCount = Math.max(1, data.guests + change);
-    onUpdate({ guests: newCount });
+    const newCount = Math.max(1, data.guestsCount + change);
+    onUpdate({ guestsCount: newCount });
   };
 
   return (
@@ -28,14 +28,14 @@ export function GuestsStep({ data, onUpdate }: GuestsStepProps) {
           variant="outline"
           size="icon"
           onClick={() => handleGuestsChange(-1)}
-          disabled={data.guests <= 1}
+          disabled={data.guestsCount <= 1}
           className="h-12 w-12 rounded-full"
         >
           <Minus className="h-5 w-5" />
         </Button>
         
         <motion.div
-          key={data.guests}
+          key={data.guestsCount}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="flex flex-col items-center"
@@ -44,7 +44,7 @@ export function GuestsStep({ data, onUpdate }: GuestsStepProps) {
             <Users className="h-8 w-8 text-primary" />
           </div>
           <span className="text-4xl font-bold text-foreground count-up">
-            {data.guests}
+            {data.guestsCount}
           </span>
         </motion.div>
         
@@ -59,10 +59,10 @@ export function GuestsStep({ data, onUpdate }: GuestsStepProps) {
       </div>
       
       <p className="mt-6 text-sm text-muted-foreground">
-        {data.guests === 1 ? '1 personne' : `${data.guests} personnes`}
+        {data.guestsCount === 1 ? '1 personne' : `${data.guestsCount} personnes`}
       </p>
       
-      {data.guests >= 10 && (
+      {data.guestsCount >= 10 && (
         <p className="mt-2 text-sm text-primary">
           Pour les groupes de 10 personnes et plus, une personne vous contactera pour finaliser les détails de votre réservation.
         </p>
