@@ -87,6 +87,13 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
     setIsSubmitting(true);
     
     try {
+      // First, get channel data to get restaurant name
+      const { data: channelData } = await supabase
+        .from('channels')
+        .select('name')
+        .eq('id', channelId)
+        .single();
+
       const { error } = await supabase
         .from('reservations')
         .insert({
@@ -110,12 +117,47 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
         return;
       }
 
+      // Send confirmation email if email is provided
+      if (bookingData.customerEmail && bookingData.customerEmail.trim()) {
+        try {
+          const emailData = {
+            customerName: bookingData.customerName,
+            customerEmail: bookingData.customerEmail,
+            restaurantName: channelData?.name || 'Restaurant',
+            reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            reservationTime: bookingData.time,
+            guestsCount: bookingData.guestsCount,
+            customerPhone: bookingData.customerPhone,
+            notes: bookingData.notes,
+          };
+
+          const { error: emailError } = await supabase.functions.invoke('send-reservation-confirmation', {
+            body: emailData
+          });
+
+          if (emailError) {
+            console.error('Email sending error:', emailError);
+            // Don't fail the booking if email fails
+          }
+        } catch (emailError) {
+          console.error('Email sending error:', emailError);
+          // Don't fail the booking if email fails
+        }
+      }
+
       // Success!
       setIsSuccess(true);
       onSuccess(bookingData);
       toast({
         title: "Réservation confirmée!",
-        description: "Votre table a été réservée avec succès.",
+        description: bookingData.customerEmail 
+          ? "Votre table a été réservée avec succès. Un email de confirmation vous a été envoyé."
+          : "Votre table a été réservée avec succès.",
       });
       
     } catch (error) {
