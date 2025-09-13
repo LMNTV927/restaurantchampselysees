@@ -141,7 +141,7 @@ export function ReservationsSection() {
       case "upcoming":
         return "Réservations des 7 prochains jours";
       case "all":
-        return "Réservations à venir (7+ jours)";
+        return "Réservations à venir";
       default:
         return "Réservations";
     }
