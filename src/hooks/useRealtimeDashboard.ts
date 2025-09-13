@@ -55,10 +55,13 @@ export function useRealtimeDashboard() {
       // Fetch today's reservations (ALL reservations for the current date, from midnight to midnight)
       // This includes both past and future reservations for today
       // Example: on Sept 13 at 23h, we show ALL Sept 13 reservations (even those at 19h which are past)
+      console.log('Dashboard - Date du jour (Paris):', today);
       const { data: todayReservations, error: reservationsError } = await supabase
         .from('reservations')
         .select('guests_count, status, created_at, customer_name, channels(name)')
         .eq('reservation_date', today);
+
+      console.log('Dashboard - Réservations d\'aujourd\'hui trouvées:', todayReservations?.length || 0);
 
       if (reservationsError) throw reservationsError;
 

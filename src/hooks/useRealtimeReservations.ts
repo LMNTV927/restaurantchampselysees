@@ -36,8 +36,9 @@ export function useRealtimeReservations() {
   const fetchReservations = async () => {
     try {
       const today = getTodayInParis();
+      console.log('Date du jour (Paris):', today);
       
-      // Fetch reservations with channel information
+      // Fetch ALL reservations (not just from today) for the reservations list
       const { data: reservationsData, error: reservationsError } = await supabase
         .from('reservations')
         .select(`
@@ -56,6 +57,8 @@ export function useRealtimeReservations() {
         .gte('reservation_date', today)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true });
+
+      console.log('Toutes les réservations trouvées:', reservationsData?.length || 0);
 
       if (reservationsError) throw reservationsError;
 
@@ -78,10 +81,12 @@ export function useRealtimeReservations() {
       // Calculate KPIs - Filter reservations by exact date match (midnight to midnight)
       // This includes ALL reservations for today (past and future within the same day)
       // Important: même si une réservation est passée, elle compte pour les KPIs du jour
-      const todayReservations = formattedReservations.filter(r => isReservationToday(r.reservationDate)).length;
-      const todayCovers = formattedReservations
-        .filter(r => isReservationToday(r.reservationDate))
-        .reduce((sum, r) => sum + r.guestsCount, 0);
+      const todayReservationsFiltered = formattedReservations.filter(r => isReservationToday(r.reservationDate));
+      console.log('Réservations filtrées pour aujourd\'hui:', todayReservationsFiltered.length);
+      console.log('Détail des réservations d\'aujourd\'hui:', todayReservationsFiltered.map(r => ({ date: r.reservationDate, time: r.reservationTime, name: r.customerName })));
+      
+      const todayReservations = todayReservationsFiltered.length;
+      const todayCovers = todayReservationsFiltered.reduce((sum, r) => sum + r.guestsCount, 0);
       
       const upcomingReservations = formattedReservations.length;
       
