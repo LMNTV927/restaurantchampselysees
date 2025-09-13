@@ -95,7 +95,10 @@ export function ReservationsSection() {
     const totalReservations = reservations.length;
     const totalCovers = reservations.reduce((sum, r) => sum + r.partySize, 0);
     const confirmedReservations = reservations.filter(r => r.status === 'confirmed' || r.status === 'show').length;
-    const occupancyRate = totalReservations > 0 ? Math.round((confirmedReservations / totalReservations) * 100) : 0;
+    
+    // Restaurant capacity: 100 seats
+    const restaurantCapacity = 100;
+    const occupancyRate = Math.min(Math.round((totalCovers / restaurantCapacity) * 100), 100);
 
     return {
       totalReservations,
