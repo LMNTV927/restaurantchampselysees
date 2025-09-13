@@ -35,7 +35,6 @@ export function useRealtimeReservations() {
   const fetchReservations = async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      console.log('Fetching reservations for date >=', today);
       
       // Fetch reservations with channel information
       const { data: reservationsData, error: reservationsError } = await supabase
@@ -57,8 +56,6 @@ export function useRealtimeReservations() {
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true });
 
-      console.log('Reservations query result:', { reservationsData, reservationsError });
-
       if (reservationsError) throw reservationsError;
 
       const formattedReservations: ReservationData[] = reservationsData?.map(reservation => ({
@@ -75,8 +72,6 @@ export function useRealtimeReservations() {
         createdAt: reservation.created_at
       })) || [];
 
-      console.log('Formatted reservations:', formattedReservations);
-
       setReservations(formattedReservations);
 
       // Calculate KPIs
@@ -91,16 +86,12 @@ export function useRealtimeReservations() {
       const totalCapacity = 120; // Example: 120 covers max per day
       const occupancyRate = Math.min((todayCovers / totalCapacity) * 100, 100);
 
-      const calculatedKpis = {
+      setKpis({
         todayReservations,
         todayCovers,
         upcomingReservations,
         occupancyRate
-      };
-
-      console.log('Calculated KPIs:', calculatedKpis);
-
-      setKpis(calculatedKpis);
+      });
 
     } catch (error) {
       console.error('Error fetching reservations:', error);

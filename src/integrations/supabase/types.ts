@@ -85,6 +85,36 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       reservations: {
         Row: {
           channel_id: string
@@ -143,6 +173,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_role: {
+        Args: { user_uuid?: string }
+        Returns: string
+      }
       increment_channel_clicks: {
         Args: { channel_slug: string }
         Returns: undefined
@@ -150,6 +184,10 @@ export type Database = {
       increment_channel_reservation: {
         Args: { channel_slug: string; covers_count: number }
         Returns: undefined
+      }
+      is_admin: {
+        Args: { user_uuid?: string }
+        Returns: boolean
       }
     }
     Enums: {

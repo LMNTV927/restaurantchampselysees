@@ -52,13 +52,11 @@ export function useRealtimeDashboard() {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
       // Fetch today's reservations
-      console.log('Fetching dashboard data for today:', today);
       const { data: todayReservations, error: reservationsError } = await supabase
         .from('reservations')
         .select('guests_count, status, created_at, customer_name, channels(name)')
         .eq('reservation_date', today);
 
-      console.log('Dashboard today reservations result:', { todayReservations, reservationsError });
       if (reservationsError) throw reservationsError;
 
       // Fetch weekly data for trends
