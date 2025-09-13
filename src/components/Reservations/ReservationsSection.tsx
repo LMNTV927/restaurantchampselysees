@@ -141,7 +141,7 @@ export function ReservationsSection() {
       >
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Réservations du jour"
+            title="Réservations Aujourd'hui"
             value={kpis.todayReservations}
             icon={Calendar}
             trend={{ value: 5.2, isPositive: true }}
