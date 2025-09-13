@@ -94,11 +94,17 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
         .eq('id', channelId)
         .single();
 
+      // Format the date correctly in Paris timezone to avoid timezone offset issues
+      // This ensures the selected date is stored exactly as the user selected it
+      const reservationDate = bookingData.date!.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+      console.log('Date sélectionnée par l\'utilisateur:', bookingData.date);
+      console.log('Date formatée pour la base de données:', reservationDate);
+
       const { error } = await supabase
         .from('reservations')
         .insert({
           channel_id: channelId,
-          reservation_date: bookingData.date!.toISOString().split('T')[0],
+          reservation_date: reservationDate,
           reservation_time: bookingData.time,
           guests_count: bookingData.guestsCount,
           customer_name: bookingData.customerName,
