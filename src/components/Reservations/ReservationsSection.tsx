@@ -60,7 +60,10 @@ export function ReservationsSection() {
 
     switch (selectedFilter) {
       case "today":
-        // Réservations d'aujourd'hui uniquement
+        // Réservations d'aujourd'hui uniquement (TOUTES les réservations du jour courant)
+        // Ceci inclut les réservations passées et futures du même jour
+        // Par exemple: le 13 septembre à 23h, on affiche toutes les réservations du 13 septembre
+        // même si certaines étaient prévues à 19h (déjà passées)
         return allReservations.filter(reservation => {
           const reservationDate = new Date(reservation.startAt);
           const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());

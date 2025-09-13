@@ -76,7 +76,8 @@ export function useRealtimeReservations() {
       setReservations(formattedReservations);
 
       // Calculate KPIs - Filter reservations by exact date match (midnight to midnight)
-      // This ensures we only count reservations for the current calendar day
+      // This includes ALL reservations for today (past and future within the same day)
+      // Important: même si une réservation est passée, elle compte pour les KPIs du jour
       const todayReservations = formattedReservations.filter(r => isReservationToday(r.reservationDate)).length;
       const todayCovers = formattedReservations
         .filter(r => isReservationToday(r.reservationDate))
