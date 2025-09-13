@@ -90,6 +90,23 @@ export function ReservationsSection() {
 
   const reservations = getFilteredReservations();
 
+  // Calculate KPIs based on filtered reservations
+  const getFilteredKPIs = () => {
+    const totalReservations = reservations.length;
+    const totalCovers = reservations.reduce((sum, r) => sum + r.partySize, 0);
+    const confirmedReservations = reservations.filter(r => r.status === 'confirmed' || r.status === 'show').length;
+    const occupancyRate = totalReservations > 0 ? Math.round((confirmedReservations / totalReservations) * 100) : 0;
+
+    return {
+      totalReservations,
+      totalCovers,
+      confirmedReservations,
+      occupancyRate
+    };
+  };
+
+  const filteredKPIs = getFilteredKPIs();
+
   const handleUpdateReservationStatus = async (reservationId: string, newStatus: ReservationStatus) => {
     try {
       await updateReservationStatus(reservationId, newStatus);
@@ -126,6 +143,41 @@ export function ReservationsSection() {
         return "Réservations";
     }
   };
+
+  const getKPITitles = () => {
+    switch (selectedFilter) {
+      case "today":
+        return {
+          reservations: "Réservations Aujourd'hui",
+          covers: "Couverts Aujourd'hui",
+          confirmed: "Confirmées Aujourd'hui",
+          occupancy: "Taux d'Occupation"
+        };
+      case "upcoming":
+        return {
+          reservations: "Réservations 7 jours",
+          covers: "Couverts 7 jours",
+          confirmed: "Confirmées 7 jours",
+          occupancy: "Taux d'Occupation"
+        };
+      case "all":
+        return {
+          reservations: "Réservations futures",
+          covers: "Couverts futures",
+          confirmed: "Confirmées futures",
+          occupancy: "Taux d'Occupation"
+        };
+      default:
+        return {
+          reservations: "Réservations",
+          covers: "Couverts",
+          confirmed: "Confirmées",
+          occupancy: "Taux d'Occupation"
+        };
+    }
+  };
+
+  const kpiTitles = getKPITitles();
 
   const filters = [
     { id: "today", label: "Aujourd'hui" },
@@ -195,8 +247,8 @@ export function ReservationsSection() {
       >
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Réservations Aujourd'hui"
-            value={kpis.todayReservations}
+            title={kpiTitles.reservations}
+            value={filteredKPIs.totalReservations}
             icon={Calendar}
             trend={{ value: 5.2, isPositive: true }}
             loading={loading}
@@ -204,8 +256,8 @@ export function ReservationsSection() {
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Couverts Aujourd'hui"
-            value={kpis.todayCovers}
+            title={kpiTitles.covers}
+            value={filteredKPIs.totalCovers}
             icon={Users}
             trend={{ value: 12.8, isPositive: true }}
             loading={loading}
@@ -213,16 +265,16 @@ export function ReservationsSection() {
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Réservations à venir"
-            value={kpis.upcomingReservations}
+            title={kpiTitles.confirmed}
+            value={filteredKPIs.confirmedReservations}
             icon={Clock}
             loading={loading}
           />
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Taux d'occupation"
-            value={kpis.occupancyRate}
+            title={kpiTitles.occupancy}
+            value={filteredKPIs.occupancyRate}
             suffix="%"
             icon={MapPin}
             trend={{ value: 3.4, isPositive: true }}
