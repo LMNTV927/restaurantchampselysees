@@ -36,6 +36,15 @@ export function getDaysAgoInParis(daysAgo: number): string {
 }
 
 /**
+ * Check if a reservation date matches today (regardless of time)
+ * This ensures we show all reservations for the current day from midnight to midnight
+ */
+export function isReservationToday(reservationDate: string): boolean {
+  const today = getTodayInParis();
+  return reservationDate === today;
+}
+
+/**
  * Check if a reservation date/time is in the future (Paris timezone)
  */
 export function isReservationInFuture(reservationDate: string, reservationTime: string): boolean {

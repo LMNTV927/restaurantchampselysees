@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getTodayInParis } from '@/lib/dateUtils';
+import { getTodayInParis, isReservationToday } from '@/lib/dateUtils';
 
 export interface ReservationData {
   id: string;
@@ -75,10 +75,11 @@ export function useRealtimeReservations() {
 
       setReservations(formattedReservations);
 
-      // Calculate KPIs
-      const todayReservations = formattedReservations.filter(r => r.reservationDate === today).length;
+      // Calculate KPIs - Filter reservations by exact date match (midnight to midnight)
+      // This ensures we only count reservations for the current calendar day
+      const todayReservations = formattedReservations.filter(r => isReservationToday(r.reservationDate)).length;
       const todayCovers = formattedReservations
-        .filter(r => r.reservationDate === today)
+        .filter(r => isReservationToday(r.reservationDate))
         .reduce((sum, r) => sum + r.guestsCount, 0);
       
       const upcomingReservations = formattedReservations.length;

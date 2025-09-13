@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis } from '@/lib/dateUtils';
+import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, isReservationToday } from '@/lib/dateUtils';
 
 export interface DashboardKPIs {
   reservations: number;
@@ -52,7 +52,8 @@ export function useRealtimeDashboard() {
       const today = getTodayInParis();
       const sevenDaysAgo = getDaysAgoInParis(7);
 
-      // Fetch today's reservations
+      // Fetch today's reservations (ALL reservations for the current date, from midnight to midnight)
+      // This will show all reservations scheduled for today regardless of the current time
       const { data: todayReservations, error: reservationsError } = await supabase
         .from('reservations')
         .select('guests_count, status, created_at, customer_name, channels(name)')
