@@ -28,7 +28,7 @@ export function ReservationsSection() {
   const { reservations: realtimeReservations, kpis, loading, updateReservationStatus } = useRealtimeReservations();
 
   // Transform real-time reservations to match local interface
-  const reservations: Reservation[] = realtimeReservations.map(reservation => {
+  const allReservations: Reservation[] = realtimeReservations.map(reservation => {
     const nameParts = reservation.customerName.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
@@ -48,6 +48,47 @@ export function ReservationsSection() {
       source: reservation.channelName
     };
   });
+
+  // Filter reservations based on selected period
+  const getFilteredReservations = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    switch (selectedFilter) {
+      case "today":
+        // Réservations d'aujourd'hui uniquement
+        return allReservations.filter(reservation => {
+          const reservationDate = new Date(reservation.startAt);
+          const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());
+          return reservationDay.getTime() === today.getTime();
+        });
+      
+      case "upcoming":
+        // Réservations des 7 prochains jours (sans aujourd'hui)
+        return allReservations.filter(reservation => {
+          const reservationDate = new Date(reservation.startAt);
+          const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());
+          return reservationDay.getTime() >= tomorrow.getTime() && reservationDay.getTime() < nextWeek.getTime();
+        });
+      
+      case "all":
+        // Réservations au-delà de 7 jours
+        return allReservations.filter(reservation => {
+          const reservationDate = new Date(reservation.startAt);
+          const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());
+          return reservationDay.getTime() >= nextWeek.getTime();
+        });
+      
+      default:
+        return allReservations;
+    }
+  };
+
+  const reservations = getFilteredReservations();
 
   const handleUpdateReservationStatus = async (reservationId: string, newStatus: ReservationStatus) => {
     try {
@@ -70,6 +111,19 @@ export function ReservationsSection() {
         description: "Impossible de mettre à jour le statut",
         variant: "destructive",
       });
+    }
+  };
+
+  const getFilterTitle = () => {
+    switch (selectedFilter) {
+      case "today":
+        return "Réservations d'aujourd'hui";
+      case "upcoming":
+        return "Réservations des 7 prochains jours";
+      case "all":
+        return "Réservations à venir (7+ jours)";
+      default:
+        return "Réservations";
     }
   };
 
@@ -185,90 +239,96 @@ export function ReservationsSection() {
       >
         <Card className="premium-card overflow-hidden">
           <div className="p-6 border-b border-border/50">
-            <h3 className="text-lg font-playfair font-semibold">Réservations du jour</h3>
+            <h3 className="text-lg font-playfair font-semibold">{getFilterTitle()}</h3>
             <p className="text-sm text-muted-foreground mt-1">
               {reservations.length} réservations • {reservations.reduce((sum, r) => sum + r.partySize, 0)} couverts
             </p>
           </div>
           
           <div className="p-6 space-y-4">
-            {reservations.map((reservation, index) => (
-              <motion.div
-                key={reservation.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl hover:bg-muted/30 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="text-center">
-                    <p className="text-lg font-semibold text-foreground">
-                      {reservation.startAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {reservation.startAt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {reservation.partySize} pers.
-                    </p>
+            {reservations.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Aucune réservation pour cette période</p>
+              </div>
+            ) : (
+              reservations.map((reservation, index) => (
+                <motion.div
+                  key={reservation.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl hover:bg-muted/30 transition-all duration-300 group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <p className="text-lg font-semibold text-foreground">
+                        {reservation.startAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {reservation.startAt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {reservation.partySize} pers.
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground">
+                          {reservation.customer.firstName} {reservation.customer.lastName}
+                        </p>
+                        <StatusBadge status={reservation.status} />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {reservation.customer.phone}
+                      </p>
+                      {reservation.occasion && (
+                        <Badge variant="outline" className="text-xs">
+                          {reservation.occasion}
+                        </Badge>
+                      )}
+                      {reservation.notes && (
+                        <p className="text-xs text-muted-foreground italic">
+                          "{reservation.notes}"
+                        </p>
+                      )}
+                      {reservation.source && (
+                        <p className="text-xs text-primary">
+                          via {reservation.source}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground">
-                        {reservation.customer.firstName} {reservation.customer.lastName}
-                      </p>
-                      <StatusBadge status={reservation.status} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {reservation.customer.phone}
-                    </p>
-                    {reservation.occasion && (
-                      <Badge variant="outline" className="text-xs">
-                        {reservation.occasion}
-                      </Badge>
-                    )}
-                    {reservation.notes && (
-                      <p className="text-xs text-muted-foreground italic">
-                        "{reservation.notes}"
-                      </p>
-                    )}
-                    {reservation.source && (
-                      <p className="text-xs text-primary">
-                        via {reservation.source}
-                      </p>
-                    )}
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="premium-button"
+                      onClick={() => handleUpdateReservationStatus(reservation.id, "show")}
+                    >
+                      Show
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="premium-button"
+                      onClick={() => handleUpdateReservationStatus(reservation.id, "no_show")}
+                    >
+                      No-show
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="premium-button"
+                      onClick={() => handleUpdateReservationStatus(reservation.id, "cancelled")}
+                    >
+                      Annuler
+                    </Button>
                   </div>
-                </div>
-                
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="premium-button"
-                    onClick={() => handleUpdateReservationStatus(reservation.id, "show")}
-                  >
-                    Show
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="premium-button"
-                    onClick={() => handleUpdateReservationStatus(reservation.id, "no_show")}
-                  >
-                    No-show
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="premium-button"
-                    onClick={() => handleUpdateReservationStatus(reservation.id, "cancelled")}
-                  >
-                    Annuler
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))
+            )}
           </div>
         </Card>
       </motion.div>
