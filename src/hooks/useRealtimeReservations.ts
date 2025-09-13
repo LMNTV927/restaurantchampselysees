@@ -50,7 +50,7 @@ export function useRealtimeReservations() {
           notes,
           status,
           created_at,
-          channels!inner(name)
+          channels(name)
         `)
         .gte('reservation_date', today)
         .order('reservation_date', { ascending: true })
