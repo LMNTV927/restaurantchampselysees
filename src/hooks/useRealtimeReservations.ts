@@ -75,10 +75,13 @@ export function useRealtimeReservations() {
       setReservations(formattedReservations);
 
       // Calculate KPIs
+      console.log('Reservations hook - today date:', today);
+      console.log('Reservations hook - all reservations:', formattedReservations.map(r => ({ date: r.reservationDate, name: r.customerName })));
       const todayReservations = formattedReservations.filter(r => r.reservationDate === today).length;
       const todayCovers = formattedReservations
         .filter(r => r.reservationDate === today)
         .reduce((sum, r) => sum + r.guestsCount, 0);
+      console.log('Reservations hook - today reservations:', todayReservations, 'covers:', todayCovers);
       
       const upcomingReservations = formattedReservations.length;
       
