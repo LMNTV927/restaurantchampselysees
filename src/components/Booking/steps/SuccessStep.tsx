@@ -75,9 +75,10 @@ export function SuccessStep({ bookingData }: SuccessStepProps) {
             📞 Nous vous appellerons prochainement pour confirmer votre réservation.
           </p>
         )}
-        <p>
-          📍 Prince Palace Restaurant, à bientôt !
-        </p>
+        <div className="text-sm text-muted-foreground space-y-1">
+          <p>📍 76 Av. Des Champs Elysées, 75008 Paris</p>
+          <p>📍 59 Rue de Ponthieu, 75008</p>
+        </div>
       </div>
     </motion.div>
   );

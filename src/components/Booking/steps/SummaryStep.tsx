@@ -78,8 +78,7 @@ export function SummaryStep({ data }: SummaryStepProps) {
       
       <div className="mt-6 p-4 bg-primary/10 rounded-lg">
         <p className="text-sm text-foreground text-center">
-          En confirmant cette réservation, vous acceptez nos conditions d'utilisation. 
-          Nous vous enverrons une confirmation par téléphone.
+          Après avoir confirmé votre réservation, nous vous enverrons un mail de confirmation.
         </p>
       </div>
     </div>
