@@ -107,7 +107,7 @@
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 400px auto;
-    opacity: 0.08;
+    opacity: 0.15;
     z-index: -1;
     pointer-events: none;
   }
