@@ -41,6 +41,9 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
               />
             </div>
             <div>
+              <h1 className="text-xl font-playfair font-semibold text-foreground">
+                Prince Palace
+              </h1>
               <p className="text-xs text-muted-foreground">
                 Réservations & Tracking
               </p>
