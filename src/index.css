@@ -106,8 +106,8 @@
     background-image: url('./assets/prince-palace-watermark.png');
     background-repeat: no-repeat;
     background-position: center center;
-    background-size: 600px auto;
-    opacity: 0.03;
+    background-size: 400px auto;
+    opacity: 0.08;
     z-index: -1;
     pointer-events: none;
   }
