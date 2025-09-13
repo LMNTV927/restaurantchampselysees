@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTodayInParis } from '@/lib/dateUtils';
 
 export interface ReservationData {
   id: string;
@@ -34,7 +35,7 @@ export function useRealtimeReservations() {
 
   const fetchReservations = async () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayInParis();
       
       // Fetch reservations with channel information
       const { data: reservationsData, error: reservationsError } = await supabase
@@ -75,13 +76,10 @@ export function useRealtimeReservations() {
       setReservations(formattedReservations);
 
       // Calculate KPIs
-      console.log('Reservations hook - today date:', today);
-      console.log('Reservations hook - all reservations:', formattedReservations.map(r => ({ date: r.reservationDate, name: r.customerName })));
       const todayReservations = formattedReservations.filter(r => r.reservationDate === today).length;
       const todayCovers = formattedReservations
         .filter(r => r.reservationDate === today)
         .reduce((sum, r) => sum + r.guestsCount, 0);
-      console.log('Reservations hook - today reservations:', todayReservations, 'covers:', todayCovers);
       
       const upcomingReservations = formattedReservations.length;
       

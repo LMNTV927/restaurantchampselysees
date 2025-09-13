@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis } from '@/lib/dateUtils';
 
 export interface DashboardKPIs {
   reservations: number;
@@ -48,17 +49,15 @@ export function useRealtimeDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const today = getTodayInParis();
+      const sevenDaysAgo = getDaysAgoInParis(7);
 
       // Fetch today's reservations
-      console.log('Dashboard fetching for today:', today);
       const { data: todayReservations, error: reservationsError } = await supabase
         .from('reservations')
         .select('guests_count, status, created_at, customer_name, channels(name)')
         .eq('reservation_date', today);
 
-      console.log('Dashboard today reservations:', { todayReservations, reservationsError, today });
       if (reservationsError) throw reservationsError;
 
       // Fetch weekly data for trends
@@ -82,9 +81,9 @@ export function useRealtimeDashboard() {
       const weeklyTrendMap = new Map<string, { day: string; reservations: number; covers: number }>();
       
       for (let i = 6; i >= 0; i--) {
-        const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-        const dateStr = date.toISOString().split('T')[0];
-        const dayName = date.toLocaleDateString('fr-FR', { weekday: 'short' });
+        const dateStr = getDaysAgoInParis(i);
+        const date = new Date(dateStr + 'T12:00:00');
+        const dayName = date.toLocaleDateString('fr-FR', { weekday: 'short', timeZone: 'Europe/Paris' });
         weeklyTrendMap.set(dateStr, { day: dayName, reservations: 0, covers: 0 });
       }
 
@@ -104,10 +103,10 @@ export function useRealtimeDashboard() {
         .map((reservation, index) => ({
           id: `activity-${index}`,
           type: 'reservation' as const,
-          message: `Nouvelle réservation via ${(reservation.channels as any)?.name || 'Web'}`,
-          customer: reservation.customer_name,
-          time: getTimeAgo(reservation.created_at),
-          status: reservation.status as any
+           message: `Nouvelle réservation via ${(reservation.channels as any)?.name || 'Web'}`,
+           customer: reservation.customer_name,
+           time: getTimeAgoInParis(reservation.created_at),
+           status: reservation.status as any
         })) || [];
 
       // Generate alerts based on data
@@ -150,20 +149,6 @@ export function useRealtimeDashboard() {
     }
   };
 
-  const getTimeAgo = (dateString: string): string => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return "Il y a moins d'une minute";
-    if (diffInMinutes < 60) return `Il y a ${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''}`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `Il y a ${diffInHours} heure${diffInHours > 1 ? 's' : ''}`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
-  };
 
   useEffect(() => {
     fetchDashboardData();
