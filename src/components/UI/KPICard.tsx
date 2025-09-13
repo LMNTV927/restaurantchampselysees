@@ -35,7 +35,7 @@ export function KPICard({
       <Card className="premium-card p-6 group hover:shadow-medium transition-all duration-300">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
               {title}
             </p>
             <div className="flex items-baseline gap-2">
