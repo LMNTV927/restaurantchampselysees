@@ -45,11 +45,6 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
         ))}
       </div>
       
-      {data.time && (
-        <p className="mt-4 text-sm text-muted-foreground">
-          Heure sélectionnée: {data.time}
-        </p>
-      )}
     </div>
   );
 }

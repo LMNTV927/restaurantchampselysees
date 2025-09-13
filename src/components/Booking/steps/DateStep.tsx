@@ -41,16 +41,11 @@ export function DateStep({ data, onUpdate }: DateStepProps) {
           className="rounded-xl border border-border bg-background p-4 pointer-events-auto"
           classNames={{
             day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-            day_today: "bg-accent text-accent-foreground",
+            day_today: "",
           }}
         />
       </div>
       
-      {data.date && (
-        <p className="mt-4 text-sm text-muted-foreground">
-          Date sélectionnée: {format(data.date, 'EEEE d MMMM yyyy', { locale: fr })}
-        </p>
-      )}
     </div>
   );
 }
