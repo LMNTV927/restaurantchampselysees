@@ -70,6 +70,24 @@ export function formatDateInParis(date: Date): string {
 }
 
 /**
+ * Get current month in YYYY-MM format (Paris timezone)
+ */
+export function getCurrentMonthInParis(): string {
+  const now = new Date();
+  const parisTime = new Date(now.toLocaleString('en-US', { timeZone: PARIS_TIMEZONE }));
+  return parisTime.toISOString().slice(0, 7);
+}
+
+/**
+ * Get current year in Paris timezone
+ */
+export function getCurrentYearInParis(): number {
+  const now = new Date();
+  const parisTime = new Date(now.toLocaleString('en-US', { timeZone: PARIS_TIMEZONE }));
+  return parisTime.getFullYear();
+}
+
+/**
  * Get time ago string using Paris timezone
  */
 export function getTimeAgoInParis(dateString: string): string {
