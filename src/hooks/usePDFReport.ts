@@ -19,6 +19,21 @@ interface KPIData {
   conversion: number;
 }
 
+interface ReservationData {
+  id: string;
+  customer_name: string;
+  customer_email: string | null;
+  customer_phone: string;
+  reservation_date: string;
+  reservation_time: string;
+  guests_count: number;
+  status: string;
+  notes: string | null;
+  created_at: string;
+  channel_id: string;
+  channel_name: string;
+}
+
 declare module 'jspdf' {
   interface jsPDF {
     autoTable: (options: UserOptions) => jsPDF;
@@ -29,7 +44,8 @@ export const usePDFReport = () => {
   const generateMonthlyReport = (
     channels: ChannelData[], 
     kpis: KPIData, 
-    selectedMonth: string
+    selectedMonth: string,
+    reservations: ReservationData[] = []
   ) => {
     try {
       const doc = new jsPDF();
@@ -223,6 +239,67 @@ export const usePDFReport = () => {
         }
         yPosition += 6;
       });
+
+      // Section Détail des Réservations (si disponibles)
+      if (reservations.length > 0) {
+        doc.addPage();
+        
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(0);
+        doc.text('DÉTAIL DES RÉSERVATIONS', 20, 30);
+        
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(50);
+        doc.text(`${reservations.length} réservations enregistrées pour ${monthLabel}`, 20, 45);
+        
+        // Tableau des réservations
+        const reservationTableData = reservations.slice(0, 50).map(reservation => [
+          reservation.customer_name,
+          reservation.customer_phone,
+          reservation.customer_email || 'N/A',
+          new Date(reservation.reservation_date).toLocaleDateString('fr-FR'),
+          reservation.reservation_time,
+          reservation.guests_count.toString(),
+          reservation.status === 'confirmed' ? 'Confirmée' :
+          reservation.status === 'show' ? 'Présentée' :
+          reservation.status === 'no_show' ? 'Absent' : 'Annulée',
+          reservation.channel_name
+        ]);
+
+        doc.autoTable({
+          startY: 55,
+          head: [['Client', 'Téléphone', 'Email', 'Date', 'Heure', 'Couverts', 'Statut', 'Canal']],
+          body: reservationTableData,
+          theme: 'striped',
+          styles: {
+            fontSize: 8,
+            cellPadding: 3
+          },
+          headStyles: {
+            fillColor: [52, 73, 94],
+            textColor: 255,
+            fontStyle: 'bold'
+          },
+          columnStyles: {
+            0: { cellWidth: 25 },
+            1: { cellWidth: 20 },
+            2: { cellWidth: 30 },
+            3: { cellWidth: 18 },
+            4: { cellWidth: 15 },
+            5: { cellWidth: 12, halign: 'center' },
+            6: { cellWidth: 20 },
+            7: { cellWidth: 20 }
+          }
+        });
+        
+        if (reservations.length > 50) {
+          doc.setFontSize(10);
+          doc.setTextColor(100);
+          doc.text(`... et ${reservations.length - 50} autres réservations`, 20, (doc as any).lastAutoTable.finalY + 10);
+        }
+      }
 
       // Footer
       for (let i = 1; i <= doc.getNumberOfPages(); i++) {

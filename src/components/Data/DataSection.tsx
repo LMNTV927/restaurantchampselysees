@@ -40,13 +40,30 @@ import {
   Cell,
 } from "recharts";
 import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
+import { useMonthlyData } from "@/hooks/useMonthlyData";
 import { usePDFReport } from "@/hooks/usePDFReport";
 import { toast } from "sonner";
 
 export function DataSection() {
   const [selectedMonth, setSelectedMonth] = useState("2024-11");
-  const { channels, kpis, loading } = useRealtimeChannelsData();
+  const [monthlyChannels, setMonthlyChannels] = useState<any[]>([]);
+  const [monthlyKpis, setMonthlyKpis] = useState<any>({
+    totalClicks: 0,
+    totalReservations: 0,
+    totalCovers: 0,
+    conversion: 0
+  });
+  const [monthlyReservations, setMonthlyReservations] = useState<any[]>([]);
+  const { channels: currentChannels, kpis: currentKpis, loading: currentLoading } = useRealtimeChannelsData();
+  const { fetchMonthlyData, loading: monthlyLoading } = useMonthlyData();
   const { generateMonthlyReport } = usePDFReport();
+
+  // Use monthly data for historical months, current data for current month
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const isCurrentMonth = selectedMonth === currentMonth;
+  const channels = isCurrentMonth ? currentChannels : monthlyChannels;
+  const kpis = isCurrentMonth ? currentKpis : monthlyKpis;
+  const loading = isCurrentMonth ? currentLoading : monthlyLoading;
 
   // Configuration pour les graphiques
   const chartConfig = {
@@ -81,6 +98,26 @@ export function DataSection() {
     cumulé: channels.slice(0, index + 1).reduce((acc, c) => acc + c.covers, 0),
   }));
 
+  // Load monthly data when month changes
+  const loadMonthlyData = async (month: string) => {
+    if (month === currentMonth) return; // Use real-time data for current month
+    
+    try {
+      const data = await fetchMonthlyData(month);
+      setMonthlyChannels(data.channels);
+      setMonthlyKpis(data.kpis);
+      setMonthlyReservations(data.reservations);
+    } catch (error) {
+      toast.error("Erreur lors du chargement des données du mois");
+      console.error("Monthly data loading error:", error);
+    }
+  };
+
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
+    loadMonthlyData(month);
+  };
+
   const months = [
     { value: "2024-11", label: "Novembre 2024" },
     { value: "2024-10", label: "Octobre 2024" },
@@ -108,7 +145,12 @@ export function DataSection() {
     toast.loading("Génération du rapport PDF...");
     
     try {
-      const result = generateMonthlyReport(channels, kpis, selectedMonth);
+      // Use current data for current month, monthly data for historical months
+      const reportChannels = isCurrentMonth ? currentChannels : monthlyChannels;
+      const reportKpis = isCurrentMonth ? currentKpis : monthlyKpis;
+      const reportReservations = isCurrentMonth ? [] : monthlyReservations;
+      
+      const result = generateMonthlyReport(reportChannels, reportKpis, selectedMonth, reportReservations);
       
       if (result.success) {
         toast.success(`Rapport PDF généré: ${result.fileName}`);
@@ -140,7 +182,7 @@ export function DataSection() {
         </div>
         
         <div className="flex items-center gap-3">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <Select value={selectedMonth} onValueChange={handleMonthChange}>
             <SelectTrigger className="w-48 premium-input">
               <SelectValue />
             </SelectTrigger>
