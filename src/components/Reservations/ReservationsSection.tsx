@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Calendar, Clock, Users, MapPin } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, History } from "lucide-react";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
 import { AddReservationDialog } from "./AddReservationDialog";
+import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis } from "@/lib/dateUtils";
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
 
@@ -52,19 +53,25 @@ export function ReservationsSection() {
 
   // Filter reservations based on selected period
   const getFilteredReservations = () => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayString = getTodayInParis();
+    const currentTime = getCurrentTimeInParis();
+    const currentMonth = getCurrentMonthInParis();
+    
+    // Parse today's date
+    const today = new Date(todayString);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const nextWeek = new Date(today);
     nextWeek.setDate(nextWeek.getDate() + 7);
+    
+    // Get current month boundaries
+    const [year, month] = currentMonth.split('-');
+    const monthStart = new Date(parseInt(year), parseInt(month) - 1, 1);
+    const monthEnd = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59);
 
     switch (selectedFilter) {
       case "today":
         // Réservations d'aujourd'hui uniquement (TOUTES les réservations du jour courant)
-        // Ceci inclut les réservations passées et futures du même jour
-        // Par exemple: le 13 septembre à 23h, on affiche toutes les réservations du 13 septembre
-        // même si certaines étaient prévues à 19h (déjà passées)
         return allReservations.filter(reservation => {
           const reservationDate = new Date(reservation.startAt);
           const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());
@@ -86,6 +93,18 @@ export function ReservationsSection() {
           const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());
           return reservationDay.getTime() >= nextWeek.getTime();
         });
+      
+      case "past":
+        // Réservations passées du mois en cours seulement
+        return allReservations.filter(reservation => {
+          const reservationDateTime = new Date(reservation.startAt);
+          const now = new Date();
+          
+          // Vérifier que la réservation est dans le mois actuel ET qu'elle est passée
+          return reservationDateTime >= monthStart && 
+                 reservationDateTime <= monthEnd && 
+                 reservationDateTime < now;
+        }).sort((a, b) => b.startAt.getTime() - a.startAt.getTime()); // Tri chronologique inverse (plus récentes en premier)
       
       default:
         return allReservations;
@@ -146,6 +165,8 @@ export function ReservationsSection() {
         return "Réservations des 7 prochains jours";
       case "all":
         return "Réservations à venir";
+      case "past":
+        return "Réservations passées (ce mois)";
       default:
         return "Réservations";
     }
@@ -174,6 +195,13 @@ export function ReservationsSection() {
           confirmed: "Confirmées futures",
           occupancy: "Taux d'Occupation"
         };
+      case "past":
+        return {
+          reservations: "Réservations Passées",
+          covers: "Couverts Passés",
+          confirmed: "Confirmées Passées",
+          occupancy: "Taux d'Occupation"
+        };
       default:
         return {
           reservations: "Réservations",
@@ -190,6 +218,7 @@ export function ReservationsSection() {
     { id: "today", label: "Aujourd'hui" },
     { id: "upcoming", label: "Prochains 7 jours" },
     { id: "all", label: "Tout à venir" },
+    { id: "past", label: "Réservations passées" },
   ];
 
   return (
@@ -259,7 +288,7 @@ export function ReservationsSection() {
           <KPICard
             title={kpiTitles.reservations}
             value={filteredKPIs.totalReservations}
-            icon={Calendar}
+            icon={selectedFilter === "past" ? History : Calendar}
             trend={{ value: 5.2, isPositive: true }}
             loading={loading}
           />
@@ -362,32 +391,34 @@ export function ReservationsSection() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="premium-button"
-                      onClick={() => handleUpdateReservationStatus(reservation.id, "show")}
-                    >
-                      Show
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="premium-button"
-                      onClick={() => handleUpdateReservationStatus(reservation.id, "no_show")}
-                    >
-                      No-show
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="premium-button"
-                      onClick={() => handleUpdateReservationStatus(reservation.id, "cancelled")}
-                    >
-                      Annuler
-                    </Button>
-                  </div>
+                  {selectedFilter !== "past" && (
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="premium-button"
+                        onClick={() => handleUpdateReservationStatus(reservation.id, "show")}
+                      >
+                        Show
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="premium-button"
+                        onClick={() => handleUpdateReservationStatus(reservation.id, "no_show")}
+                      >
+                        No-show
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="premium-button"
+                        onClick={() => handleUpdateReservationStatus(reservation.id, "cancelled")}
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  )}
                 </motion.div>
               ))
             )}
