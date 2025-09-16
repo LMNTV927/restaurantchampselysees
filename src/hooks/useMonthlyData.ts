@@ -33,7 +33,11 @@ export function useMonthlyData() {
       // Parse selected month (format: "2024-11")
       const [year, month] = selectedMonth.split('-');
       const startDate = `${year}-${month}-01`;
-      const endDate = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}-01`;
+      
+      // Calculate end date properly (next month)
+      const nextMonth = parseInt(month) === 12 ? 1 : parseInt(month) + 1;
+      const nextYear = parseInt(month) === 12 ? parseInt(year) + 1 : parseInt(year);
+      const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
       
       // Fetch channels
       const { data: channelsData, error: channelsError } = await supabase
@@ -69,8 +73,8 @@ export function useMonthlyData() {
           channel_id,
           channels!inner(name)
         `)
-        .gte('created_at', startDate)
-        .lt('created_at', endDate)
+        .gte('reservation_date', startDate)
+        .lt('reservation_date', endDate)
         .order('created_at', { ascending: false });
 
       if (reservationsError) throw reservationsError;

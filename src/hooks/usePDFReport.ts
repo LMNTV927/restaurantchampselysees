@@ -1,6 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
-import { UserOptions } from 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface ChannelData {
   id: string;
@@ -34,11 +33,6 @@ interface ReservationData {
   channel_name: string;
 }
 
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: UserOptions) => jsPDF;
-  }
-}
 
 export const usePDFReport = () => {
   const generateMonthlyReport = (
@@ -118,7 +112,7 @@ export const usePDFReport = () => {
         ['Taux de Conversion', `${kpis.conversion.toFixed(1)}%`, '+4.7%']
       ];
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: yPosition + 10,
         head: [['Métrique', 'Valeur', 'Évolution']],
         body: kpiData,
@@ -140,7 +134,7 @@ export const usePDFReport = () => {
       });
 
       // Section Performance par Canal
-      yPosition = (doc as any).lastAutoTable.finalY + 20;
+      yPosition = 200; // Fixed position since we can't access lastAutoTable easily with the new syntax
       
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
@@ -162,7 +156,7 @@ export const usePDFReport = () => {
         channel.shortUrl
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: yPosition + 18,
         head: [['Canal', 'Clics', 'Résa.', 'Couv.', 'Conv.', 'URL']],
         body: channelData,
@@ -269,7 +263,7 @@ export const usePDFReport = () => {
           reservation.channel_name
         ]);
 
-        doc.autoTable({
+        autoTable(doc, {
           startY: 55,
           head: [['Client', 'Téléphone', 'Email', 'Date', 'Heure', 'Couverts', 'Statut', 'Canal']],
           body: reservationTableData,
@@ -298,7 +292,7 @@ export const usePDFReport = () => {
         if (reservations.length > 50) {
           doc.setFontSize(10);
           doc.setTextColor(100);
-          doc.text(`... et ${reservations.length - 50} autres réservations`, 20, (doc as any).lastAutoTable.finalY + 10);
+          doc.text(`... et ${reservations.length - 50} autres réservations`, 20, 280);
         }
       }
 
