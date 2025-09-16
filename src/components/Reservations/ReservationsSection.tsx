@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
 import { AddReservationDialog } from "./AddReservationDialog";
-import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis } from "@/lib/dateUtils";
+import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis, createDateTimeInParis } from "@/lib/dateUtils";
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
 
@@ -42,7 +42,7 @@ export function ReservationsSection() {
         lastName, 
         phone: reservation.customerPhone 
       },
-      startAt: new Date(`${reservation.reservationDate}T${reservation.reservationTime}`),
+      startAt: createDateTimeInParis(reservation.reservationDate, reservation.reservationTime),
       partySize: reservation.guestsCount,
       occasion: '', // We don't have occasion in our data model yet
       notes: reservation.notes || '',
@@ -98,12 +98,15 @@ export function ReservationsSection() {
         // Réservations passées du mois en cours seulement
         return allReservations.filter(reservation => {
           const reservationDateTime = new Date(reservation.startAt);
-          const now = new Date();
+          
+          // Obtenir la date et heure actuelle en timezone Paris
+          const nowParis = new Date();
+          const parisTime = new Date(nowParis.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
           
           // Vérifier que la réservation est dans le mois actuel ET qu'elle est passée
           return reservationDateTime >= monthStart && 
                  reservationDateTime <= monthEnd && 
-                 reservationDateTime < now;
+                 reservationDateTime < parisTime;
         }).sort((a, b) => b.startAt.getTime() - a.startAt.getTime()); // Tri chronologique inverse (plus récentes en premier)
       
       default:

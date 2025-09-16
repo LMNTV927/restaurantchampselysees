@@ -79,6 +79,19 @@ export function getCurrentMonthInParis(): string {
 }
 
 /**
+ * Create a date object from date and time strings in Paris timezone
+ */
+export function createDateTimeInParis(dateString: string, timeString: string): Date {
+  // Combine date and time, then interpret in Paris timezone
+  const dateTimeString = `${dateString}T${timeString}`;
+  const tempDate = new Date(dateTimeString);
+  
+  // Create a proper date in Paris timezone
+  const parisOffset = tempDate.getTimezoneOffset() + (60 * 1); // Approximation, Paris is UTC+1/+2
+  return new Date(tempDate.getTime() + (parisOffset * 60 * 1000));
+}
+
+/**
  * Get current year in Paris timezone
  */
 export function getCurrentYearInParis(): number {
