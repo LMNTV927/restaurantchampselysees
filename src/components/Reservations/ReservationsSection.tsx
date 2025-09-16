@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
+import { AddReservationDialog } from "./AddReservationDialog";
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
 
@@ -25,7 +26,7 @@ interface Reservation {
 export function ReservationsSection() {
   const [selectedFilter, setSelectedFilter] = useState("today");
   const { toast } = useToast();
-  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus } = useRealtimeReservations();
+  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, refetch } = useRealtimeReservations();
 
   // Transform real-time reservations to match local interface
   const allReservations: Reservation[] = realtimeReservations.map(reservation => {
@@ -209,30 +210,33 @@ export function ReservationsSection() {
           </p>
         </div>
         
-        {/* Filters */}
-        <div className="flex items-center bg-card/50 rounded-2xl p-1 backdrop-blur-sm">
-          {filters.map((filter) => (
-            <motion.button
-              key={filter.id}
-              onClick={() => setSelectedFilter(filter.id)}
-              className={`relative px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 ${
-                selectedFilter === filter.id
-                  ? "text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {selectedFilter === filter.id && (
-                <motion.div
-                  className="absolute inset-0 bg-gradient-gold rounded-xl shadow-gold"
-                  layoutId="activeFilter"
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-              )}
-              <span className="relative z-10">{filter.label}</span>
-            </motion.button>
-          ))}
+        <div className="flex items-center gap-4">
+          <AddReservationDialog onReservationAdded={refetch} />
+          {/* Filters */}
+          <div className="flex items-center bg-card/50 rounded-2xl p-1 backdrop-blur-sm">
+            {filters.map((filter) => (
+              <motion.button
+                key={filter.id}
+                onClick={() => setSelectedFilter(filter.id)}
+                className={`relative px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 ${
+                  selectedFilter === filter.id
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {selectedFilter === filter.id && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-gold rounded-xl shadow-gold"
+                    layoutId="activeFilter"
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  />
+                )}
+                <span className="relative z-10">{filter.label}</span>
+              </motion.button>
+            ))}
+          </div>
         </div>
       </div>
 
