@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Download, Calendar, BarChart3, TrendingUp, Users, Target } from "lucide-react";
+import { Download, Calendar, BarChart3, TrendingUp, Users, Target, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { KPICard } from "@/components/UI/KPICard";
@@ -40,10 +40,13 @@ import {
   Cell,
 } from "recharts";
 import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
+import { usePDFReport } from "@/hooks/usePDFReport";
+import { toast } from "sonner";
 
 export function DataSection() {
   const [selectedMonth, setSelectedMonth] = useState("2024-11");
   const { channels, kpis, loading } = useRealtimeChannelsData();
+  const { generateMonthlyReport } = usePDFReport();
 
   // Configuration pour les graphiques
   const chartConfig = {
@@ -101,6 +104,23 @@ export function DataSection() {
     document.body.removeChild(link);
   };
 
+  const handleGeneratePDF = async () => {
+    toast.loading("Génération du rapport PDF...");
+    
+    try {
+      const result = generateMonthlyReport(channels, kpis, selectedMonth);
+      
+      if (result.success) {
+        toast.success(`Rapport PDF généré: ${result.fileName}`);
+      } else {
+        toast.error(`Erreur: ${result.error}`);
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la génération du PDF");
+      console.error("PDF generation error:", error);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -140,6 +160,15 @@ export function DataSection() {
           >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
+          </Button>
+          
+          <Button 
+            onClick={handleGeneratePDF}
+            variant="default" 
+            className="premium-button"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Rapport PDF
           </Button>
         </div>
       </div>
