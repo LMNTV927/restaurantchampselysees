@@ -50,6 +50,7 @@ export const usePDFReport = () => {
     try {
       const doc = new jsPDF();
       const monthNames: { [key: string]: string } = {
+        '2025-09': 'Septembre 2025',
         '2024-11': 'Novembre 2024',
         '2024-10': 'Octobre 2024', 
         '2024-09': 'Septembre 2024'

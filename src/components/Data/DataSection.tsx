@@ -45,7 +45,8 @@ import { usePDFReport } from "@/hooks/usePDFReport";
 import { toast } from "sonner";
 
 export function DataSection() {
-  const [selectedMonth, setSelectedMonth] = useState("2024-11");
+  const currentMonth = new Date().toISOString().slice(0, 7); // Format: "2025-09"
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [monthlyChannels, setMonthlyChannels] = useState<any[]>([]);
   const [monthlyKpis, setMonthlyKpis] = useState<any>({
     totalClicks: 0,
@@ -58,8 +59,7 @@ export function DataSection() {
   const { fetchMonthlyData, loading: monthlyLoading } = useMonthlyData();
   const { generateMonthlyReport } = usePDFReport();
 
-  // Use monthly data for historical months, current data for current month
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  // Use monthly data for historical months, current data for current month  
   const isCurrentMonth = selectedMonth === currentMonth;
   const channels = isCurrentMonth ? currentChannels : monthlyChannels;
   const kpis = isCurrentMonth ? currentKpis : monthlyKpis;
@@ -119,6 +119,7 @@ export function DataSection() {
   };
 
   const months = [
+    { value: "2025-09", label: "Septembre 2025" },
     { value: "2024-11", label: "Novembre 2024" },
     { value: "2024-10", label: "Octobre 2024" },
     { value: "2024-09", label: "Septembre 2024" },
