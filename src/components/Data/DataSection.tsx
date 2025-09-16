@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Download, Calendar, BarChart3, TrendingUp, Users, Target, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -61,8 +61,10 @@ export function DataSection() {
 
   // Use monthly data for historical months, current data for current month  
   const isCurrentMonth = selectedMonth === currentMonth;
-  const channels = isCurrentMonth ? currentChannels : monthlyChannels;
-  const kpis = isCurrentMonth ? currentKpis : monthlyKpis;
+  
+  // For September 2025 (current month), we need to fetch data properly since useRealtimeChannelsData might not have all historical data
+  const channels = monthlyChannels.length > 0 ? monthlyChannels : currentChannels;
+  const kpis = Object.keys(monthlyKpis).length > 1 ? monthlyKpis : currentKpis;
   const loading = isCurrentMonth ? currentLoading : monthlyLoading;
 
   // Configuration pour les graphiques
@@ -98,10 +100,8 @@ export function DataSection() {
     cumulé: channels.slice(0, index + 1).reduce((acc, c) => acc + c.covers, 0),
   }));
 
-  // Load monthly data when month changes
+  // Load monthly data when month changes or on component mount
   const loadMonthlyData = async (month: string) => {
-    if (month === currentMonth) return; // Use real-time data for current month
-    
     try {
       const data = await fetchMonthlyData(month);
       setMonthlyChannels(data.channels);
@@ -117,6 +117,11 @@ export function DataSection() {
     setSelectedMonth(month);
     loadMonthlyData(month);
   };
+
+  // Load data for current month on mount
+  React.useEffect(() => {
+    loadMonthlyData(selectedMonth);
+  }, []);
 
   const months = [
     { value: "2025-09", label: "Septembre 2025" },
@@ -147,9 +152,9 @@ export function DataSection() {
     
     try {
       // Use current data for current month, monthly data for historical months
-      const reportChannels = isCurrentMonth ? currentChannels : monthlyChannels;
-      const reportKpis = isCurrentMonth ? currentKpis : monthlyKpis;
-      const reportReservations = isCurrentMonth ? [] : monthlyReservations;
+      const reportChannels = channels;
+      const reportKpis = kpis;
+      const reportReservations = monthlyReservations;
       
       const result = generateMonthlyReport(reportChannels, reportKpis, selectedMonth, reportReservations);
       

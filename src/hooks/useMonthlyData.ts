@@ -60,24 +60,17 @@ export function useMonthlyData() {
       const { data: reservationsData, error: reservationsError } = await supabase
         .from('reservations')
         .select(`
-          id,
-          customer_name,
-          customer_email,
-          customer_phone,
-          reservation_date,
-          reservation_time,
-          guests_count,
-          status,
-          notes,
-          created_at,
-          channel_id,
-          channels!inner(name)
+          *,
+          channels(name)
         `)
-        .gte('reservation_date', startDate)
-        .lt('reservation_date', endDate)
+        .gte('created_at', startDate)
+        .lt('created_at', endDate)
         .order('created_at', { ascending: false });
 
-      if (reservationsError) throw reservationsError;
+      if (reservationsError) {
+        console.error('Reservations error:', reservationsError);
+        throw reservationsError;
+      }
 
       // Aggregate stats by channel for the month
       const channelStatsMap = new Map();
