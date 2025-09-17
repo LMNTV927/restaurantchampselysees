@@ -7,6 +7,8 @@ export interface DashboardKPIs {
   covers: number;
   occupancy: number;
   revenue: number;
+  noShows: number;
+  cancellations: number;
 }
 
 export interface MonthlyTrendData {
@@ -41,7 +43,7 @@ export interface DashboardData {
 
 export function useRealtimeDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
-    todayKPIs: { reservations: 0, covers: 0, occupancy: 0, revenue: 0 },
+    todayKPIs: { reservations: 0, covers: 0, occupancy: 0, revenue: 0, noShows: 0, cancellations: 0 },
     monthlyTrend: [],
     recentActivity: [],
     alerts: []
@@ -67,18 +69,25 @@ export function useRealtimeDashboard() {
 
       if (reservationsError) throw reservationsError;
 
-      // Fetch monthly data for trends
+      // Fetch monthly data for trends (include status for filtering)
       const { data: monthlyReservations, error: monthlyError } = await supabase
         .from('reservations')
-        .select('reservation_date, guests_count, created_at')
+        .select('reservation_date, guests_count, created_at, status')
         .gte('reservation_date', monthStart)
         .lte('reservation_date', today);
 
       if (monthlyError) throw monthlyError;
 
-      // Calculate today's KPIs
-      const todayReservationsCount = todayReservations?.length || 0;
-      const todayCovers = todayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
+      // Calculate today's KPIs - Only count 'show' status for actual attendance
+      const todayShowReservations = todayReservations?.filter(r => r.status === 'show') || [];
+      const todayNoShowReservations = todayReservations?.filter(r => r.status === 'no_show') || [];
+      const todayCancelledReservations = todayReservations?.filter(r => r.status === 'cancelled') || [];
+      
+      const todayReservationsCount = todayShowReservations.length;
+      const todayCovers = todayShowReservations.reduce((sum, r) => sum + r.guests_count, 0);
+      const todayNoShows = todayNoShowReservations.length;
+      const todayCancellations = todayCancelledReservations.length;
+      
       const totalCapacity = 120; // Restaurant capacity
       const occupancy = Math.min((todayCovers / totalCapacity) * 100, 100);
       const avgRevenuePerCover = 45; // Average revenue per cover in euros
@@ -102,10 +111,10 @@ export function useRealtimeDashboard() {
         });
       }
 
-      // Populate with actual reservation data
+      // Populate with actual reservation data - Only count 'show' status
       monthlyReservations?.forEach(reservation => {
         const existing = monthlyTrendMap.get(reservation.reservation_date);
-        if (existing) {
+        if (existing && reservation.status === 'show') {
           existing.reservations += 1;
           existing.covers += reservation.guests_count;
         }
@@ -151,7 +160,9 @@ export function useRealtimeDashboard() {
           reservations: todayReservationsCount,
           covers: todayCovers,
           occupancy,
-          revenue
+          revenue,
+          noShows: todayNoShows,
+          cancellations: todayCancellations
         },
         monthlyTrend,
         recentActivity,
