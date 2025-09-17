@@ -123,7 +123,7 @@ export const usePDFReport = () => {
         ['Taux de Conversion', `${kpis.conversion.toFixed(1)}%`, '+4.7%']
       ];
 
-      autoTable(doc, {
+      const kpiTable = autoTable(doc, {
         startY: yPosition + 10,
         head: [['Métrique', 'Valeur', 'Évolution']],
         body: kpiData,
@@ -144,8 +144,8 @@ export const usePDFReport = () => {
         }
       });
 
-      // Section Données Effectives
-      yPosition = 170;
+      // Section Données Effectives - Position dynamique après le tableau KPIs
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(0);
@@ -164,7 +164,7 @@ export const usePDFReport = () => {
         ['No-Shows + Annulations', (kpis.totalReservations - effectiveReservations.length).toString(), `${(((kpis.totalReservations - effectiveReservations.length) / kpis.totalReservations) * 100).toFixed(1)}%`]
       ];
 
-      autoTable(doc, {
+      const effectiveTable = autoTable(doc, {
         startY: yPosition + 18,
         head: [['Métrique Effective', 'Valeur', 'Ratio']],
         body: effectiveData,
@@ -185,8 +185,8 @@ export const usePDFReport = () => {
         }
       });
 
-      // Section Performance par Canal
-      yPosition = 250; // Position ajustée pour éviter le chevauchement
+      // Section Performance par Canal - Position dynamique après le tableau des données effectives
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
       
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
