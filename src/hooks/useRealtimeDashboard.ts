@@ -115,7 +115,7 @@ export function useRealtimeDashboard() {
 
       // Generate recent activity from reservations
       const recentActivity: ActivityItem[] = todayReservations
-        ?.slice(0, 4)
+        ?.slice(0, 5)
         .map((reservation, index) => ({
           id: `activity-${index}`,
           type: 'reservation' as const,
@@ -133,16 +133,6 @@ export function useRealtimeDashboard() {
           type: 'warning',
           message: `Pic d'affluence prévu ce soir (${todayReservationsCount} réservations)`,
           priority: 'high'
-        });
-      }
-
-      const pendingReservations = todayReservations?.filter(r => r.status === 'confirmed').length || 0;
-      if (pendingReservations > 3) {
-        alerts.push({
-          id: 'pending-confirmations',
-          type: 'info',
-          message: `${pendingReservations} réservations en attente de confirmation`,
-          priority: 'medium'
         });
       }
 
