@@ -57,60 +57,83 @@ export function ReservationsSection() {
     const currentTime = getCurrentTimeInParis();
     const currentMonth = getCurrentMonthInParis();
     
-    // Parse today's date
-    const today = new Date(todayString);
+    // Calculate date strings for filtering (avoid timezone issues)
+    const today = new Date(todayString + 'T00:00:00');
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const nextWeek = new Date(today);
     nextWeek.setDate(nextWeek.getDate() + 7);
     
-    // Get current month boundaries
-    const [year, month] = currentMonth.split('-');
-    const monthStart = new Date(parseInt(year), parseInt(month) - 1, 1);
-    const monthEnd = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59);
+    // Format dates as YYYY-MM-DD for string comparison
+    const tomorrowString = tomorrow.toISOString().split('T')[0];
+    const nextWeekString = nextWeek.toISOString().split('T')[0];
+    
+    // Use original reservation data for filtering (avoid timezone conversion issues)
+    const reservationsWithOriginalData = realtimeReservations.map(reservation => {
+      const nameParts = reservation.customerName.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      return {
+        id: reservation.id,
+        customer: { 
+          firstName, 
+          lastName, 
+          phone: reservation.customerPhone 
+        },
+        startAt: createDateTimeInParis(reservation.reservationDate, reservation.reservationTime),
+        partySize: reservation.guestsCount,
+        occasion: '',
+        notes: reservation.notes || '',
+        status: reservation.status,
+        source: reservation.channelName,
+        reservationDate: reservation.reservationDate, // Keep original date string
+        reservationTime: reservation.reservationTime  // Keep original time string
+      };
+    });
 
     switch (selectedFilter) {
       case "today":
-        // Réservations d'aujourd'hui uniquement (TOUTES les réservations du jour courant)
-        return allReservations.filter(reservation => {
-          const reservationDate = new Date(reservation.startAt);
-          const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());
-          return reservationDay.getTime() === today.getTime();
-        });
+        // Réservations d'aujourd'hui uniquement - comparer directement les dates string
+        return reservationsWithOriginalData.filter(reservation => 
+          reservation.reservationDate === todayString
+        );
       
       case "upcoming":
         // Réservations des 7 prochains jours (sans aujourd'hui)
-        return allReservations.filter(reservation => {
-          const reservationDate = new Date(reservation.startAt);
-          const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());
-          return reservationDay.getTime() >= tomorrow.getTime() && reservationDay.getTime() < nextWeek.getTime();
-        });
+        return reservationsWithOriginalData.filter(reservation => 
+          reservation.reservationDate >= tomorrowString && 
+          reservation.reservationDate < nextWeekString
+        );
       
       case "all":
         // Réservations au-delà de 7 jours
-        return allReservations.filter(reservation => {
-          const reservationDate = new Date(reservation.startAt);
-          const reservationDay = new Date(reservationDate.getFullYear(), reservationDate.getMonth(), reservationDate.getDate());
-          return reservationDay.getTime() >= nextWeek.getTime();
-        });
+        return reservationsWithOriginalData.filter(reservation => 
+          reservation.reservationDate >= nextWeekString
+        );
       
       case "past":
         // Réservations passées du mois en cours seulement
-        return allReservations.filter(reservation => {
-          const reservationDateTime = new Date(reservation.startAt);
+        return reservationsWithOriginalData.filter(reservation => {
+          // Vérifier que la réservation est dans le mois actuel
+          const isCurrentMonth = reservation.reservationDate.startsWith(currentMonth);
           
-          // Obtenir la date et heure actuelle en timezone Paris
-          const nowParis = new Date();
-          const parisTime = new Date(nowParis.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+          // Vérifier si la réservation est passée
+          const isPast = reservation.reservationDate < todayString || 
+                        (reservation.reservationDate === todayString && 
+                         reservation.reservationTime < currentTime);
           
-          // Vérifier que la réservation est dans le mois actuel ET qu'elle est passée
-          return reservationDateTime >= monthStart && 
-                 reservationDateTime <= monthEnd && 
-                 reservationDateTime < parisTime;
-        }).sort((a, b) => b.startAt.getTime() - a.startAt.getTime()); // Tri chronologique inverse (plus récentes en premier)
+          return isCurrentMonth && isPast;
+        }).sort((a, b) => {
+          // Tri chronologique inverse (plus récentes en premier)
+          if (a.reservationDate !== b.reservationDate) {
+            return b.reservationDate.localeCompare(a.reservationDate);
+          }
+          return b.reservationTime.localeCompare(a.reservationTime);
+        });
       
       default:
-        return allReservations;
+        return reservationsWithOriginalData;
     }
   };
 
