@@ -108,11 +108,11 @@ export function DashboardSection() {
           <Card className="premium-card">
             <div className="p-6">
               <h3 className="text-lg font-playfair font-semibold mb-4">
-                Réservations de la Semaine
+                Réservations du Mois
               </h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={dashboardData.weeklyTrend}>
+                    <AreaChart data={dashboardData.monthlyTrend}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis 
                       dataKey="day" 
@@ -150,11 +150,11 @@ export function DashboardSection() {
           <Card className="premium-card">
             <div className="p-6">
               <h3 className="text-lg font-playfair font-semibold mb-4">
-                Couverts de la Semaine
+                Couverts du Mois
               </h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={dashboardData.weeklyTrend}>
+                    <LineChart data={dashboardData.monthlyTrend}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis 
                       dataKey="day" 

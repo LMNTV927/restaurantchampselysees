@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, isReservationToday } from '@/lib/dateUtils';
+import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, isReservationToday, getCurrentMonthInParis } from '@/lib/dateUtils';
 
 export interface DashboardKPIs {
   reservations: number;
@@ -9,8 +9,9 @@ export interface DashboardKPIs {
   revenue: number;
 }
 
-export interface WeeklyTrendData {
-  day: string;
+export interface MonthlyTrendData {
+  date: string;
+  day: number;
   reservations: number;
   covers: number;
 }
@@ -33,7 +34,7 @@ export interface Alert {
 
 export interface DashboardData {
   todayKPIs: DashboardKPIs;
-  weeklyTrend: WeeklyTrendData[];
+  monthlyTrend: MonthlyTrendData[];
   recentActivity: ActivityItem[];
   alerts: Alert[];
 }
@@ -41,7 +42,7 @@ export interface DashboardData {
 export function useRealtimeDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     todayKPIs: { reservations: 0, covers: 0, occupancy: 0, revenue: 0 },
-    weeklyTrend: [],
+    monthlyTrend: [],
     recentActivity: [],
     alerts: []
   });
@@ -50,7 +51,8 @@ export function useRealtimeDashboard() {
   const fetchDashboardData = async () => {
     try {
       const today = getTodayInParis();
-      const sevenDaysAgo = getDaysAgoInParis(7);
+      const currentMonth = getCurrentMonthInParis();
+      const monthStart = `${currentMonth}-01`;
 
       // Fetch today's reservations (ALL reservations for the current date, from midnight to midnight)
       // This includes both past and future reservations for today
@@ -65,14 +67,14 @@ export function useRealtimeDashboard() {
 
       if (reservationsError) throw reservationsError;
 
-      // Fetch weekly data for trends
-      const { data: weeklyReservations, error: weeklyError } = await supabase
+      // Fetch monthly data for trends
+      const { data: monthlyReservations, error: monthlyError } = await supabase
         .from('reservations')
         .select('reservation_date, guests_count, created_at')
-        .gte('reservation_date', sevenDaysAgo)
+        .gte('reservation_date', monthStart)
         .lte('reservation_date', today);
 
-      if (weeklyError) throw weeklyError;
+      if (monthlyError) throw monthlyError;
 
       // Calculate today's KPIs
       const todayReservationsCount = todayReservations?.length || 0;
@@ -82,25 +84,34 @@ export function useRealtimeDashboard() {
       const avgRevenuePerCover = 45; // Average revenue per cover in euros
       const revenue = todayCovers * avgRevenuePerCover;
 
-      // Calculate weekly trend
-      const weeklyTrendMap = new Map<string, { day: string; reservations: number; covers: number }>();
+      // Calculate monthly trend
+      const monthlyTrendMap = new Map<string, { date: string; day: number; reservations: number; covers: number }>();
       
-      for (let i = 6; i >= 0; i--) {
-        const dateStr = getDaysAgoInParis(i);
-        const date = new Date(dateStr + 'T12:00:00');
-        const dayName = date.toLocaleDateString('fr-FR', { weekday: 'short', timeZone: 'Europe/Paris' });
-        weeklyTrendMap.set(dateStr, { day: dayName, reservations: 0, covers: 0 });
+      // Get current month and year
+      const [year, month] = currentMonth.split('-');
+      const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+      
+      // Initialize all days of the month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentMonth}-${day.toString().padStart(2, '0')}`;
+        monthlyTrendMap.set(dateStr, { 
+          date: dateStr, 
+          day: day, 
+          reservations: 0, 
+          covers: 0 
+        });
       }
 
-      weeklyReservations?.forEach(reservation => {
-        const existing = weeklyTrendMap.get(reservation.reservation_date);
+      // Populate with actual reservation data
+      monthlyReservations?.forEach(reservation => {
+        const existing = monthlyTrendMap.get(reservation.reservation_date);
         if (existing) {
           existing.reservations += 1;
           existing.covers += reservation.guests_count;
         }
       });
 
-      const weeklyTrend: WeeklyTrendData[] = Array.from(weeklyTrendMap.values());
+      const monthlyTrend: MonthlyTrendData[] = Array.from(monthlyTrendMap.values());
 
       // Generate recent activity from reservations
       const recentActivity: ActivityItem[] = todayReservations
@@ -142,7 +153,7 @@ export function useRealtimeDashboard() {
           occupancy,
           revenue
         },
-        weeklyTrend,
+        monthlyTrend,
         recentActivity,
         alerts
       });
