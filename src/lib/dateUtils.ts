@@ -101,14 +101,16 @@ export function getCurrentYearInParis(): number {
 }
 
 /**
- * Get current month name in French (Paris timezone)
+ * Get current month name in French (Paris timezone) with first letter capitalized
  */
 export function getCurrentMonthNameInParis(): string {
   const now = new Date();
-  return now.toLocaleDateString('fr-FR', { 
+  const monthName = now.toLocaleDateString('fr-FR', { 
     timeZone: PARIS_TIMEZONE,
     month: 'long'
   });
+  // Capitalize first letter
+  return monthName.charAt(0).toUpperCase() + monthName.slice(1);
 }
 
 /**
