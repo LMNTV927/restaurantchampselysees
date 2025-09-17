@@ -87,19 +87,45 @@ export function DataSection() {
   // Couleurs pour le graphique en secteurs
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
 
-  // Préparer les données pour les graphiques
-  const barChartData = channels.map(channel => ({
-    name: channel.name.length > 15 ? channel.name.substring(0, 15) + '...' : channel.name,
-    clics: channel.clicks,
-    reservations: channel.reservations,
-  }));
+  // Préparer les données pour les graphiques mensuels
+  const getDailyData = () => {
+    if (!monthlyReservations?.length) {
+      // Créer des données vides pour tous les jours du mois
+      const [year, month] = selectedMonth.split('-');
+      const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+      
+      return Array.from({ length: daysInMonth }, (_, index) => ({
+        day: index + 1,
+        reservations: 0,
+        covers: 0
+      }));
+    }
+    
+    // Grouper les réservations par jour
+    const dailyData = new Map();
+    const [year, month] = selectedMonth.split('-');
+    const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+    
+    // Initialiser tous les jours avec 0
+    for (let day = 1; day <= daysInMonth; day++) {
+      dailyData.set(day, { day, reservations: 0, covers: 0 });
+    }
+    
+    // Ajouter les données réelles
+    monthlyReservations.forEach(reservation => {
+      const reservationDate = new Date(reservation.reservation_date);
+      const day = reservationDate.getDate();
+      const existing = dailyData.get(day);
+      if (existing) {
+        existing.reservations += 1;
+        existing.covers += reservation.guests_count || 0;
+      }
+    });
+    
+    return Array.from(dailyData.values());
+  };
 
-  // Simuler des données temporelles pour le graphique linéaire (progression des couverts)
-  const lineChartData = channels.map((channel, index) => ({
-    name: channel.name.length > 10 ? channel.name.substring(0, 10) + '...' : channel.name,
-    couverts: channel.covers,
-    cumulé: channels.slice(0, index + 1).reduce((acc, c) => acc + c.covers, 0),
-  }));
+  const dailyData = getDailyData();
 
   // Load monthly data when month changes or on component mount
   const loadMonthlyData = async (month: string) => {
@@ -136,6 +162,12 @@ export function DataSection() {
     { value: `${currentYear}-02`, label: `Février ${currentYear}` },
     { value: `${currentYear}-01`, label: `Janvier ${currentYear}` },
   ];
+
+  // Obtenir le nom du mois sélectionné
+  const getSelectedMonthLabel = () => {
+    const month = months.find(m => m.value === selectedMonth);
+    return month ? month.label.split(' ')[0] : 'Septembre'; // Retourne juste le nom du mois
+  };
 
   const handleExportCSV = () => {
     // Real CSV export with current data
@@ -298,18 +330,18 @@ export function DataSection() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
-        {/* Graphique en barres - Clics vs Réservations */}
+        {/* Graphique Réservations mensuelles */}
         <Card className="premium-card p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-playfair font-semibold">Clics vs Réservations</h3>
-            <BarChart3 className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-playfair font-semibold">Réservations de {getSelectedMonthLabel()}</h3>
+            <Calendar className="h-5 w-5 text-primary" />
           </div>
           <ChartContainer config={chartConfig} className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
-                  dataKey="name" 
+                  dataKey="day" 
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
@@ -319,27 +351,46 @@ export function DataSection() {
                   fontSize={12}
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <ChartLegend content={<ChartLegendContent />} />
-                <Bar dataKey="clics" fill="var(--color-clics)" radius={4} />
-                <Bar dataKey="reservations" fill="var(--color-reservations)" radius={4} />
-              </BarChart>
+                <ChartTooltip 
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3">
+                          <p className="font-semibold">Jour {label}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Réservations: <span className="font-medium text-foreground">{payload[0]?.value}</span>
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="reservations" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={3}
+                  dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "hsl(var(--primary))", strokeWidth: 2 }}
+                />
+              </LineChart>
             </ResponsiveContainer>
           </ChartContainer>
         </Card>
 
-        {/* Graphique en ligne - Couverts par Canal */}
+        {/* Graphique Couverts mensuels */}
         <Card className="premium-card p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-playfair font-semibold">Couverts par Canal</h3>
-            <TrendingUp className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-playfair font-semibold">Couverts de {getSelectedMonthLabel()}</h3>
+            <Users className="h-5 w-5 text-primary" />
           </div>
           <ChartContainer config={chartConfig} className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
-                  dataKey="name" 
+                  dataKey="day" 
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
@@ -349,14 +400,28 @@ export function DataSection() {
                   fontSize={12}
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip 
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3">
+                          <p className="font-semibold">Jour {label}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Couverts: <span className="font-medium text-foreground">{payload[0]?.value}</span>
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
                 <Line 
                   type="monotone" 
-                  dataKey="couverts" 
-                  stroke="var(--color-couverts)" 
+                  dataKey="covers" 
+                  stroke="hsl(var(--accent))" 
                   strokeWidth={3}
-                  dot={{ fill: "var(--color-couverts)", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "var(--color-couverts)", strokeWidth: 2 }}
+                  dot={{ fill: "hsl(var(--accent))", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "hsl(var(--accent))", strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>
