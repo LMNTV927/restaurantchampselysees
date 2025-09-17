@@ -74,7 +74,10 @@ export function DashboardSection() {
             title="Réservations Aujourd'hui"
             value={dashboardData.todayKPIs.reservations}
             icon={Calendar}
-            trend={{ value: 5.2, isPositive: true }}
+            trend={dashboardData.todayKPIs.evolution?.reservationsEvolution !== null && dashboardData.todayKPIs.evolution?.reservationsEvolution !== undefined ? 
+              { value: dashboardData.todayKPIs.evolution.reservationsEvolution, isPositive: dashboardData.todayKPIs.evolution.reservationsEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>
@@ -83,7 +86,10 @@ export function DashboardSection() {
             title="Couverts Aujourd'hui"
             value={dashboardData.todayKPIs.covers}
             icon={Users}
-            trend={{ value: 12.8, isPositive: true }}
+            trend={dashboardData.todayKPIs.evolution?.coversEvolution !== null && dashboardData.todayKPIs.evolution?.coversEvolution !== undefined ? 
+              { value: dashboardData.todayKPIs.evolution.coversEvolution, isPositive: dashboardData.todayKPIs.evolution.coversEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>
@@ -93,7 +99,10 @@ export function DashboardSection() {
             value={dashboardData.todayKPIs.occupancy}
             suffix="%"
             icon={MapPin}
-            trend={{ value: 3.4, isPositive: true }}
+            trend={dashboardData.todayKPIs.evolution?.occupancyEvolution !== null && dashboardData.todayKPIs.evolution?.occupancyEvolution !== undefined ? 
+              { value: dashboardData.todayKPIs.evolution.occupancyEvolution, isPositive: dashboardData.todayKPIs.evolution.occupancyEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>

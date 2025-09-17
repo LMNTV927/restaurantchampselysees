@@ -7,6 +7,11 @@ export interface DashboardKPIs {
   covers: number;
   occupancy: number;
   revenue: number;
+  evolution?: {
+    reservationsEvolution: number | null;
+    coversEvolution: number | null;
+    occupancyEvolution: number | null;
+  };
 }
 
 export interface MonthlyTrendData {
@@ -48,15 +53,19 @@ export function useRealtimeDashboard() {
   });
   const [loading, setLoading] = useState(true);
 
+  const calculateEvolution = (current: number, previous: number): number | null => {
+    if (previous === 0) return current > 0 ? 100 : null;
+    return ((current - previous) / previous) * 100;
+  };
+
   const fetchDashboardData = async () => {
     try {
       const today = getTodayInParis();
+      const yesterday = getDaysAgoInParis(1);
       const currentMonth = getCurrentMonthInParis();
       const monthStart = `${currentMonth}-01`;
 
-      // Fetch today's reservations (ALL reservations for the current date, from midnight to midnight)
-      // This includes both past and future reservations for today
-      // Example: on Sept 13 at 23h, we show ALL Sept 13 reservations (even those at 19h which are past)
+      // Fetch today's reservations
       console.log('Dashboard - Date du jour (Paris):', today);
       const { data: todayReservations, error: reservationsError } = await supabase
         .from('reservations')
@@ -66,6 +75,14 @@ export function useRealtimeDashboard() {
       console.log('Dashboard - Réservations d\'aujourd\'hui trouvées:', todayReservations?.length || 0);
 
       if (reservationsError) throw reservationsError;
+
+      // Fetch yesterday's reservations for evolution comparison
+      const { data: yesterdayReservations, error: yesterdayError } = await supabase
+        .from('reservations')
+        .select('guests_count')
+        .eq('reservation_date', yesterday);
+
+      if (yesterdayError) throw yesterdayError;
 
       // Fetch monthly data for trends
       const { data: monthlyReservations, error: monthlyError } = await supabase
@@ -80,9 +97,19 @@ export function useRealtimeDashboard() {
       const todayReservationsCount = todayReservations?.length || 0;
       const todayCovers = todayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
       const totalCapacity = 500; // Restaurant capacity
-      const occupancy = Math.min((todayCovers / totalCapacity) * 100, 100);
+      const todayOccupancy = Math.min((todayCovers / totalCapacity) * 100, 100);
       const avgRevenuePerCover = 45; // Average revenue per cover in euros
       const revenue = todayCovers * avgRevenuePerCover;
+
+      // Calculate yesterday's KPIs for evolution
+      const yesterdayReservationsCount = yesterdayReservations?.length || 0;
+      const yesterdayCovers = yesterdayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
+      const yesterdayOccupancy = Math.min((yesterdayCovers / totalCapacity) * 100, 100);
+
+      // Calculate evolutions
+      const reservationsEvolution = calculateEvolution(todayReservationsCount, yesterdayReservationsCount);
+      const coversEvolution = calculateEvolution(todayCovers, yesterdayCovers);
+      const occupancyEvolution = calculateEvolution(todayOccupancy, yesterdayOccupancy);
 
       // Calculate monthly trend
       const monthlyTrendMap = new Map<string, { date: string; day: number; reservations: number; covers: number }>();
@@ -140,8 +167,13 @@ export function useRealtimeDashboard() {
         todayKPIs: {
           reservations: todayReservationsCount,
           covers: todayCovers,
-          occupancy,
-          revenue
+          occupancy: todayOccupancy,
+          revenue,
+          evolution: {
+            reservationsEvolution,
+            coversEvolution,
+            occupancyEvolution
+          }
         },
         monthlyTrend,
         recentActivity,
