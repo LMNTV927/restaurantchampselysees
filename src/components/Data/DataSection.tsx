@@ -155,28 +155,34 @@ export function DataSection() {
   };
 
   const handleGeneratePDF = () => {
-    const loadingToast = toast.loading("Génération du rapport PDF...");
+    // Créer une promesse pour la génération du PDF
+    const generatePDFPromise = () => {
+      return new Promise((resolve, reject) => {
+        try {
+          // Use current data for current month, monthly data for historical months
+          const reportChannels = channels;
+          const reportKpis = kpis;
+          const reportReservations = monthlyReservations;
+          
+          const result = generateMonthlyReport(reportChannels, reportKpis, selectedMonth, reportReservations);
+          
+          if (result.success) {
+            resolve(result.fileName);
+          } else {
+            reject(new Error(result.error || "Erreur inconnue"));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+    };
     
-    try {
-      // Use current data for current month, monthly data for historical months
-      const reportChannels = channels;
-      const reportKpis = kpis;
-      const reportReservations = monthlyReservations;
-      
-      const result = generateMonthlyReport(reportChannels, reportKpis, selectedMonth, reportReservations);
-      
-      toast.dismiss(loadingToast);
-      
-      if (result.success) {
-        toast.success(`Rapport PDF généré: ${result.fileName}`);
-      } else {
-        toast.error(`Erreur: ${result.error}`);
-      }
-    } catch (error) {
-      toast.dismiss(loadingToast);
-      toast.error("Erreur lors de la génération du PDF");
-      console.error("PDF generation error:", error);
-    }
+    // Utiliser toast.promise pour gérer automatiquement les états
+    toast.promise(generatePDFPromise(), {
+      loading: "Génération du rapport PDF...",
+      success: (fileName) => `Rapport PDF généré: ${fileName}`,
+      error: (error) => `Erreur: ${error.message}`,
+    });
   };
 
   return (
