@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getTodayInParis } from '@/lib/dateUtils';
+import { getCurrentMonthInParis } from '@/lib/dateUtils';
 
 export interface ChannelData {
   id: string;
@@ -48,8 +48,9 @@ export function useRealtimeChannelsData() {
 
       if (channelsError) throw channelsError;
 
-      // Fetch channel stats for today (Paris timezone)
-      const today = getTodayInParis();
+      // Fetch channel stats for current month (Paris timezone)
+      const currentMonth = getCurrentMonthInParis();
+      const monthStart = `${currentMonth}-01`;
       const { data: statsData, error: statsError } = await supabase
         .from('channel_stats')
         .select(`
@@ -58,7 +59,7 @@ export function useRealtimeChannelsData() {
           reservations,
           total_covers
         `)
-        .gte('date', today);
+        .gte('date', monthStart);
 
       if (statsError) throw statsError;
 
