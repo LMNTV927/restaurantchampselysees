@@ -38,6 +38,11 @@ export function useRealtimeChannelsData() {
   });
   const [loading, setLoading] = useState(true);
 
+  const calculateEvolution = (current: number, previous: number): number | null => {
+    if (previous === 0) return current > 0 ? 100 : null;
+    return ((current - previous) / previous) * 100;
+  };
+
   const fetchChannelsAndStats = async () => {
     try {
       // Fetch channels with their stats
@@ -57,6 +62,14 @@ export function useRealtimeChannelsData() {
       // Fetch channel stats for current month (Paris timezone)
       const currentMonth = getCurrentMonthInParis();
       const monthStart = `${currentMonth}-01`;
+      
+      // Calculate previous month
+      const [year, month] = currentMonth.split('-');
+      const prevMonth = parseInt(month) === 1 ? 12 : parseInt(month) - 1;
+      const prevYear = parseInt(month) === 1 ? parseInt(year) - 1 : parseInt(year);
+      const prevMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+      const prevStartDate = `${prevMonthStr}-01`;
+      
       const { data: statsData, error: statsError } = await supabase
         .from('channel_stats')
         .select(`
@@ -69,11 +82,36 @@ export function useRealtimeChannelsData() {
 
       if (statsError) throw statsError;
 
-      // Aggregate stats by channel
+      // Fetch previous month stats for evolution comparison
+      const { data: prevStatsData, error: prevStatsError } = await supabase
+        .from('channel_stats')
+        .select(`
+          channel_id,
+          clicks,
+          reservations,
+          total_covers
+        `)
+        .gte('date', prevStartDate)
+        .lt('date', monthStart);
+
+      if (prevStatsError) throw prevStatsError;
+
+      // Aggregate stats by channel for current month
       const channelStatsMap = new Map();
       statsData?.forEach(stat => {
         const existing = channelStatsMap.get(stat.channel_id) || { clicks: 0, reservations: 0, total_covers: 0 };
         channelStatsMap.set(stat.channel_id, {
+          clicks: existing.clicks + stat.clicks,
+          reservations: existing.reservations + stat.reservations,
+          total_covers: existing.total_covers + stat.total_covers
+        });
+      });
+
+      // Aggregate stats by channel for previous month
+      const prevChannelStatsMap = new Map();
+      prevStatsData?.forEach(stat => {
+        const existing = prevChannelStatsMap.get(stat.channel_id) || { clicks: 0, reservations: 0, total_covers: 0 };
+        prevChannelStatsMap.set(stat.channel_id, {
           clicks: existing.clicks + stat.clicks,
           reservations: existing.reservations + stat.reservations,
           total_covers: existing.total_covers + stat.total_covers
@@ -107,11 +145,23 @@ export function useRealtimeChannelsData() {
       const totalCovers = channelsWithStats.reduce((sum, channel) => sum + channel.covers, 0);
       const overallConversion = totalClicks > 0 ? (totalReservations / totalClicks) * 100 : 0;
 
+      // Calculate previous month totals for evolution
+      const prevTotalClicks = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.clicks, 0);
+      const prevTotalReservations = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.reservations, 0);
+      const prevTotalCovers = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.total_covers, 0);
+      const prevOverallConversion = prevTotalClicks > 0 ? (prevTotalReservations / prevTotalClicks) * 100 : 0;
+
       setKpis({
         totalClicks,
         totalReservations,
         totalCovers,
-        conversion: overallConversion
+        conversion: overallConversion,
+        evolution: {
+          clicksEvolution: calculateEvolution(totalClicks, prevTotalClicks),
+          reservationsEvolution: calculateEvolution(totalReservations, prevTotalReservations),
+          coversEvolution: calculateEvolution(totalCovers, prevTotalCovers),
+          conversionEvolution: calculateEvolution(overallConversion, prevOverallConversion)
+        }
       });
 
     } catch (error) {

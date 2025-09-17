@@ -317,7 +317,10 @@ export function ReservationsSection() {
             title={kpiTitles.reservations}
             value={filteredKPIs.totalReservations}
             icon={selectedFilter === "past" ? History : Calendar}
-            trend={{ value: 5.2, isPositive: true }}
+            trend={kpis.evolution?.reservationsEvolution !== null && kpis.evolution?.reservationsEvolution !== undefined && selectedFilter === "today" ? 
+              { value: kpis.evolution.reservationsEvolution, isPositive: kpis.evolution.reservationsEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>
@@ -326,7 +329,10 @@ export function ReservationsSection() {
             title={kpiTitles.covers}
             value={filteredKPIs.totalCovers}
             icon={Users}
-            trend={{ value: 12.8, isPositive: true }}
+            trend={kpis.evolution?.coversEvolution !== null && kpis.evolution?.coversEvolution !== undefined && selectedFilter === "today" ? 
+              { value: kpis.evolution.coversEvolution, isPositive: kpis.evolution.coversEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>
@@ -336,7 +342,10 @@ export function ReservationsSection() {
             value={filteredKPIs.occupancyRate}
             suffix="%"
             icon={MapPin}
-            trend={{ value: 3.4, isPositive: true }}
+            trend={kpis.evolution?.occupancyEvolution !== null && kpis.evolution?.occupancyEvolution !== undefined && selectedFilter === "today" ? 
+              { value: kpis.evolution.occupancyEvolution, isPositive: kpis.evolution.occupancyEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>

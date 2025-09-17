@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getTodayInParis, isReservationToday } from '@/lib/dateUtils';
+import { getTodayInParis, isReservationToday, getDaysAgoInParis } from '@/lib/dateUtils';
 
 export interface ReservationData {
   id: string;
@@ -21,6 +21,11 @@ export interface ReservationsKPIs {
   todayCovers: number;
   upcomingReservations: number;
   occupancyRate: number;
+  evolution?: {
+    reservationsEvolution: number | null;
+    coversEvolution: number | null;
+    occupancyEvolution: number | null;
+  };
 }
 
 export function useRealtimeReservations() {
@@ -33,9 +38,15 @@ export function useRealtimeReservations() {
   });
   const [loading, setLoading] = useState(true);
 
+  const calculateEvolution = (current: number, previous: number): number | null => {
+    if (previous === 0) return current > 0 ? 100 : null;
+    return ((current - previous) / previous) * 100;
+  };
+
   const fetchReservations = async () => {
     try {
       const today = getTodayInParis();
+      const yesterday = getDaysAgoInParis(1);
       console.log('Date du jour (Paris):', today);
       
       // Fetch ALL reservations (not just from today) for the reservations list
@@ -61,6 +72,17 @@ export function useRealtimeReservations() {
       console.log('Toutes les réservations trouvées:', reservationsData?.length || 0);
 
       if (reservationsError) throw reservationsError;
+
+      // Fetch yesterday's reservations for evolution comparison
+      const { data: yesterdayReservationsData, error: yesterdayError } = await supabase
+        .from('reservations')
+        .select(`
+          reservation_date,
+          guests_count
+        `)
+        .eq('reservation_date', yesterday);
+
+      if (yesterdayError) throw yesterdayError;
 
       const formattedReservations: ReservationData[] = reservationsData?.map(reservation => ({
         id: reservation.id,
@@ -94,11 +116,21 @@ export function useRealtimeReservations() {
       const totalCapacity = 500; // Restaurant capacity: 500 covers max per day
       const occupancyRate = Math.min((todayCovers / totalCapacity) * 100, 100);
 
+      // Calculate yesterday's KPIs for evolution
+      const yesterdayReservations = yesterdayReservationsData?.length || 0;
+      const yesterdayCovers = yesterdayReservationsData?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
+      const yesterdayOccupancyRate = Math.min((yesterdayCovers / totalCapacity) * 100, 100);
+
       setKpis({
         todayReservations,
         todayCovers,
         upcomingReservations,
-        occupancyRate
+        occupancyRate,
+        evolution: {
+          reservationsEvolution: calculateEvolution(todayReservations, yesterdayReservations),
+          coversEvolution: calculateEvolution(todayCovers, yesterdayCovers),
+          occupancyEvolution: calculateEvolution(occupancyRate, yesterdayOccupancyRate)
+        }
       });
 
     } catch (error) {

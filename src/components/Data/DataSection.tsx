@@ -289,7 +289,10 @@ export function DataSection() {
             title="Clics Totaux"
             value={kpis.totalClicks}
             icon={BarChart3}
-            trend={{ value: 18.5, isPositive: true }}
+            trend={kpis.evolution?.clicksEvolution !== null && kpis.evolution?.clicksEvolution !== undefined ? 
+              { value: kpis.evolution.clicksEvolution, isPositive: kpis.evolution.clicksEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>
@@ -298,7 +301,10 @@ export function DataSection() {
             title="Réservations"
             value={kpis.totalReservations}
             icon={Target}
-            trend={{ value: 14.2, isPositive: true }}
+            trend={kpis.evolution?.reservationsEvolution !== null && kpis.evolution?.reservationsEvolution !== undefined ? 
+              { value: kpis.evolution.reservationsEvolution, isPositive: kpis.evolution.reservationsEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>
@@ -307,7 +313,10 @@ export function DataSection() {
             title="Couverts"
             value={kpis.totalCovers}
             icon={Users}
-            trend={{ value: 22.1, isPositive: true }}
+            trend={kpis.evolution?.coversEvolution !== null && kpis.evolution?.coversEvolution !== undefined ? 
+              { value: kpis.evolution.coversEvolution, isPositive: kpis.evolution.coversEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>
@@ -317,7 +326,10 @@ export function DataSection() {
             value={kpis.conversion}
             suffix="%"
             icon={TrendingUp}
-            trend={{ value: 4.7, isPositive: true }}
+            trend={kpis.evolution?.conversionEvolution !== null && kpis.evolution?.conversionEvolution !== undefined ? 
+              { value: kpis.evolution.conversionEvolution, isPositive: kpis.evolution.conversionEvolution >= 0 } : 
+              undefined
+            }
             loading={loading}
           />
         </motion.div>
