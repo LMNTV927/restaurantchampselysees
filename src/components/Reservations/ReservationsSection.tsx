@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Calendar, Clock, Users, MapPin, History, AlertTriangle, TrendingUp } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, History } from "lucide-react";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -139,17 +139,11 @@ export function ReservationsSection() {
 
   const reservations = getFilteredReservations();
 
-  // Calculate KPIs based on filtered reservations - Only count 'show' for effective data
+  // Calculate KPIs based on filtered reservations
   const getFilteredKPIs = () => {
-    const showReservations = reservations.filter(r => r.status === 'show');
-    const noShowReservations = reservations.filter(r => r.status === 'no_show');
-    const cancelledReservations = reservations.filter(r => r.status === 'cancelled');
-    
-    const totalReservations = showReservations.length;
-    const totalCovers = showReservations.reduce((sum, r) => sum + r.partySize, 0);
-    const confirmedReservations = reservations.filter(r => r.status === 'confirmed').length;
-    const totalNoShows = noShowReservations.length;
-    const totalCancellations = cancelledReservations.length;
+    const totalReservations = reservations.length;
+    const totalCovers = reservations.reduce((sum, r) => sum + r.partySize, 0);
+    const confirmedReservations = reservations.filter(r => r.status === 'confirmed' || r.status === 'show').length;
     
     // Restaurant capacity: 100 seats
     const restaurantCapacity = 100;
@@ -159,9 +153,7 @@ export function ReservationsSection() {
       totalReservations,
       totalCovers,
       confirmedReservations,
-      occupancyRate,
-      totalNoShows,
-      totalCancellations
+      occupancyRate
     };
   };
 
@@ -210,48 +202,38 @@ export function ReservationsSection() {
     switch (selectedFilter) {
       case "today":
         return {
-          reservations: "Réservations Effectives",
-          covers: "Couverts Servis",
-          confirmed: "Confirmées",
-          occupancy: "Taux d'Occupation",
-          noShows: "No-Shows",
-          cancellations: "Annulations"
+          reservations: "Réservations Aujourd'hui",
+          covers: "Couverts Aujourd'hui",
+          confirmed: "Confirmées Aujourd'hui",
+          occupancy: "Taux d'Occupation"
         };
       case "upcoming":
         return {
-          reservations: "Réservations Effectives",
-          covers: "Couverts Prévus",
-          confirmed: "Confirmées",
-          occupancy: "Taux d'Occupation",
-          noShows: "No-Shows",
-          cancellations: "Annulations"
+          reservations: "Réservations 7 jours",
+          covers: "Couverts 7 jours",
+          confirmed: "Confirmées 7 jours",
+          occupancy: "Taux d'Occupation"
         };
       case "all":
         return {
-          reservations: "Réservations Effectives",
-          covers: "Couverts Prévus",
-          confirmed: "Confirmées",
-          occupancy: "Taux d'Occupation",
-          noShows: "No-Shows",
-          cancellations: "Annulations"
+          reservations: "Réservations futures",
+          covers: "Couverts futures",
+          confirmed: "Confirmées futures",
+          occupancy: "Taux d'Occupation"
         };
       case "past":
         return {
-          reservations: "Réservations Effectives",
-          covers: "Couverts Servis",
-          confirmed: "Confirmées",
-          occupancy: "Taux d'Occupation",
-          noShows: "No-Shows",
-          cancellations: "Annulations"
+          reservations: "Réservations Passées",
+          covers: "Couverts Passés",
+          confirmed: "Confirmées Passées",
+          occupancy: "Taux d'Occupation"
         };
       default:
         return {
           reservations: "Réservations",
           covers: "Couverts",
           confirmed: "Confirmées",
-          occupancy: "Taux d'Occupation",
-          noShows: "No-Shows",
-          cancellations: "Annulations"
+          occupancy: "Taux d'Occupation"
         };
     }
   };
@@ -315,7 +297,7 @@ export function ReservationsSection() {
 
       {/* KPI Cards */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
         variants={{
           hidden: { opacity: 0 },
           show: {
@@ -361,22 +343,6 @@ export function ReservationsSection() {
             suffix="%"
             icon={MapPin}
             trend={{ value: 3.4, isPositive: true }}
-            loading={loading}
-          />
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-          <KPICard
-            title={kpiTitles.noShows}
-            value={filteredKPIs.totalNoShows}
-            icon={AlertTriangle}
-            loading={loading}
-          />
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-          <KPICard
-            title={kpiTitles.cancellations}
-            value={filteredKPIs.totalCancellations}
-            icon={TrendingUp}
             loading={loading}
           />
         </motion.div>

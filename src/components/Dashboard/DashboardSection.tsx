@@ -56,7 +56,7 @@ export function DashboardSection() {
 
       {/* KPI Cards */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
         variants={{
           hidden: { opacity: 0 },
           show: {
@@ -71,7 +71,7 @@ export function DashboardSection() {
       >
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Réservations Effectives"
+            title="Réservations Aujourd'hui"
             value={dashboardData.todayKPIs.reservations}
             icon={Calendar}
             trend={{ value: 5.2, isPositive: true }}
@@ -80,7 +80,7 @@ export function DashboardSection() {
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Couverts Servis"
+            title="Couverts Aujourd'hui"
             value={dashboardData.todayKPIs.covers}
             icon={Users}
             trend={{ value: 12.8, isPositive: true }}
@@ -94,22 +94,6 @@ export function DashboardSection() {
             suffix="%"
             icon={MapPin}
             trend={{ value: 3.4, isPositive: true }}
-            loading={loading}
-          />
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-          <KPICard
-            title="No-Shows"
-            value={dashboardData.todayKPIs.noShows}
-            icon={AlertTriangle}
-            loading={loading}
-          />
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-          <KPICard
-            title="Annulations"
-            value={dashboardData.todayKPIs.cancellations}
-            icon={TrendingUp}
             loading={loading}
           />
         </motion.div>

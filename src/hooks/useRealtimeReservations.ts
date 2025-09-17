@@ -21,8 +21,6 @@ export interface ReservationsKPIs {
   todayCovers: number;
   upcomingReservations: number;
   occupancyRate: number;
-  todayNoShows: number;
-  todayCancellations: number;
 }
 
 export function useRealtimeReservations() {
@@ -31,9 +29,7 @@ export function useRealtimeReservations() {
     todayReservations: 0,
     todayCovers: 0,
     upcomingReservations: 0,
-    occupancyRate: 0,
-    todayNoShows: 0,
-    todayCancellations: 0
+    occupancyRate: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -82,20 +78,15 @@ export function useRealtimeReservations() {
 
       setReservations(formattedReservations);
 
-      // Calculate KPIs - Only count 'show' status for effective reservations
-      // Filter reservations by exact date match (midnight to midnight)
-      const todayReservationsAll = formattedReservations.filter(r => isReservationToday(r.reservationDate));
-      const todayReservationsShow = todayReservationsAll.filter(r => r.status === 'show');
-      const todayNoShows = todayReservationsAll.filter(r => r.status === 'no_show');
-      const todayCancellations = todayReservationsAll.filter(r => r.status === 'cancelled');
+      // Calculate KPIs - Filter reservations by exact date match (midnight to midnight)
+      // This includes ALL reservations for today (past and future within the same day)
+      // Important: même si une réservation est passée, elle compte pour les KPIs du jour
+      const todayReservationsFiltered = formattedReservations.filter(r => isReservationToday(r.reservationDate));
+      console.log('Réservations filtrées pour aujourd\'hui:', todayReservationsFiltered.length);
+      console.log('Détail des réservations d\'aujourd\'hui:', todayReservationsFiltered.map(r => ({ date: r.reservationDate, time: r.reservationTime, name: r.customerName })));
       
-      console.log('Réservations filtrées pour aujourd\'hui (toutes):', todayReservationsAll.length);
-      console.log('Réservations présentes aujourd\'hui (show):', todayReservationsShow.length);
-      console.log('No-shows aujourd\'hui:', todayNoShows.length);
-      console.log('Annulations aujourd\'hui:', todayCancellations.length);
-      
-      const todayReservations = todayReservationsShow.length;
-      const todayCovers = todayReservationsShow.reduce((sum, r) => sum + r.guestsCount, 0);
+      const todayReservations = todayReservationsFiltered.length;
+      const todayCovers = todayReservationsFiltered.reduce((sum, r) => sum + r.guestsCount, 0);
       
       const upcomingReservations = formattedReservations.length;
       
@@ -107,9 +98,7 @@ export function useRealtimeReservations() {
         todayReservations,
         todayCovers,
         upcomingReservations,
-        occupancyRate,
-        todayNoShows: todayNoShows.length,
-        todayCancellations: todayCancellations.length
+        occupancyRate
       });
 
     } catch (error) {
