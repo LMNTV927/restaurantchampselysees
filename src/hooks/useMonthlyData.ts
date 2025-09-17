@@ -26,6 +26,11 @@ interface MonthlyData {
 export function useMonthlyData() {
   const [loading, setLoading] = useState(false);
 
+  const calculateEvolution = (current: number, previous: number): number | null => {
+    if (previous === 0) return current > 0 ? 100 : null;
+    return ((current - previous) / previous) * 100;
+  };
+
   const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
     setLoading(true);
     
@@ -38,7 +43,13 @@ export function useMonthlyData() {
       const nextMonth = parseInt(month) === 12 ? 1 : parseInt(month) + 1;
       const nextYear = parseInt(month) === 12 ? parseInt(year) + 1 : parseInt(year);
       const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
-      
+
+      // Calculate previous month dates
+      const prevMonth = parseInt(month) === 1 ? 12 : parseInt(month) - 1;
+      const prevYear = parseInt(month) === 1 ? parseInt(year) - 1 : parseInt(year);
+      const prevStartDate = `${prevYear}-${String(prevMonth).padStart(2, '0')}-01`;
+      const prevEndDate = startDate; // Current month start = previous month end
+
       // Fetch channels
       const { data: channelsData, error: channelsError } = await supabase
         .from('channels')
@@ -56,6 +67,15 @@ export function useMonthlyData() {
 
       if (statsError) throw statsError;
 
+      // Fetch channel stats for the previous month
+      const { data: prevStatsData, error: prevStatsError } = await supabase
+        .from('channel_stats')
+        .select('channel_id, clicks, reservations, total_covers, date')
+        .gte('date', prevStartDate)
+        .lt('date', prevEndDate);
+
+      if (prevStatsError) throw prevStatsError;
+
       // Fetch reservations for the selected month with channel information
       const { data: reservationsData, error: reservationsError } = await supabase
         .from('reservations')
@@ -72,7 +92,7 @@ export function useMonthlyData() {
         throw reservationsError;
       }
 
-      // Aggregate stats by channel for the month
+      // Aggregate stats by channel for the current month
       const channelStatsMap = new Map();
       statsData?.forEach(stat => {
         const existing = channelStatsMap.get(stat.channel_id) || { 
@@ -81,6 +101,21 @@ export function useMonthlyData() {
           total_covers: 0 
         };
         channelStatsMap.set(stat.channel_id, {
+          clicks: existing.clicks + stat.clicks,
+          reservations: existing.reservations + stat.reservations,
+          total_covers: existing.total_covers + stat.total_covers
+        });
+      });
+
+      // Aggregate stats by channel for the previous month
+      const prevChannelStatsMap = new Map();
+      prevStatsData?.forEach(stat => {
+        const existing = prevChannelStatsMap.get(stat.channel_id) || { 
+          clicks: 0, 
+          reservations: 0, 
+          total_covers: 0 
+        };
+        prevChannelStatsMap.set(stat.channel_id, {
           clicks: existing.clicks + stat.clicks,
           reservations: existing.reservations + stat.reservations,
           total_covers: existing.total_covers + stat.total_covers
@@ -116,11 +151,23 @@ export function useMonthlyData() {
       const totalCovers = channelsWithStats.reduce((sum, channel) => sum + channel.covers, 0);
       const overallConversion = totalClicks > 0 ? (totalReservations / totalClicks) * 100 : 0;
 
+      // Calculate previous month totals for evolution
+      const prevTotalClicks = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.clicks, 0);
+      const prevTotalReservations = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.reservations, 0);
+      const prevTotalCovers = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.total_covers, 0);
+      const prevOverallConversion = prevTotalClicks > 0 ? (prevTotalReservations / prevTotalClicks) * 100 : 0;
+
       const monthlyKpis: ChannelsKPIs = {
         totalClicks,
         totalReservations,
         totalCovers,
-        conversion: overallConversion
+        conversion: overallConversion,
+        evolution: {
+          clicksEvolution: calculateEvolution(totalClicks, prevTotalClicks),
+          reservationsEvolution: calculateEvolution(totalReservations, prevTotalReservations),
+          coversEvolution: calculateEvolution(totalCovers, prevTotalCovers),
+          conversionEvolution: calculateEvolution(overallConversion, prevOverallConversion)
+        }
       };
 
       // Format reservations data

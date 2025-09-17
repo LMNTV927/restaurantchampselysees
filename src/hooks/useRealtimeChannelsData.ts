@@ -20,6 +20,12 @@ export interface ChannelsKPIs {
   totalReservations: number;
   totalCovers: number;
   conversion: number;
+  evolution?: {
+    clicksEvolution: number | null;
+    reservationsEvolution: number | null;
+    coversEvolution: number | null;
+    conversionEvolution: number | null;
+  };
 }
 
 export function useRealtimeChannelsData() {

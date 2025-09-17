@@ -16,6 +16,12 @@ interface KPIData {
   totalReservations: number;
   totalCovers: number;
   conversion: number;
+  evolution?: {
+    clicksEvolution: number | null;
+    reservationsEvolution: number | null;
+    coversEvolution: number | null;
+    conversionEvolution: number | null;
+  };
 }
 
 interface ReservationData {
@@ -108,19 +114,25 @@ export const usePDFReport = () => {
       const effectiveReservations = reservations.filter(r => r.status === 'show');
       const effectiveCovers = effectiveReservations.reduce((sum, r) => sum + r.guests_count, 0);
 
-      // Section KPIs
+      // Section KPIs avec vraies évolutions
       yPosition += 10;
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(0);
       doc.text('INDICATEURS CLÉS DE PERFORMANCE', 20, yPosition);
       
-      // Tableau KPIs
+      const formatEvolution = (evolution: number | null): string => {
+        if (evolution === null) return 'N/A';
+        const sign = evolution >= 0 ? '+' : '';
+        return `${sign}${evolution.toFixed(1)}%`;
+      };
+      
+      // Tableau KPIs avec vraies évolutions
       const kpiData = [
-        ['Clics Totaux', kpis.totalClicks.toLocaleString(), '+18.5%'],
-        ['Réservations Totales', kpis.totalReservations.toString(), '+14.2%'],
-        ['Couverts Totaux', kpis.totalCovers.toString(), '+22.1%'],
-        ['Taux de Conversion', `${kpis.conversion.toFixed(1)}%`, '+4.7%']
+        ['Clics Totaux', kpis.totalClicks.toLocaleString(), formatEvolution(kpis.evolution?.clicksEvolution || null)],
+        ['Réservations Totales', kpis.totalReservations.toString(), formatEvolution(kpis.evolution?.reservationsEvolution || null)],
+        ['Couverts Totaux', kpis.totalCovers.toString(), formatEvolution(kpis.evolution?.coversEvolution || null)],
+        ['Taux de Conversion', `${kpis.conversion.toFixed(1)}%`, formatEvolution(kpis.evolution?.conversionEvolution || null)]
       ];
 
       const kpiTable = autoTable(doc, {
@@ -254,7 +266,9 @@ export const usePDFReport = () => {
         'POINTS FORTS :',
         `• Le canal "${bestChannel?.name}" affiche les meilleures performances avec un taux`,
         `  de conversion de ${bestChannel?.conversion.toFixed(1)}% et ${bestChannel?.reservations} réservations.`,
-        `• La croissance globale de +22.1% des couverts témoigne d'une dynamique positive.`,
+        kpis.evolution?.coversEvolution && kpis.evolution.coversEvolution > 0 ? 
+          `• La croissance de ${kpis.evolution.coversEvolution.toFixed(1)}% des couverts témoigne d'une dynamique positive.` :
+          `• Le niveau de ${kpis.totalCovers} couverts démontre l'activité du restaurant.`,
         `• Le nombre total de clics (${kpis.totalClicks.toLocaleString()}) indique une bonne visibilité digitale.`,
         '',
         'AXES D\'AMÉLIORATION :',
