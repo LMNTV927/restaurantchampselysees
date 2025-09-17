@@ -91,7 +91,7 @@ export function useRealtimeReservations() {
       const upcomingReservations = formattedReservations.length;
       
       // Mock occupancy rate calculation (you can adjust this based on your restaurant capacity)
-      const totalCapacity = 1000; // Restaurant capacity: 1000 covers max per day
+      const totalCapacity = 500; // Restaurant capacity: 500 covers max per day
       const occupancyRate = Math.min((todayCovers / totalCapacity) * 100, 100);
 
       setKpis({
