@@ -104,6 +104,10 @@ export const usePDFReport = () => {
         yPosition += 6;
       });
 
+      // Calcul des données effectives (réservations présentées)
+      const effectiveReservations = reservations.filter(r => r.status === 'show');
+      const effectiveCovers = effectiveReservations.reduce((sum, r) => sum + r.guests_count, 0);
+
       // Section KPIs
       yPosition += 10;
       doc.setFontSize(14);
@@ -114,8 +118,8 @@ export const usePDFReport = () => {
       // Tableau KPIs
       const kpiData = [
         ['Clics Totaux', kpis.totalClicks.toLocaleString(), '+18.5%'],
-        ['Réservations', kpis.totalReservations.toString(), '+14.2%'],
-        ['Couverts Servis', kpis.totalCovers.toString(), '+22.1%'],
+        ['Réservations Totales', kpis.totalReservations.toString(), '+14.2%'],
+        ['Couverts Totaux', kpis.totalCovers.toString(), '+22.1%'],
         ['Taux de Conversion', `${kpis.conversion.toFixed(1)}%`, '+4.7%']
       ];
 
@@ -140,8 +144,49 @@ export const usePDFReport = () => {
         }
       });
 
+      // Section Données Effectives
+      yPosition = 170;
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0);
+      doc.text('DONNÉES EFFECTIVES (PRÉSENTATIONS RÉELLES)', 20, yPosition);
+      
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(50);
+      doc.text('Réservations et couverts où les clients se sont réellement présentés', 20, yPosition + 8);
+
+      // Tableau des données effectives
+      const effectiveData = [
+        ['Réservations Effectives', effectiveReservations.length.toString(), `${((effectiveReservations.length / kpis.totalReservations) * 100).toFixed(1)}%`],
+        ['Couverts Effectifs', effectiveCovers.toString(), `${((effectiveCovers / kpis.totalCovers) * 100).toFixed(1)}%`],
+        ['Taux de Présentation', `${((effectiveReservations.length / kpis.totalReservations) * 100).toFixed(1)}%`, 'vs total résa'],
+        ['No-Shows + Annulations', (kpis.totalReservations - effectiveReservations.length).toString(), `${(((kpis.totalReservations - effectiveReservations.length) / kpis.totalReservations) * 100).toFixed(1)}%`]
+      ];
+
+      autoTable(doc, {
+        startY: yPosition + 18,
+        head: [['Métrique Effective', 'Valeur', 'Ratio']],
+        body: effectiveData,
+        theme: 'grid',
+        styles: {
+          fontSize: 10,
+          cellPadding: 5
+        },
+        headStyles: {
+          fillColor: [39, 174, 96],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        columnStyles: {
+          0: { fontStyle: 'bold' },
+          1: { halign: 'center' },
+          2: { halign: 'center', textColor: [39, 174, 96] }
+        }
+      });
+
       // Section Performance par Canal
-      yPosition = 200; // Fixed position since we can't access lastAutoTable easily with the new syntax
+      yPosition = 250; // Position ajustée pour éviter le chevauchement
       
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
