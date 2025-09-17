@@ -154,8 +154,8 @@ export function DataSection() {
     document.body.removeChild(link);
   };
 
-  const handleGeneratePDF = async () => {
-    toast.loading("Génération du rapport PDF...");
+  const handleGeneratePDF = () => {
+    const loadingToast = toast.loading("Génération du rapport PDF...");
     
     try {
       // Use current data for current month, monthly data for historical months
@@ -165,12 +165,15 @@ export function DataSection() {
       
       const result = generateMonthlyReport(reportChannels, reportKpis, selectedMonth, reportReservations);
       
+      toast.dismiss(loadingToast);
+      
       if (result.success) {
         toast.success(`Rapport PDF généré: ${result.fileName}`);
       } else {
         toast.error(`Erreur: ${result.error}`);
       }
     } catch (error) {
+      toast.dismiss(loadingToast);
       toast.error("Erreur lors de la génération du PDF");
       console.error("PDF generation error:", error);
     }
