@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/UI/StatusBadge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useRealtimeDashboard } from "@/hooks/useRealtimeDashboard";
+import { getCurrentMonthNameInParis } from "@/lib/dateUtils";
 
 export function DashboardSection() {
   const { dashboardData, loading } = useRealtimeDashboard();
+  const currentMonthName = getCurrentMonthNameInParis();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -108,7 +110,7 @@ export function DashboardSection() {
           <Card className="premium-card">
             <div className="p-6">
               <h3 className="text-lg font-playfair font-semibold mb-4">
-                Réservations du Mois
+                Réservations de {currentMonthName}
               </h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -150,7 +152,7 @@ export function DashboardSection() {
           <Card className="premium-card">
             <div className="p-6">
               <h3 className="text-lg font-playfair font-semibold mb-4">
-                Couverts du Mois
+                Couverts de {currentMonthName}
               </h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">

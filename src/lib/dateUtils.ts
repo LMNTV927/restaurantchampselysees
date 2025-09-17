@@ -101,6 +101,17 @@ export function getCurrentYearInParis(): number {
 }
 
 /**
+ * Get current month name in French (Paris timezone)
+ */
+export function getCurrentMonthNameInParis(): string {
+  const now = new Date();
+  return now.toLocaleDateString('fr-FR', { 
+    timeZone: PARIS_TIMEZONE,
+    month: 'long'
+  });
+}
+
+/**
  * Get time ago string using Paris timezone
  */
 export function getTimeAgoInParis(dateString: string): string {
