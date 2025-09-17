@@ -143,7 +143,6 @@ export function ReservationsSection() {
   const getFilteredKPIs = () => {
     const totalReservations = reservations.length;
     const totalCovers = reservations.reduce((sum, r) => sum + r.partySize, 0);
-    const confirmedReservations = reservations.filter(r => r.status === 'confirmed' || r.status === 'show').length;
     
     // Restaurant capacity: 100 seats
     const restaurantCapacity = 100;
@@ -152,7 +151,6 @@ export function ReservationsSection() {
     return {
       totalReservations,
       totalCovers,
-      confirmedReservations,
       occupancyRate
     };
   };
@@ -204,35 +202,30 @@ export function ReservationsSection() {
         return {
           reservations: "Réservations Aujourd'hui",
           covers: "Couverts Aujourd'hui",
-          confirmed: "Confirmées Aujourd'hui",
           occupancy: "Taux d'Occupation"
         };
       case "upcoming":
         return {
           reservations: "Réservations 7 jours",
           covers: "Couverts 7 jours",
-          confirmed: "Confirmées 7 jours",
           occupancy: "Taux d'Occupation"
         };
       case "all":
         return {
           reservations: "Réservations futures",
           covers: "Couverts futures",
-          confirmed: "Confirmées futures",
           occupancy: "Taux d'Occupation"
         };
       case "past":
         return {
           reservations: "Réservations Passées",
           covers: "Couverts Passés",
-          confirmed: "Confirmées Passées",
           occupancy: "Taux d'Occupation"
         };
       default:
         return {
           reservations: "Réservations",
           covers: "Couverts",
-          confirmed: "Confirmées",
           occupancy: "Taux d'Occupation"
         };
     }
@@ -297,7 +290,7 @@ export function ReservationsSection() {
 
       {/* KPI Cards */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         variants={{
           hidden: { opacity: 0 },
           show: {
@@ -325,14 +318,6 @@ export function ReservationsSection() {
             value={filteredKPIs.totalCovers}
             icon={Users}
             trend={{ value: 12.8, isPositive: true }}
-            loading={loading}
-          />
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-          <KPICard
-            title={kpiTitles.confirmed}
-            value={filteredKPIs.confirmedReservations}
-            icon={Clock}
             loading={loading}
           />
         </motion.div>
