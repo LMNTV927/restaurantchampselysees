@@ -111,11 +111,22 @@ export const usePDFReport = () => {
       doc.setTextColor(0);
       doc.text('INDICATEURS CLÉS DE PERFORMANCE', 20, yPosition);
       
-      // Tableau KPIs
+      // Calcul des métriques précises basées sur les réservations réelles
+      const totalReservations = kpis.totalReservations;
+      const totalCovers = kpis.totalCovers;
+      
+      // Filtrer les réservations qui sont vraiment venues (status = 'show')
+      const actualReservations = reservations.filter(r => r.status === 'show');
+      const actualReservationsCount = actualReservations.length;
+      const actualCoversCount = actualReservations.reduce((sum, r) => sum + r.guests_count, 0);
+      
+      // Tableau KPIs avec métriques précises
       const kpiData = [
         ['Clics Totaux', kpis.totalClicks.toLocaleString(), '+18.5%'],
-        ['Réservations', kpis.totalReservations.toString(), '+14.2%'],
-        ['Couverts Servis', kpis.totalCovers.toString(), '+22.1%'],
+        ['Réservations Totales', totalReservations.toString(), '+14.2%'],
+        ['Réservations Effectives', actualReservationsCount.toString(), `${totalReservations > 0 ? ((actualReservationsCount / totalReservations) * 100).toFixed(1) : 0}%`],
+        ['Couverts Totaux', totalCovers.toString(), '+22.1%'],
+        ['Couverts Effectifs', actualCoversCount.toString(), `${totalCovers > 0 ? ((actualCoversCount / totalCovers) * 100).toFixed(1) : 0}%`],
         ['Taux de Conversion', `${kpis.conversion.toFixed(1)}%`, '+4.7%']
       ];
 
