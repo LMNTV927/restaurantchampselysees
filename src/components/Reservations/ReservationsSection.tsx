@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
 import { AddReservationDialog } from "./AddReservationDialog";
+import { EditCommentDialog } from "./EditCommentDialog";
 import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis, createDateTimeInParis } from "@/lib/dateUtils";
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
@@ -27,7 +28,7 @@ interface Reservation {
 export function ReservationsSection() {
   const [selectedFilter, setSelectedFilter] = useState("today");
   const { toast } = useToast();
-  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, refetch } = useRealtimeReservations();
+  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, refetch } = useRealtimeReservations();
 
   // Transform real-time reservations to match local interface
   const allReservations: Reservation[] = realtimeReservations.map(reservation => {
@@ -178,6 +179,14 @@ export function ReservationsSection() {
         description: "Impossible de mettre à jour le statut",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleUpdateReservationNotes = async (reservationId: string, notes: string) => {
+    try {
+      await updateReservationNotes(reservationId, notes);
+    } catch (error) {
+      throw error; // Re-throw to let EditCommentDialog handle the error
     }
   };
 
@@ -389,11 +398,18 @@ export function ReservationsSection() {
                           {reservation.occasion}
                         </Badge>
                       )}
-                      {reservation.notes && (
-                        <p className="text-xs text-muted-foreground italic">
-                          "{reservation.notes}"
-                        </p>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {reservation.notes && (
+                          <p className="text-xs text-muted-foreground italic">
+                            "{reservation.notes}"
+                          </p>
+                        )}
+                        <EditCommentDialog
+                          reservationId={reservation.id}
+                          currentNotes={reservation.notes}
+                          onNotesUpdate={handleUpdateReservationNotes}
+                        />
+                      </div>
                       {reservation.source && (
                         <p className="text-xs text-primary">
                           via {reservation.source}

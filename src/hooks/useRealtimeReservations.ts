@@ -130,6 +130,28 @@ export function useRealtimeReservations() {
     }
   };
 
+  const updateReservationNotes = async (reservationId: string, notes: string) => {
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ notes })
+        .eq('id', reservationId);
+
+      if (error) throw error;
+
+      // Update local state
+      setReservations(prev => prev.map(reservation => 
+        reservation.id === reservationId 
+          ? { ...reservation, notes }
+          : reservation
+      ));
+
+    } catch (error) {
+      console.error('Error updating reservation notes:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchReservations();
 
@@ -155,6 +177,7 @@ export function useRealtimeReservations() {
     kpis, 
     loading, 
     updateReservationStatus,
+    updateReservationNotes,
     refetch: fetchReservations 
   };
 }
