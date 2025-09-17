@@ -79,7 +79,7 @@ export function useRealtimeDashboard() {
       // Calculate today's KPIs
       const todayReservationsCount = todayReservations?.length || 0;
       const todayCovers = todayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
-      const totalCapacity = 120; // Restaurant capacity
+      const totalCapacity = 1000; // Restaurant capacity
       const occupancy = Math.min((todayCovers / totalCapacity) * 100, 100);
       const avgRevenuePerCover = 45; // Average revenue per cover in euros
       const revenue = todayCovers * avgRevenuePerCover;
