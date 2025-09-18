@@ -22,16 +22,19 @@ export function ImageCarousel({ images, autoPlayInterval = 5000 }: ImageCarousel
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, scale: 1.1 }}
+          initial={{ opacity: 0, scale: 1.05 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
           className="absolute inset-0"
         >
           <img
             src={images[currentIndex]}
             alt={`Plat ${currentIndex + 1}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
+            style={{ 
+              filter: 'contrast(1.05) brightness(1.02)'
+            }}
           />
         </motion.div>
       </AnimatePresence>
