@@ -8,8 +8,9 @@ const princePalaceLogo = "/lovable-uploads/ce9ac516-0580-4c36-b708-89f1a0a13c29.
 import dish1 from "@/assets/dish-1.jpg";
 import dish2 from "@/assets/dish-2.jpg";
 import dish3 from "@/assets/dish-3.jpg";
+import dish4 from "@/assets/dish-4.jpg";
 
-const dishImages = [dish1, dish2, dish3];
+const dishImages = [dish1, dish2, dish3, dish4];
 
 export function BookingPage() {
   const { slug } = useParams<{ slug: string }>();
