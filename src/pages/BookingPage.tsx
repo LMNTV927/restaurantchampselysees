@@ -107,7 +107,7 @@ export function BookingPage() {
     <div className="min-h-screen relative overflow-hidden">
       {/* Background Carousel */}
       <div className="absolute inset-0 z-0">
-        <ImageCarousel images={dishImages} autoPlayInterval={3000} />
+        <ImageCarousel images={dishImages} />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
       </div>
 
