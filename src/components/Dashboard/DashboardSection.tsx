@@ -54,21 +54,21 @@ export function DashboardSection() {
         </motion.div>
       )}
 
-      {/* KPI Cards */}
-      <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-        variants={{
-          hidden: { opacity: 0 },
-          show: {
-            opacity: 1,
-            transition: {
-              staggerChildren: 0.1
+        {/* KPI Cards */}
+        <motion.div 
+          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1
+              }
             }
-          }
-        }}
-        initial="hidden"
-        animate="show"
-      >
+          }}
+          initial="hidden"
+          animate="show"
+        >
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
             title="Réservations Aujourd'hui"
@@ -108,8 +108,8 @@ export function DashboardSection() {
         </motion.div>
       </motion.div>
 
-      {/* Graphiques */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Graphiques */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         {/* Tendance des réservations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -117,11 +117,11 @@ export function DashboardSection() {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <Card className="premium-card">
-            <div className="p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-playfair font-semibold mb-4">
+            <div className="p-3 sm:p-4 lg:p-6">
+              <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold mb-3 sm:mb-4">
                 Réservations de {currentMonthName}
               </h3>
-                <div className="h-48 sm:h-64">
+                <div className="h-40 sm:h-48 lg:h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={dashboardData.monthlyTrend}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -159,11 +159,11 @@ export function DashboardSection() {
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <Card className="premium-card">
-            <div className="p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-playfair font-semibold mb-4">
+            <div className="p-3 sm:p-4 lg:p-6">
+              <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold mb-3 sm:mb-4">
                 Couverts de {currentMonthName}
               </h3>
-                <div className="h-48 sm:h-64">
+                <div className="h-40 sm:h-48 lg:h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={dashboardData.monthlyTrend}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -202,16 +202,16 @@ export function DashboardSection() {
         transition={{ duration: 0.5, delay: 0.5 }}
       >
         <Card className="premium-card">
-          <div className="p-4 sm:p-6 border-b border-border/50">
+          <div className="p-3 sm:p-4 lg:p-6 border-b border-border/50">
             <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              <h3 className="text-base sm:text-lg font-playfair font-semibold">
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold">
                 Activité Récente
               </h3>
             </div>
           </div>
           
-          <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+          <div className="p-3 sm:p-4 lg:p-6 space-y-2 sm:space-y-3 lg:space-y-4">
             {dashboardData.recentActivity.map((activity, index) => (
               <motion.div
                 key={activity.id}

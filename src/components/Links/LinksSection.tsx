@@ -94,30 +94,32 @@ export function LinksSection() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-4 sm:space-y-8"
+      className="space-y-3 sm:space-y-6 lg:space-y-8"
     >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-playfair font-semibold text-foreground">
-            Liens de tracking
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Créez et suivez les performances de vos liens de réservation
-          </p>
+      <div className="flex flex-col space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="text-center sm:text-left">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-playfair font-semibold text-foreground">
+              Liens de tracking
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              Créez et suivez les performances de vos liens de réservation
+            </p>
+          </div>
+          <Button 
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="premium-button flex-shrink-0 w-full sm:w-auto"
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Nouveau lien
+          </Button>
         </div>
-        <Button 
-          onClick={() => setIsCreateDialogOpen(true)}
-          className="premium-button flex-shrink-0"
-        >
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Nouveau lien
-        </Button>
       </div>
 
       {/* KPI Cards */}
       <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6"
         variants={{
           hidden: { opacity: 0 },
           show: {

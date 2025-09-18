@@ -1,0 +1,81 @@
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  /* Hide scrollbars on mobile for better UX */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Ensure proper touch targets */
+  button, .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve form inputs on mobile */
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-padding {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  /* Better card spacing on mobile */
+  .premium-card {
+    border-radius: 12px;
+  }
+  
+  /* Improved mobile navigation */
+  nav {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better chart responsiveness */
+  .recharts-responsive-container {
+    min-height: 160px;
+  }
+  
+  /* Ensure KPI cards are well centered */
+  .kpi-mobile-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  /* Better mobile typography */
+  .mobile-text-sm {
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+  
+  /* Improve mobile animations */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Better focus states for accessibility */
+@media (max-width: 640px) {
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+}
