@@ -222,12 +222,12 @@ export function DataSection() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-8"
+      className="space-y-4 sm:space-y-8"
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-playfair font-semibold text-foreground">
+          <h2 className="text-2xl sm:text-3xl font-playfair font-semibold text-foreground">
             Données & Analytics
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -235,9 +235,9 @@ export function DataSection() {
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Select value={selectedMonth} onValueChange={handleMonthChange}>
-            <SelectTrigger className="w-48 premium-input">
+            <SelectTrigger className="w-full sm:w-48 premium-input">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-popover/95 backdrop-blur-sm">
@@ -249,29 +249,33 @@ export function DataSection() {
             </SelectContent>
           </Select>
           
-          <Button 
-            onClick={handleExportCSV}
-            variant="outline" 
-            className="premium-button"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
-          
-          <Button 
-            onClick={handleGeneratePDF}
-            variant="default" 
-            className="premium-button"
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            Rapport PDF
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleExportCSV}
+              variant="outline" 
+              className="premium-button flex-1 sm:flex-none"
+              size="sm"
+            >
+              <Download className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Export </span>CSV
+            </Button>
+            
+            <Button 
+              onClick={handleGeneratePDF}
+              variant="default" 
+              className="premium-button flex-1 sm:flex-none"
+              size="sm"
+            >
+              <FileText className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Rapport </span>PDF
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Monthly KPIs */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
         variants={{
           hidden: { opacity: 0 },
           show: {
@@ -340,15 +344,15 @@ export function DataSection() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
       >
         {/* Graphique Réservations mensuelles */}
-        <Card className="premium-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-playfair font-semibold">Réservations de {getSelectedMonthLabel()}</h3>
+        <Card className="premium-card p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h3 className="text-base sm:text-lg font-playfair font-semibold">Réservations de {getSelectedMonthLabel()}</h3>
             <Calendar className="h-5 w-5 text-primary" />
           </div>
-          <ChartContainer config={chartConfig} className="h-64 w-full">
+          <ChartContainer config={chartConfig} className="h-48 sm:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -392,12 +396,12 @@ export function DataSection() {
         </Card>
 
         {/* Graphique Couverts mensuels */}
-        <Card className="premium-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-playfair font-semibold">Couverts de {getSelectedMonthLabel()}</h3>
+        <Card className="premium-card p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h3 className="text-base sm:text-lg font-playfair font-semibold">Couverts de {getSelectedMonthLabel()}</h3>
             <Users className="h-5 w-5 text-primary" />
           </div>
-          <ChartContainer config={chartConfig} className="h-64 w-full">
+          <ChartContainer config={chartConfig} className="h-48 sm:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -447,12 +451,12 @@ export function DataSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <Card className="premium-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-playfair font-semibold">Répartition des Réservations par Canal</h3>
+        <Card className="premium-card p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h3 className="text-base sm:text-lg font-playfair font-semibold">Répartition des Réservations par Canal</h3>
             <Target className="h-5 w-5 text-primary" />
           </div>
-          <ChartContainer config={chartConfig} className="h-80 w-full">
+          <ChartContainer config={chartConfig} className="h-64 sm:h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -461,9 +465,9 @@ export function DataSection() {
                   cy="50%"
                   labelLine={false}
                   label={({ name, value, percent }) => 
-                    `${name}: ${value} (${(percent * 100).toFixed(1)}%)`
+                    window.innerWidth < 640 ? `${(percent * 100).toFixed(0)}%` : `${name}: ${value} (${(percent * 100).toFixed(1)}%)`
                   }
-                  outerRadius={120}
+                  outerRadius={window.innerWidth < 640 ? 80 : 120}
                   fill="#8884d8"
                   dataKey="reservations"
                   nameKey="name"

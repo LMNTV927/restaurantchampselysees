@@ -94,12 +94,12 @@ export function LinksSection() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-8"
+      className="space-y-4 sm:space-y-8"
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-playfair font-semibold text-foreground">
+          <h2 className="text-2xl sm:text-3xl font-playfair font-semibold text-foreground">
             Liens de tracking
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -108,7 +108,7 @@ export function LinksSection() {
         </div>
         <Button 
           onClick={() => setIsCreateDialogOpen(true)}
-          className="premium-button"
+          className="premium-button flex-shrink-0"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Nouveau lien
@@ -117,7 +117,7 @@ export function LinksSection() {
 
       {/* KPI Cards */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
         variants={{
           hidden: { opacity: 0 },
           show: {

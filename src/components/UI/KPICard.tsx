@@ -32,10 +32,10 @@ export function KPICard({
       }}
       transition={{ duration: 0.2, ease: "easeOut" }}
     >
-      <Card className="premium-card p-6 group hover:shadow-medium transition-all duration-300">
+      <Card className="premium-card p-4 sm:p-6 group hover:shadow-medium transition-all duration-300">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
+            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap text-xs sm:text-sm">
               {title}
             </p>
             <div className="flex items-baseline gap-2">
@@ -43,7 +43,7 @@ export function KPICard({
                 <div className="h-8 w-20 bg-muted animate-pulse rounded" />
               ) : (
                 <motion.p 
-                  className="text-3xl font-bold count-up text-foreground"
+                  className="text-2xl sm:text-3xl font-bold count-up text-foreground"
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ 

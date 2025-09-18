@@ -16,11 +16,11 @@ export function DashboardSection() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-8"
+      className="space-y-4 sm:space-y-8"
     >
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-playfair font-semibold text-foreground">
+        <h2 className="text-2xl sm:text-3xl font-playfair font-semibold text-foreground">
           Dashboard
         </h2>
         <p className="text-muted-foreground mt-1">
@@ -56,7 +56,7 @@ export function DashboardSection() {
 
       {/* KPI Cards */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
         variants={{
           hidden: { opacity: 0 },
           show: {
@@ -109,7 +109,7 @@ export function DashboardSection() {
       </motion.div>
 
       {/* Graphiques */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Tendance des réservations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -117,11 +117,11 @@ export function DashboardSection() {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <Card className="premium-card">
-            <div className="p-6">
-              <h3 className="text-lg font-playfair font-semibold mb-4">
+            <div className="p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-playfair font-semibold mb-4">
                 Réservations de {currentMonthName}
               </h3>
-                <div className="h-64">
+                <div className="h-48 sm:h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={dashboardData.monthlyTrend}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -159,11 +159,11 @@ export function DashboardSection() {
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <Card className="premium-card">
-            <div className="p-6">
-              <h3 className="text-lg font-playfair font-semibold mb-4">
+            <div className="p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-playfair font-semibold mb-4">
                 Couverts de {currentMonthName}
               </h3>
-                <div className="h-64">
+                <div className="h-48 sm:h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={dashboardData.monthlyTrend}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -202,16 +202,16 @@ export function DashboardSection() {
         transition={{ duration: 0.5, delay: 0.5 }}
       >
         <Card className="premium-card">
-          <div className="p-6 border-b border-border/50">
+          <div className="p-4 sm:p-6 border-b border-border/50">
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-playfair font-semibold">
+              <h3 className="text-base sm:text-lg font-playfair font-semibold">
                 Activité Récente
               </h3>
             </div>
           </div>
           
-          <div className="p-6 space-y-4">
+          <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
             {dashboardData.recentActivity.map((activity, index) => (
               <motion.div
                 key={activity.id}
