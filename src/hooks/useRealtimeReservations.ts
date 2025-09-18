@@ -40,7 +40,7 @@ export function useRealtimeReservations() {
 
   const calculateEvolution = (current: number, previous: number): number | null => {
     if (previous === 0) return current > 0 ? 100 : null;
-    return ((current - previous) / previous) * 100;
+    return Math.round(((current - previous) / previous) * 100);
   };
 
   const fetchReservations = async () => {
