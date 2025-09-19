@@ -114,12 +114,12 @@ export function useRealtimeReservations() {
       
       // Mock occupancy rate calculation (you can adjust this based on your restaurant capacity)
       const totalCapacity = 500; // Restaurant capacity: 500 covers max per day
-      const occupancyRate = Math.min((todayCovers / totalCapacity) * 100, 100);
+      const occupancyRate = Math.round(Math.min((todayCovers / totalCapacity) * 100, 100));
 
       // Calculate yesterday's KPIs for evolution
       const yesterdayReservations = yesterdayReservationsData?.length || 0;
       const yesterdayCovers = yesterdayReservationsData?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
-      const yesterdayOccupancyRate = Math.min((yesterdayCovers / totalCapacity) * 100, 100);
+      const yesterdayOccupancyRate = Math.round(Math.min((yesterdayCovers / totalCapacity) * 100, 100));
 
       setKpis({
         todayReservations,

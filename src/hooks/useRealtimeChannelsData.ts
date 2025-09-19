@@ -121,7 +121,7 @@ export function useRealtimeChannelsData() {
       // Combine channels with their stats
       const channelsWithStats: ChannelData[] = channelsData?.map(channel => {
         const stats = channelStatsMap.get(channel.id) || { clicks: 0, reservations: 0, total_covers: 0 };
-        const conversion = stats.clicks > 0 ? (stats.reservations / stats.clicks) * 100 : 0;
+        const conversion = stats.clicks > 0 ? Math.round((stats.reservations / stats.clicks) * 100) : 0;
         
         return {
           id: channel.id,
@@ -143,13 +143,13 @@ export function useRealtimeChannelsData() {
       const totalClicks = channelsWithStats.reduce((sum, channel) => sum + channel.clicks, 0);
       const totalReservations = channelsWithStats.reduce((sum, channel) => sum + channel.reservations, 0);
       const totalCovers = channelsWithStats.reduce((sum, channel) => sum + channel.covers, 0);
-      const overallConversion = totalClicks > 0 ? (totalReservations / totalClicks) * 100 : 0;
+      const overallConversion = totalClicks > 0 ? Math.round((totalReservations / totalClicks) * 100) : 0;
 
       // Calculate previous month totals for evolution
       const prevTotalClicks = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.clicks, 0);
       const prevTotalReservations = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.reservations, 0);
       const prevTotalCovers = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.total_covers, 0);
-      const prevOverallConversion = prevTotalClicks > 0 ? (prevTotalReservations / prevTotalClicks) * 100 : 0;
+      const prevOverallConversion = prevTotalClicks > 0 ? Math.round((prevTotalReservations / prevTotalClicks) * 100) : 0;
 
       setKpis({
         totalClicks,

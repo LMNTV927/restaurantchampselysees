@@ -97,14 +97,14 @@ export function useRealtimeDashboard() {
       const todayReservationsCount = todayReservations?.length || 0;
       const todayCovers = todayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
       const totalCapacity = 500; // Restaurant capacity
-      const todayOccupancy = Math.min((todayCovers / totalCapacity) * 100, 100);
+      const todayOccupancy = Math.round(Math.min((todayCovers / totalCapacity) * 100, 100));
       const avgRevenuePerCover = 45; // Average revenue per cover in euros
       const revenue = todayCovers * avgRevenuePerCover;
 
       // Calculate yesterday's KPIs for evolution
       const yesterdayReservationsCount = yesterdayReservations?.length || 0;
       const yesterdayCovers = yesterdayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
-      const yesterdayOccupancy = Math.min((yesterdayCovers / totalCapacity) * 100, 100);
+      const yesterdayOccupancy = Math.round(Math.min((yesterdayCovers / totalCapacity) * 100, 100));
 
       // Calculate evolutions
       const reservationsEvolution = calculateEvolution(todayReservationsCount, yesterdayReservationsCount);
