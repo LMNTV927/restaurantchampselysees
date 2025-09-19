@@ -215,7 +215,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="premium-card p-6 backdrop-blur-md bg-card/90"
+      className="premium-card p-4 md:p-6 backdrop-blur-md bg-card/90 max-w-md md:max-w-lg mx-auto"
     >
       {/* Progress Bar */}
       <div className="mb-8">
