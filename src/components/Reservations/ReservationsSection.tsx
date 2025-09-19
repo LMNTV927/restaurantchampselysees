@@ -114,17 +114,14 @@ export function ReservationsSection() {
         );
       
       case "past":
-        // Réservations passées du mois en cours seulement
+        // Toutes les réservations passées (sans limitation de mois)
         return reservationsWithOriginalData.filter(reservation => {
-          // Vérifier que la réservation est dans le mois actuel
-          const isCurrentMonth = reservation.reservationDate.startsWith(currentMonth);
-          
           // Vérifier si la réservation est passée
           const isPast = reservation.reservationDate < todayString || 
                         (reservation.reservationDate === todayString && 
                          reservation.reservationTime < currentTime);
           
-          return isCurrentMonth && isPast;
+          return isPast;
         }).sort((a, b) => {
           // Tri chronologique inverse (plus récentes en premier)
           if (a.reservationDate !== b.reservationDate) {
@@ -199,7 +196,7 @@ export function ReservationsSection() {
       case "all":
         return "Réservations à venir";
       case "past":
-        return "Réservations passées (ce mois)";
+        return "Réservations passées";
       default:
         return "Réservations";
     }
