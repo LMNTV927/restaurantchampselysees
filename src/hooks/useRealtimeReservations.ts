@@ -49,7 +49,7 @@ export function useRealtimeReservations() {
       const yesterday = getDaysAgoInParis(1);
       console.log('Date du jour (Paris):', today);
       
-      // Fetch ALL reservations (not just from today) for the reservations list
+      // Fetch ALL reservations (including past ones) for the reservations list
       const { data: reservationsData, error: reservationsError } = await supabase
         .from('reservations')
         .select(`
@@ -65,7 +65,6 @@ export function useRealtimeReservations() {
           created_at,
           channels(name)
         `)
-        .gte('reservation_date', today)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true });
 
