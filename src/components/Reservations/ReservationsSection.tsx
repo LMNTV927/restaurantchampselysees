@@ -395,20 +395,20 @@ export function ReservationsSection() {
                   <span className="text-sm font-medium text-muted-foreground">{kpiTitles.occupancy}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center justify-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <Button
                     key={page}
                     variant={currentPage === page ? "default" : "outline"}
                     size="sm"
                     onClick={() => setCurrentPage(page)}
-                    className="min-w-8"
+                    className="h-8 w-8 p-0 text-xs"
                   >
                     {page}
                   </Button>
                 ))}
                 {totalPages === 0 && (
-                  <span className="text-sm text-muted-foreground">Aucune page</span>
+                  <span className="text-xs text-muted-foreground">Aucune page</span>
                 )}
               </div>
             </Card>
