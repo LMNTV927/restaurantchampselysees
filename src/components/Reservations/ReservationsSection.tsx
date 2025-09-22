@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Clock, Users, MapPin, History } from "lucide-react";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
@@ -27,6 +27,8 @@ interface Reservation {
 
 export function ReservationsSection() {
   const [selectedFilter, setSelectedFilter] = useState("today");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
   const { toast } = useToast();
   const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, refetch } = useRealtimeReservations();
 
@@ -114,8 +116,8 @@ export function ReservationsSection() {
         );
       
       case "past":
-        // Toutes les réservations passées (sans limitation de mois)
-        return reservationsWithOriginalData.filter(reservation => {
+        // Toutes les réservations passées avec pagination
+        const allPastReservations = reservationsWithOriginalData.filter(reservation => {
           // Vérifier si la réservation est passée
           const isPast = reservation.reservationDate < todayString || 
                         (reservation.reservationDate === todayString && 
@@ -129,6 +131,11 @@ export function ReservationsSection() {
           }
           return b.reservationTime.localeCompare(a.reservationTime);
         });
+        
+        // Pagination - afficher seulement ITEMS_PER_PAGE réservations
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return allPastReservations.slice(startIndex, endIndex);
       
       default:
         return reservationsWithOriginalData;
@@ -154,6 +161,50 @@ export function ReservationsSection() {
   };
 
   const filteredKPIs = getFilteredKPIs();
+
+  // Calculer les informations de pagination pour les réservations passées
+  const getTotalPastReservations = () => {
+    const todayString = getTodayInParis();
+    const currentTime = getCurrentTimeInParis();
+    
+    const reservationsWithOriginalData = realtimeReservations.map(reservation => {
+      const nameParts = reservation.customerName.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      return {
+        id: reservation.id,
+        customer: { 
+          firstName, 
+          lastName, 
+          phone: reservation.customerPhone 
+        },
+        startAt: createDateTimeInParis(reservation.reservationDate, reservation.reservationTime),
+        partySize: reservation.guestsCount,
+        occasion: '',
+        notes: reservation.notes || '',
+        status: reservation.status,
+        source: reservation.channelName,
+        reservationDate: reservation.reservationDate,
+        reservationTime: reservation.reservationTime
+      };
+    });
+
+    return reservationsWithOriginalData.filter(reservation => {
+      const isPast = reservation.reservationDate < todayString || 
+                    (reservation.reservationDate === todayString && 
+                     reservation.reservationTime < currentTime);
+      return isPast;
+    }).length;
+  };
+
+  const totalPastReservations = selectedFilter === "past" ? getTotalPastReservations() : 0;
+  const totalPages = Math.ceil(totalPastReservations / ITEMS_PER_PAGE);
+
+  // Reset à la page 1 si on change de filtre
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedFilter]);
 
   const handleUpdateReservationStatus = async (reservationId: string, newStatus: ReservationStatus) => {
     try {
@@ -226,7 +277,7 @@ export function ReservationsSection() {
         return {
           reservations: "Réservations Passées",
           covers: "Couverts Passés",
-          occupancy: "Taux d'Occupation"
+          occupancy: "Pages"
         };
       default:
         return {
@@ -334,17 +385,46 @@ export function ReservationsSection() {
           />
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-          <KPICard
-            title={kpiTitles.occupancy}
-            value={filteredKPIs.occupancyRate}
-            suffix="%"
-            icon={MapPin}
-            trend={kpis.evolution?.occupancyEvolution !== null && kpis.evolution?.occupancyEvolution !== undefined && selectedFilter === "today" ? 
-              { value: kpis.evolution.occupancyEvolution, isPositive: kpis.evolution.occupancyEvolution >= 0 } : 
-              undefined
-            }
-            loading={loading}
-          />
+          {selectedFilter === "past" ? (
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-gradient-primary rounded-lg">
+                    <History className="h-4 w-4 text-background" />
+                  </div>
+                  <span className="text-sm font-medium text-muted-foreground">{kpiTitles.occupancy}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className="min-w-8"
+                  >
+                    {page}
+                  </Button>
+                ))}
+                {totalPages === 0 && (
+                  <span className="text-sm text-muted-foreground">Aucune page</span>
+                )}
+              </div>
+            </Card>
+          ) : (
+            <KPICard
+              title={kpiTitles.occupancy}
+              value={filteredKPIs.occupancyRate}
+              suffix="%"
+              icon={MapPin}
+              trend={kpis.evolution?.occupancyEvolution !== null && kpis.evolution?.occupancyEvolution !== undefined && selectedFilter === "today" ? 
+                { value: kpis.evolution.occupancyEvolution, isPositive: kpis.evolution.occupancyEvolution >= 0 } : 
+                undefined
+              }
+              loading={loading}
+            />
+          )}
         </motion.div>
       </motion.div>
 
