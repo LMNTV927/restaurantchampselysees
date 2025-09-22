@@ -115,11 +115,30 @@ export function ReservationsSection() {
       
       case "past":
         // Toutes les réservations passées (sans limitation de mois)
-        return reservationsWithOriginalData.filter(reservation => {
+        console.log('DEBUG Past Filter:', {
+          todayString,
+          currentTime,
+          totalReservations: reservationsWithOriginalData.length,
+          reservationSample: reservationsWithOriginalData.slice(0, 2).map(r => ({
+            date: r.reservationDate,
+            time: r.reservationTime,
+            name: r.customer.firstName
+          }))
+        });
+        
+        const pastReservations = reservationsWithOriginalData.filter(reservation => {
           // Vérifier si la réservation est passée
           const isPast = reservation.reservationDate < todayString || 
                         (reservation.reservationDate === todayString && 
                          reservation.reservationTime < currentTime);
+          
+          if (isPast) {
+            console.log('Past reservation found:', {
+              date: reservation.reservationDate,
+              time: reservation.reservationTime,
+              name: reservation.customer.firstName
+            });
+          }
           
           return isPast;
         }).sort((a, b) => {
@@ -129,6 +148,9 @@ export function ReservationsSection() {
           }
           return b.reservationTime.localeCompare(a.reservationTime);
         });
+        
+        console.log('Past reservations after filter:', pastReservations.length);
+        return pastReservations;
       
       default:
         return reservationsWithOriginalData;
