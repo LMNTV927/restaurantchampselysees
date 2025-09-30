@@ -174,7 +174,7 @@ export function DataSection() {
     const csvContent = "data:text/csv;charset=utf-8," + 
       "Canal,Clics,Réservations,Couverts,Conversion\n" +
       channels.map(channel => 
-        `${channel.name},${channel.clicks},${channel.reservations},${channel.covers},${channel.conversion.toFixed(1)}%`
+        `${channel.name},${channel.clicks},${channel.reservations},${channel.covers},${Math.round(channel.conversion)}%`
       ).join("\n");
     
     const encodedUri = encodeURI(csvContent);
