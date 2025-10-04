@@ -387,12 +387,10 @@ export function ReservationsSection() {
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           {selectedFilter === "past" ? (
             <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-start justify-between mb-4">
+                <span className="text-sm font-medium text-muted-foreground">{kpiTitles.occupancy}</span>
                 <div className="p-2 bg-gradient-primary rounded-lg">
                   <History className="h-5 w-5 text-background" />
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-muted-foreground">{kpiTitles.occupancy}</span>
                 </div>
               </div>
               <div className="flex items-center justify-center gap-1">
