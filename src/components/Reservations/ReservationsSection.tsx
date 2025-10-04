@@ -386,28 +386,33 @@ export function ReservationsSection() {
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           {selectedFilter === "past" ? (
-            <Card className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <span className="text-sm font-medium text-muted-foreground">{kpiTitles.occupancy}</span>
-                <div className="p-2 bg-gradient-primary rounded-lg">
-                  <History className="h-5 w-5 text-background" />
+            <Card className="premium-card p-3 sm:p-6 group hover:shadow-medium transition-all duration-300">
+              <div className="flex flex-col items-center text-center space-y-3 sm:space-y-2 sm:flex-row sm:text-left sm:items-center sm:justify-between">
+                <div className="space-y-1 sm:space-y-2 order-2 sm:order-1 w-full sm:w-auto">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
+                    {kpiTitles.occupancy}
+                  </p>
+                  <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(page)}
+                        className="h-8 w-8 p-0 text-xs"
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                    {totalPages === 0 && (
+                      <span className="text-xs text-muted-foreground">Aucune page</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                    className="h-8 w-8 p-0 text-xs"
-                  >
-                    {page}
-                  </Button>
-                ))}
-                {totalPages === 0 && (
-                  <span className="text-xs text-muted-foreground">Aucune page</span>
-                )}
+                
+                <div className="p-2 sm:p-3 bg-gradient-gold rounded-xl shadow-gold group-hover:shadow-large transition-all duration-300 order-1 sm:order-2">
+                  <History className="h-5 w-5 sm:h-6 sm:w-6 text-charcoal" />
+                </div>
               </div>
             </Card>
           ) : (
