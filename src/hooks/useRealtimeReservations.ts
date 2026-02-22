@@ -14,6 +14,8 @@ export interface ReservationData {
   status: 'confirmed' | 'show' | 'no_show' | 'cancelled';
   channelName: string | null;
   createdAt: string;
+  source: string | null;
+  externalId: string | null;
 }
 
 export interface ReservationsKPIs {
@@ -63,6 +65,8 @@ export function useRealtimeReservations() {
           notes,
           status,
           created_at,
+          source,
+          external_id,
           channels(name)
         `)
         .order('reservation_date', { ascending: true })
@@ -94,7 +98,9 @@ export function useRealtimeReservations() {
         notes: reservation.notes,
         status: reservation.status as any,
         channelName: (reservation.channels as any)?.name || null,
-        createdAt: reservation.created_at
+        createdAt: reservation.created_at,
+        source: (reservation as any).source || null,
+        externalId: (reservation as any).external_id || null,
       })) || [];
 
       setReservations(formattedReservations);
@@ -203,12 +209,25 @@ export function useRealtimeReservations() {
     };
   }, []);
 
+  const syncGoogleCalendar = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-google-calendar');
+      if (error) throw error;
+      await fetchReservations();
+      return data;
+    } catch (error) {
+      console.error('Error syncing Google Calendar:', error);
+      throw error;
+    }
+  };
+
   return { 
     reservations, 
     kpis, 
     loading, 
     updateReservationStatus,
     updateReservationNotes,
+    syncGoogleCalendar,
     refetch: fetchReservations 
   };
 }
