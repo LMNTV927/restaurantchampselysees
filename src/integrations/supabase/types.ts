@@ -86,11 +86,13 @@ export type Database = {
           customer_email: string | null
           customer_name: string
           customer_phone: string
+          external_id: string | null
           guests_count: number
           id: string
           notes: string | null
           reservation_date: string
           reservation_time: string
+          source: string | null
           status: string | null
         }
         Insert: {
@@ -99,11 +101,13 @@ export type Database = {
           customer_email?: string | null
           customer_name: string
           customer_phone: string
+          external_id?: string | null
           guests_count?: number
           id?: string
           notes?: string | null
           reservation_date: string
           reservation_time: string
+          source?: string | null
           status?: string | null
         }
         Update: {
@@ -112,11 +116,13 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string
           customer_phone?: string
+          external_id?: string | null
           guests_count?: number
           id?: string
           notes?: string | null
           reservation_date?: string
           reservation_time?: string
+          source?: string | null
           status?: string | null
         }
         Relationships: [
