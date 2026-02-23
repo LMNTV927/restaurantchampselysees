@@ -1,97 +1,47 @@
-# Synchronisation Google Agenda vers le Dashboard
 
-## Vue d'ensemble
 
-Creer une synchronisation automatique qui importe les evenements de votre Google Agenda comme reservations externes dans votre dashboard. Les evenements seront recuperes toutes les 10 minutes via une tache planifiee.
+# Mise en place de l'envoi automatique d'emails de confirmation
 
-## Comment ca marche
+## Etat actuel
 
-1. Une fonction backend lit votre Google Agenda via l'API Google Calendar
-2. Elle extrait le nom du client (titre), la date, l'heure, et les details (description)
-3. Les reservations sont inserees dans la base de donnees avec un marqueur "source externe"
-4. Un cron job execute cette fonction toutes les 5 minutes
-5. Le dashboard affiche ces reservations avec un badge "Google Agenda" pour les distinguer
+L'infrastructure est deja en place :
+- La fonction backend `send-reservation-confirmation` existe avec un template email professionnel
+- Le formulaire de reservation public (page booking) envoie deja l'email quand un email client est fourni
+- Le secret `RESEND_API_KEY` est configure
 
-## Pre-requis cote Google
+## Ce qui doit etre modifie
 
-Vous devrez creer un **compte de service Google** (gratuit) :
+### 1. Ajouter l'envoi d'email dans le formulaire d'ajout manuel
 
-1. Aller sur Google Cloud Console
-2. Creer un projet (ou utiliser un existant)
-3. Activer l'API Google Calendar
-4. Creer un compte de service et telecharger la cle JSON
-5. Partager votre agenda avec l'email du compte de service
+Le composant `AddReservationDialog.tsx` cree des reservations mais n'envoie pas d'email de confirmation. Il faut ajouter l'appel a la fonction backend apres l'insertion reussie, uniquement si un email client est fourni.
 
-## Etapes d'implementation
+### 2. Verifier le domaine Resend (action manuelle requise)
 
-### 1. Ajouter une colonne source aux reservations
+Actuellement, l'adresse d'envoi est `confirmation@resend.dev` (mode sandbox). Cela signifie que les emails ne sont envoyes qu'aux adresses verifiees manuellement dans votre compte Resend.
 
-- Ajouter `source` (text, nullable, default null) a la table `reservations` pour distinguer les reservations manuelles des externes
-- Ajouter `external_id` (text, nullable, unique) pour eviter les doublons lors des re-syncs
+Pour envoyer a tous vos clients :
+1. Aller sur https://resend.com/domains
+2. Ajouter et verifier votre domaine (ex: `votredomaine.com`)
+3. Mettre a jour l'adresse d'envoi dans la fonction backend (ex: `confirmation@votredomaine.com`)
 
-### 2. Creer la fonction backend `sync-google-calendar`
+### 3. Mettre a jour l'adresse d'envoi dans la fonction backend
 
-- Lit les evenements Google Calendar via l'API REST
-- Parse le titre (nom du client) et la description (couverts, telephone)
-- Format attendu de la description : lignes contenant "Couverts: X", "Tel: 06...", "Notes: ..."
-- Upsert dans la table reservations avec `external_id` = event ID Google
-- Source = "Google Agenda"
-
-### 3. Configurer le cron job
-
-- Executer `sync-google-calendar` toutes les 5 minutes via pg_cron
-- La fonction ne re-cree pas les reservations existantes (upsert sur external_id)
-
-### 4. Adapter l'affichage dans le dashboard
-
-- Afficher un badge "Google Agenda" sur les reservations importees
-- Distinguer visuellement les reservations externes des reservations internes
-
-### 5. Ajouter un bouton de sync manuelle
-
-- Bouton "Synchroniser" dans la section reservations pour forcer un rafraichissement immediat
+Remplacer `confirmation@resend.dev` par l'adresse basee sur votre domaine verifie.
 
 ## Details techniques
 
-### Format attendu des evenements Google Agenda
+### Modification de `AddReservationDialog.tsx`
+- Apres l'insertion reussie dans la base de donnees, verifier si `customerEmail` est fourni
+- Si oui, appeler `supabase.functions.invoke('send-reservation-confirmation', { body: emailData })`
+- Recuperer le nom du canal pour le nom du restaurant
+- Ne pas bloquer la creation de reservation si l'email echoue (try/catch silencieux)
 
-- **Titre** : Nom du client (ex: "Dupont Martin")
-- **Date/Heure** : Date et heure de debut de l'evenement
-- **Description** (optionnelle, format libre avec extraction intelligente) :
-  ```
-  Couverts: 4
-  Tel: 0612345678
-  Notes: Anniversaire, table pres de la fenetre
-  ```
-
-### Secrets necessaires
-
-- `GOOGLE_CALENDAR_ID` : l'ID de votre agenda (souvent votre email)
-- `GOOGLE_SERVICE_ACCOUNT_KEY` : la cle JSON du compte de service
-
-### Schema de la migration
-
-```text
-ALTER TABLE reservations
-  ADD COLUMN source text DEFAULT null,
-  ADD COLUMN external_id text UNIQUE DEFAULT null;
-```
-
-### Logique de sync (edge function)
-
-```text
-1. Fetch events from Google Calendar API (today + 30 days)
-2. For each event:
-   a. Parse title -> customer_name
-   b. Parse start time -> reservation_date, reservation_time
-   c. Parse description -> guests_count, phone, notes
-   d. Upsert into reservations WHERE external_id = event.id
-3. Return count of synced reservations
-```
+### Modification de `send-reservation-confirmation/index.ts`
+- Mettre a jour l'adresse `from` une fois le domaine verifie
+- Ajouter les headers CORS manquants pour la compatibilite
 
 ## Resultat attendu
+- Chaque reservation (publique ou manuelle) avec un email client recoit automatiquement un email de confirmation
+- L'email contient tous les details : date, heure, nombre de personnes, notes
+- Si l'envoi echoue, la reservation est quand meme creee
 
-- Les reservations de votre Google Agenda apparaissent automatiquement dans le dashboard
-- Badge "Google Agenda" visible pour les differencier
-- Aucune duplication grace au systeme d'external_id
-- Sync toutes les 5 minutes + bouton manuel
