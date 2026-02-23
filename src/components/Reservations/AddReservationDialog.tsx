@@ -102,10 +102,10 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
         timeZone: 'Europe/Paris' 
       });
 
-      // Get the first active channel (assuming manual reservations go to a default channel)
+      // Get the first active channel with its name
       const { data: channels, error: channelError } = await supabase
         .from('channels')
-        .select('id')
+        .select('id, name')
         .eq('is_active', true)
         .limit(1);
 
@@ -131,9 +131,36 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
         throw error;
       }
 
+      // Send confirmation email if email is provided
+      if (values.customerEmail && values.customerEmail.trim()) {
+        try {
+          await supabase.functions.invoke('send-reservation-confirmation', {
+            body: {
+              customerName: values.customerName,
+              customerEmail: values.customerEmail,
+              restaurantName: channels[0].name || 'Restaurant',
+              reservationDate: values.reservationDate.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }),
+              reservationTime: values.reservationTime,
+              guestsCount: values.guestsCount,
+              customerPhone: values.customerPhone,
+              notes: values.notes,
+            }
+          });
+        } catch (emailError) {
+          console.error('Erreur envoi email:', emailError);
+        }
+      }
+
       toast({
         title: "Réservation créée",
-        description: `Réservation pour ${values.customerName} ajoutée avec succès`,
+        description: values.customerEmail
+          ? `Réservation pour ${values.customerName} ajoutée. Email de confirmation envoyé.`
+          : `Réservation pour ${values.customerName} ajoutée avec succès`,
       });
 
       form.reset();
