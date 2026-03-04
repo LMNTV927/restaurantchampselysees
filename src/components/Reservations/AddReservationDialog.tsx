@@ -156,6 +156,27 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
         }
       }
 
+      // Send confirmation SMS
+      try {
+        await supabase.functions.invoke('send-reservation-sms', {
+          body: {
+            customerName: values.customerName,
+            customerPhone: values.customerPhone,
+            restaurantName: channels[0].name || 'Restaurant',
+            reservationDate: values.reservationDate.toLocaleDateString('fr-FR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            reservationTime: values.reservationTime,
+            guestsCount: values.guestsCount,
+          }
+        });
+      } catch (smsError) {
+        console.error('Erreur envoi SMS:', smsError);
+      }
+
       toast({
         title: "Réservation créée",
         description: values.customerEmail
