@@ -32,7 +32,7 @@ serve(async (req) => {
       });
     }
 
-    const message = `Bonjour ${customerName}, votre réservation au ${restaurantName || 'restaurant'} est confirmée pour le ${reservationDate} à ${reservationTime} (${guestsCount} pers.). À bientôt !`;
+    const message = `Cher(e) ${customerName},\n\nMerci pour votre réservation au Prince Palace le ${reservationDate} à ${reservationTime} pour ${guestsCount} personnes. Nous avons hâte de vous accueillir !\n\nPour toute question, contactez-nous au 01 59 13 32 68.\n\nÀ bientôt,\n\nL'équipe du Prince Palace`;
 
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
 
