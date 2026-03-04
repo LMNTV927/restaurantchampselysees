@@ -148,12 +148,37 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
 
           if (emailError) {
             console.error('Email sending error:', emailError);
-            // Don't fail the booking if email fails
           }
         } catch (emailError) {
           console.error('Email sending error:', emailError);
-          // Don't fail the booking if email fails
         }
+      }
+
+      // Send confirmation SMS
+      try {
+        const smsData = {
+          customerName: bookingData.customerName,
+          customerPhone: bookingData.customerPhone,
+          restaurantName: channelData?.name || 'Restaurant',
+          reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          reservationTime: bookingData.time,
+          guestsCount: bookingData.guestsCount,
+        };
+
+        const { error: smsError } = await supabase.functions.invoke('send-reservation-sms', {
+          body: smsData
+        });
+
+        if (smsError) {
+          console.error('SMS sending error:', smsError);
+        }
+      } catch (smsError) {
+        console.error('SMS sending error:', smsError);
       }
 
       // Success!
