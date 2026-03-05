@@ -2,25 +2,35 @@
 
 ## Diagnostic
 
-Le chargement infini vient du hook `useAuth.tsx`. La fonction `fetchRole()` appelle `supabase.rpc("get_user_role")` **sans try/catch**. Si cet appel échoue (erreur réseau, permission RLS, etc.), l'exception empêche `setLoading(false)` de s'exécuter, et l'app reste bloquée sur "Chargement..." indéfiniment.
+Le ralentissement lors du changement d'onglet est causé par le fait que chaque section (Dashboard, Liens, Reservations, Donnees) possede son propre hook qui refait toutes les requetes a la base de donnees a chaque montage. Il n'y a aucune mise en cache : quand tu passes de "Dashboard" a "Liens", le composant Dashboard est detruit puis "Liens" est monte et relance 4-5 requetes reseau depuis zero.
 
-## Correction
+De plus, les network requests montrent que certaines requetes sont dupliquees (channels et channel_stats sont appeles 3-4 fois simultanement).
 
-**Fichier : `src/hooks/useAuth.tsx`**
+## Solution
 
-Entourer `fetchRole` d'un try/catch pour que `setLoading(false)` soit toujours appelé, même en cas d'erreur :
+Migrer les hooks de donnees vers **React Query** (deja installe dans le projet via `@tanstack/react-query`) pour beneficier du cache automatique. Les donnees restent en memoire quand on change d'onglet, donc le retour est instantane.
 
-```typescript
-const fetchRole = async (userId: string) => {
-  try {
-    const { data } = await supabase.rpc("get_user_role", { _user_id: userId });
-    setRole(data as string | null);
-  } catch (error) {
-    console.error("Error fetching role:", error);
-    setRole(null);
-  }
-};
-```
+### Modifications
 
-De plus, ajouter un try/catch dans les deux blocs (`onAuthStateChange` et `getSession`) pour garantir que `setLoading(false)` s'exécute dans tous les cas, en utilisant un pattern `finally`.
+**1. `src/hooks/useRealtimeDashboard.ts`**
+- Remplacer `useState`/`useEffect` par `useQuery` de React Query
+- La cle de cache (`queryKey`) garantit que les donnees sont gardees en memoire
+- Le realtime subscription invalide le cache au lieu de refetcher directement
+- `staleTime: 30000` (30s) pour eviter les refetch inutiles
+
+**2. `src/hooks/useRealtimeChannelsData.ts`**
+- Meme approche : `useQuery` avec cache
+- Les subscriptions realtime appellent `queryClient.invalidateQueries()` au lieu de refetcher
+
+**3. `src/hooks/useRealtimeReservations.ts`**
+- Meme approche avec `useQuery`
+- Les mutations (updateStatus, delete, etc.) invalident le cache
+
+**4. `src/components/Data/DataSection.tsx`** (et `useMonthlyData.ts`)
+- Utiliser `useQuery` avec la cle incluant le mois selectionne
+
+### Resultat attendu
+- Changement d'onglet instantane (donnees servies depuis le cache)
+- Les subscriptions realtime continuent de mettre a jour les donnees en arriere-plan
+- Moins de requetes reseau dupliquees
 
