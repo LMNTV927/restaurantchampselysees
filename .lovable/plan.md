@@ -1,29 +1,26 @@
 
 
-## Plan : Suppression de réservations (admin uniquement)
+## Diagnostic
 
-### Objectif
-Permettre aux administrateurs de supprimer définitivement une réservation (suppression physique de la base de données, pas juste un changement de statut). Les serveurs ne verront pas cette option.
+Le chargement infini vient du hook `useAuth.tsx`. La fonction `fetchRole()` appelle `supabase.rpc("get_user_role")` **sans try/catch**. Si cet appel échoue (erreur réseau, permission RLS, etc.), l'exception empêche `setLoading(false)` de s'exécuter, et l'app reste bloquée sur "Chargement..." indéfiniment.
 
-### Modifications
+## Correction
 
-**1. Migration base de données** — Ajouter une policy RLS DELETE sur la table `reservations`, limitée aux admins via `has_role()`.
+**Fichier : `src/hooks/useAuth.tsx`**
 
-```sql
-CREATE POLICY "Admins can delete reservations"
-ON public.reservations
-FOR DELETE
-TO authenticated
-USING (public.has_role(auth.uid(), 'admin'));
+Entourer `fetchRole` d'un try/catch pour que `setLoading(false)` soit toujours appelé, même en cas d'erreur :
+
+```typescript
+const fetchRole = async (userId: string) => {
+  try {
+    const { data } = await supabase.rpc("get_user_role", { _user_id: userId });
+    setRole(data as string | null);
+  } catch (error) {
+    console.error("Error fetching role:", error);
+    setRole(null);
+  }
+};
 ```
 
-**2. Hook `useRealtimeReservations.ts`** — Ajouter une fonction `deleteReservation` qui exécute un `DELETE` sur la table reservations et met à jour l'état local.
-
-**3. Composant `ReservationsSection.tsx`** — 
-- Importer `useAuth` pour vérifier le rôle
-- Ajouter un bouton "Supprimer" (icône poubelle, rouge) visible uniquement si `role === 'admin'`
-- Ajouter un dialogue de confirmation (`AlertDialog`) avant suppression
-- Au clic, appeler `deleteReservation` puis afficher un toast de confirmation
-
-Le bouton apparaîtra dans la zone d'actions au hover, à côté des boutons Show/No-show/Annuler, et aussi pour les réservations passées.
+De plus, ajouter un try/catch dans les deux blocs (`onAuthStateChange` et `getSession`) pour garantir que `setLoading(false)` s'exécute dans tous les cas, en utilisant un pattern `finally`.
 
