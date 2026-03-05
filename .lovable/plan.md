@@ -1,29 +1,29 @@
 
 
-## Plan : Suppression de réservations (admin uniquement)
+## Diagnostic : Preview bloqué sur "Chargement..."
 
-### Objectif
-Permettre aux administrateurs de supprimer définitivement une réservation (suppression physique de la base de données, pas juste un changement de statut). Les serveurs ne verront pas cette option.
+### Cause
+Le composant `ProtectedRoute` dans `App.tsx` affiche "Chargement..." tant que `loading` est `true` dans le hook `useAuth`. Ce hook attend la réponse de `supabase.auth.getSession()` et `onAuthStateChange`. Si la connexion au backend est lente ou si le preview vient de se recharger après les modifications, cela peut prendre quelques secondes.
 
-### Modifications
+### Ce n'est probablement pas un bug
+- Aucune erreur dans la console (juste des warnings React Router standard)
+- Aucune requête réseau en erreur
+- Le code d'authentification est correct : il appelle `getSession()`, met à jour le state, puis `setLoading(false)`
 
-**1. Migration base de données** — Ajouter une policy RLS DELETE sur la table `reservations`, limitée aux admins via `has_role()`.
+### Solution
+1. **Rafraîchir le preview** — Un simple rechargement devrait résoudre le problème. Le preview se stabilisera et redirigera vers `/login` (si pas connecté) ou affichera le dashboard (si connecté).
 
-```sql
-CREATE POLICY "Admins can delete reservations"
-ON public.reservations
-FOR DELETE
-TO authenticated
-USING (public.has_role(auth.uid(), 'admin'));
+2. **Si le problème persiste** — Ajouter un timeout de sécurité dans `useAuth.tsx` pour forcer `setLoading(false)` après 5 secondes, évitant un blocage indéfini :
+
+```typescript
+// Dans useAuth.tsx, ajouter un useEffect avec timeout
+useEffect(() => {
+  const timeout = setTimeout(() => {
+    if (loading) setLoading(false);
+  }, 5000);
+  return () => clearTimeout(timeout);
+}, [loading]);
 ```
 
-**2. Hook `useRealtimeReservations.ts`** — Ajouter une fonction `deleteReservation` qui exécute un `DELETE` sur la table reservations et met à jour l'état local.
-
-**3. Composant `ReservationsSection.tsx`** — 
-- Importer `useAuth` pour vérifier le rôle
-- Ajouter un bouton "Supprimer" (icône poubelle, rouge) visible uniquement si `role === 'admin'`
-- Ajouter un dialogue de confirmation (`AlertDialog`) avant suppression
-- Au clic, appeler `deleteReservation` puis afficher un toast de confirmation
-
-Le bouton apparaîtra dans la zone d'actions au hover, à côté des boutons Show/No-show/Annuler, et aussi pour les réservations passées.
+Aucune modification de code n'est nécessaire si un simple rafraîchissement résout le problème. Voulez-vous que j'ajoute le timeout de sécurité ?
 
