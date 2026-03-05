@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, History, RefreshCw } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
+import { useAuth } from "@/hooks/useAuth";
 import { AddReservationDialog } from "./AddReservationDialog";
 import { EditCommentDialog } from "./EditCommentDialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis, createDateTimeInParis } from "@/lib/dateUtils";
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
@@ -30,8 +32,8 @@ export function ReservationsSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
   const { toast } = useToast();
-  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, syncGoogleCalendar, refetch } = useRealtimeReservations();
-  const [syncing, setSyncing] = useState(false);
+  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, refetch } = useRealtimeReservations();
+  const { role } = useAuth();
 
   // Transform real-time reservations to match local interface
   const allReservations: Reservation[] = realtimeReservations.map(reservation => {
@@ -317,33 +319,6 @@ export function ReservationsSection() {
         </div>
         
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="premium-button gap-2"
-            disabled={syncing}
-            onClick={async () => {
-              setSyncing(true);
-              try {
-                const result = await syncGoogleCalendar();
-                toast({
-                  title: "Synchronisation terminée",
-                  description: `${result?.synced || 0} réservation(s) synchronisée(s) depuis Google Agenda`,
-                });
-              } catch (error) {
-                toast({
-                  title: "Erreur de synchronisation",
-                  description: "Impossible de synchroniser avec Google Agenda",
-                  variant: "destructive",
-                });
-              } finally {
-                setSyncing(false);
-              }
-            }}
-          >
-            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
-            Sync Google
-          </Button>
           <AddReservationDialog onReservationAdded={refetch} />
           {/* Filters */}
           <div className="flex items-center bg-card/50 rounded-2xl p-1 backdrop-blur-sm">
@@ -535,34 +510,80 @@ export function ReservationsSection() {
                     </div>
                   </div>
                   
-                  {selectedFilter !== "past" && (
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="premium-button"
-                        onClick={() => handleUpdateReservationStatus(reservation.id, "show")}
-                      >
-                        Show
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="premium-button"
-                        onClick={() => handleUpdateReservationStatus(reservation.id, "no_show")}
-                      >
-                        No-show
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="premium-button"
-                        onClick={() => handleUpdateReservationStatus(reservation.id, "cancelled")}
-                      >
-                        Annuler
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {selectedFilter !== "past" && (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="premium-button"
+                          onClick={() => handleUpdateReservationStatus(reservation.id, "show")}
+                        >
+                          Show
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="premium-button"
+                          onClick={() => handleUpdateReservationStatus(reservation.id, "no_show")}
+                        >
+                          No-show
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="premium-button"
+                          onClick={() => handleUpdateReservationStatus(reservation.id, "cancelled")}
+                        >
+                          Annuler
+                        </Button>
+                      </>
+                    )}
+                    {role === 'admin' && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-destructive/50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Supprimer cette réservation ?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Cette action est irréversible. La réservation de {reservation.customer.firstName} {reservation.customer.lastName} sera définitivement supprimée de la base de données et n'apparaîtra plus dans les rapports.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={async () => {
+                                try {
+                                  await deleteReservation(reservation.id);
+                                  toast({
+                                    title: "Réservation supprimée",
+                                    description: `La réservation de ${reservation.customer.firstName} ${reservation.customer.lastName} a été supprimée.`,
+                                  });
+                                } catch (error) {
+                                  toast({
+                                    title: "Erreur",
+                                    description: "Impossible de supprimer la réservation",
+                                    variant: "destructive",
+                                  });
+                                }
+                              }}
+                            >
+                              Supprimer
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </div>
                 </motion.div>
               ))
             )}
