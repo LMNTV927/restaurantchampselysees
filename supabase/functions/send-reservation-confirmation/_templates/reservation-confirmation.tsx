@@ -99,17 +99,22 @@ export const ReservationConfirmationEmail = ({
           {/* Buttons */}
           <table cellPadding="0" cellSpacing="0" width="100%" style={actionsSection}>
             <tr><td align="center" style={{ paddingBottom: '10px' }}>
-              <Link href={calendarUrl} style={{ ...btn, ...btnGold }}>
+              <Link href={calendarUrl} style={{ ...btn, ...btnGold, display: 'block' as const, width: '100%' }}>
                 Ajouter au calendrier
               </Link>
             </td></tr>
             <tr><td align="center">
-              <table cellPadding="0" cellSpacing="0" width="100%" style={{ borderCollapse: 'separate' as const, borderSpacing: '10px 0' }}>
+              <table
+                cellPadding="0"
+                cellSpacing="0"
+                width="100%"
+                style={{ borderCollapse: 'separate' as const, borderSpacing: '0', tableLayout: 'fixed' as const }}
+              >
                 <tr>
-                  <td width="50%" align="center" style={{ padding: '0' }}>
+                  <td width="50%" align="center" style={{ padding: '0 6px 0 0' }}>
                     <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block' as const, width: '100%' }}>Modifier</Link>
                   </td>
-                  <td width="50%" align="center" style={{ padding: '0' }}>
+                  <td width="50%" align="center" style={{ padding: '0 0 0 6px' }}>
                     <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block' as const, width: '100%' }}>Annuler</Link>
                   </td>
                 </tr>
@@ -264,6 +269,7 @@ const btn = {
   display: 'inline-block' as const,
   width: '100%',
   padding: '14px',
+  boxSizing: 'border-box' as const,
   textAlign: 'center' as const,
   fontFamily: "'DM Sans', sans-serif",
   fontSize: '14px',
