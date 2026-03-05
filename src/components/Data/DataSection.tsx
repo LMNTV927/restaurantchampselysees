@@ -46,26 +46,16 @@ import { getCurrentMonthInParis, getCurrentYearInParis } from "@/lib/dateUtils";
 import { toast } from "sonner";
 
 export function DataSection() {
-  const currentMonth = getCurrentMonthInParis(); // Format: "2025-09"
+  const currentMonth = getCurrentMonthInParis();
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-  const [monthlyChannels, setMonthlyChannels] = useState<any[]>([]);
-  const [monthlyKpis, setMonthlyKpis] = useState<any>({
-    totalClicks: 0,
-    totalReservations: 0,
-    totalCovers: 0,
-    conversion: 0
-  });
-  const [monthlyReservations, setMonthlyReservations] = useState<any[]>([]);
   const { channels: currentChannels, kpis: currentKpis, loading: currentLoading } = useRealtimeChannelsData();
-  const { fetchMonthlyData, loading: monthlyLoading } = useMonthlyData();
+  const { data: monthlyData, loading: monthlyLoading } = useMonthlyData(selectedMonth);
   const { generateMonthlyReport } = usePDFReport();
 
-  // Use monthly data for historical months, current data for current month  
   const isCurrentMonth = selectedMonth === currentMonth;
-  
-  // For September 2025 (current month), we need to fetch data properly since useRealtimeChannelsData might not have all historical data
-  const channels = monthlyChannels.length > 0 ? monthlyChannels : currentChannels;
-  const kpis = Object.keys(monthlyKpis).length > 1 ? monthlyKpis : currentKpis;
+  const channels = monthlyData?.channels || currentChannels;
+  const kpis = monthlyData?.kpis || currentKpis;
+  const monthlyReservations = monthlyData?.reservations || [];
   const loading = isCurrentMonth ? currentLoading : monthlyLoading;
 
   // Configuration pour les graphiques
@@ -127,28 +117,9 @@ export function DataSection() {
 
   const dailyData = getDailyData();
 
-  // Load monthly data when month changes or on component mount
-  const loadMonthlyData = async (month: string) => {
-    try {
-      const data = await fetchMonthlyData(month);
-      setMonthlyChannels(data.channels);
-      setMonthlyKpis(data.kpis);
-      setMonthlyReservations(data.reservations);
-    } catch (error) {
-      toast.error("Erreur lors du chargement des données du mois");
-      console.error("Monthly data loading error:", error);
-    }
-  };
-
   const handleMonthChange = (month: string) => {
     setSelectedMonth(month);
-    loadMonthlyData(month);
   };
-
-  // Load data for current month on mount
-  React.useEffect(() => {
-    loadMonthlyData(selectedMonth);
-  }, []);
 
   const currentYear = getCurrentYearInParis();
   const months = [

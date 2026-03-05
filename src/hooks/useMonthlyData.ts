@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ChannelData, ChannelsKPIs } from './useRealtimeChannelsData';
 
@@ -23,182 +23,103 @@ interface MonthlyData {
   reservations: ReservationData[];
 }
 
-export function useMonthlyData() {
-  const [loading, setLoading] = useState(false);
+const calculateEvolution = (current: number, previous: number): number | null => {
+  if (previous === 0) return current > 0 ? 100 : null;
+  return Math.round(((current - previous) / previous) * 100);
+};
 
-  const calculateEvolution = (current: number, previous: number): number | null => {
-    if (previous === 0) return current > 0 ? 100 : null;
-    return Math.round(((current - previous) / previous) * 100);
+const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
+  const [year, month] = selectedMonth.split('-');
+  const startDate = `${year}-${month}-01`;
+  const nextMonth = parseInt(month) === 12 ? 1 : parseInt(month) + 1;
+  const nextYear = parseInt(month) === 12 ? parseInt(year) + 1 : parseInt(year);
+  const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
+  const prevMonth = parseInt(month) === 1 ? 12 : parseInt(month) - 1;
+  const prevYear = parseInt(month) === 1 ? parseInt(year) - 1 : parseInt(year);
+  const prevStartDate = `${prevYear}-${String(prevMonth).padStart(2, '0')}-01`;
+
+  const [channelsRes, statsRes, prevStatsRes, reservationsRes] = await Promise.all([
+    supabase.from('channels').select('id, name, slug, description, is_active').eq('is_active', true),
+    supabase.from('channel_stats').select('channel_id, clicks, reservations, total_covers, date').gte('date', startDate).lt('date', endDate),
+    supabase.from('channel_stats').select('channel_id, clicks, reservations, total_covers, date').gte('date', prevStartDate).lt('date', startDate),
+    supabase.from('reservations').select('*, channels(name)').gte('created_at', startDate).lt('created_at', endDate).order('created_at', { ascending: false }),
+  ]);
+
+  if (channelsRes.error) throw channelsRes.error;
+  if (statsRes.error) throw statsRes.error;
+  if (prevStatsRes.error) throw prevStatsRes.error;
+  if (reservationsRes.error) throw reservationsRes.error;
+
+  const aggregate = (data: any[]) => {
+    const map = new Map();
+    data.forEach(stat => {
+      const e = map.get(stat.channel_id) || { clicks: 0, reservations: 0, total_covers: 0 };
+      map.set(stat.channel_id, {
+        clicks: e.clicks + stat.clicks,
+        reservations: e.reservations + stat.reservations,
+        total_covers: e.total_covers + stat.total_covers
+      });
+    });
+    return map;
   };
 
-  const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
-    setLoading(true);
-    
-    try {
-      // Parse selected month (format: "2024-11")
-      const [year, month] = selectedMonth.split('-');
-      const startDate = `${year}-${month}-01`;
-      
-      // Calculate end date properly (next month)
-      const nextMonth = parseInt(month) === 12 ? 1 : parseInt(month) + 1;
-      const nextYear = parseInt(month) === 12 ? parseInt(year) + 1 : parseInt(year);
-      const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
+  const channelStatsMap = aggregate(statsRes.data || []);
+  const prevChannelStatsMap = aggregate(prevStatsRes.data || []);
 
-      // Calculate previous month dates
-      const prevMonth = parseInt(month) === 1 ? 12 : parseInt(month) - 1;
-      const prevYear = parseInt(month) === 1 ? parseInt(year) - 1 : parseInt(year);
-      const prevStartDate = `${prevYear}-${String(prevMonth).padStart(2, '0')}-01`;
-      const prevEndDate = startDate; // Current month start = previous month end
+  const channels: ChannelData[] = channelsRes.data?.map(channel => {
+    const stats = channelStatsMap.get(channel.id) || { clicks: 0, reservations: 0, total_covers: 0 };
+    const conversion = stats.clicks > 0 ? Math.round((stats.reservations / stats.clicks) * 100) : 0;
+    return {
+      id: channel.id, name: channel.name, slug: channel.slug,
+      description: channel.description, isActive: channel.is_active,
+      clicks: stats.clicks, reservations: stats.reservations,
+      covers: stats.total_covers, conversion,
+      shortUrl: `${window.location.origin}/book/${channel.slug}`
+    };
+  }) || [];
 
-      // Fetch channels
-      const { data: channelsData, error: channelsError } = await supabase
-        .from('channels')
-        .select('id, name, slug, description, is_active')
-        .eq('is_active', true);
+  const totalClicks = channels.reduce((s, c) => s + c.clicks, 0);
+  const totalReservations = channels.reduce((s, c) => s + c.reservations, 0);
+  const totalCovers = channels.reduce((s, c) => s + c.covers, 0);
+  const conversion = totalClicks > 0 ? Math.round((totalReservations / totalClicks) * 100) : 0;
+  const prevTotalClicks = Array.from(prevChannelStatsMap.values()).reduce((s, st) => s + st.clicks, 0);
+  const prevTotalReservations = Array.from(prevChannelStatsMap.values()).reduce((s, st) => s + st.reservations, 0);
+  const prevTotalCovers = Array.from(prevChannelStatsMap.values()).reduce((s, st) => s + st.total_covers, 0);
+  const prevConversion = prevTotalClicks > 0 ? Math.round((prevTotalReservations / prevTotalClicks) * 100) : 0;
 
-      if (channelsError) throw channelsError;
+  const reservations: ReservationData[] = reservationsRes.data?.map(r => ({
+    id: r.id, customer_name: r.customer_name, customer_email: r.customer_email,
+    customer_phone: r.customer_phone, reservation_date: r.reservation_date,
+    reservation_time: r.reservation_time, guests_count: r.guests_count,
+    status: r.status, notes: r.notes, created_at: r.created_at,
+    channel_id: r.channel_id, channel_name: (r.channels as any)?.name || 'Canal inconnu'
+  })) || [];
 
-      // Fetch channel stats for the selected month
-      const { data: statsData, error: statsError } = await supabase
-        .from('channel_stats')
-        .select('channel_id, clicks, reservations, total_covers, date')
-        .gte('date', startDate)
-        .lt('date', endDate);
-
-      if (statsError) throw statsError;
-
-      // Fetch channel stats for the previous month
-      const { data: prevStatsData, error: prevStatsError } = await supabase
-        .from('channel_stats')
-        .select('channel_id, clicks, reservations, total_covers, date')
-        .gte('date', prevStartDate)
-        .lt('date', prevEndDate);
-
-      if (prevStatsError) throw prevStatsError;
-
-      // Fetch reservations for the selected month with channel information
-      const { data: reservationsData, error: reservationsError } = await supabase
-        .from('reservations')
-        .select(`
-          *,
-          channels(name)
-        `)
-        .gte('created_at', startDate)
-        .lt('created_at', endDate)
-        .order('created_at', { ascending: false });
-
-      if (reservationsError) {
-        console.error('Reservations error:', reservationsError);
-        throw reservationsError;
+  return {
+    channels,
+    kpis: {
+      totalClicks, totalReservations, totalCovers, conversion,
+      evolution: {
+        clicksEvolution: calculateEvolution(totalClicks, prevTotalClicks),
+        reservationsEvolution: calculateEvolution(totalReservations, prevTotalReservations),
+        coversEvolution: calculateEvolution(totalCovers, prevTotalCovers),
+        conversionEvolution: calculateEvolution(conversion, prevConversion)
       }
-
-      // Aggregate stats by channel for the current month
-      const channelStatsMap = new Map();
-      statsData?.forEach(stat => {
-        const existing = channelStatsMap.get(stat.channel_id) || { 
-          clicks: 0, 
-          reservations: 0, 
-          total_covers: 0 
-        };
-        channelStatsMap.set(stat.channel_id, {
-          clicks: existing.clicks + stat.clicks,
-          reservations: existing.reservations + stat.reservations,
-          total_covers: existing.total_covers + stat.total_covers
-        });
-      });
-
-      // Aggregate stats by channel for the previous month
-      const prevChannelStatsMap = new Map();
-      prevStatsData?.forEach(stat => {
-        const existing = prevChannelStatsMap.get(stat.channel_id) || { 
-          clicks: 0, 
-          reservations: 0, 
-          total_covers: 0 
-        };
-        prevChannelStatsMap.set(stat.channel_id, {
-          clicks: existing.clicks + stat.clicks,
-          reservations: existing.reservations + stat.reservations,
-          total_covers: existing.total_covers + stat.total_covers
-        });
-      });
-
-      // Combine channels with their monthly stats
-      const channelsWithStats: ChannelData[] = channelsData?.map(channel => {
-        const stats = channelStatsMap.get(channel.id) || { 
-          clicks: 0, 
-          reservations: 0, 
-          total_covers: 0 
-        };
-        const conversion = stats.clicks > 0 ? Math.round((stats.reservations / stats.clicks) * 100) : 0;
-        
-        return {
-          id: channel.id,
-          name: channel.name,
-          slug: channel.slug,
-          description: channel.description,
-          isActive: channel.is_active,
-          clicks: stats.clicks,
-          reservations: stats.reservations,
-          covers: stats.total_covers,
-          conversion: conversion,
-          shortUrl: `${window.location.origin}/book/${channel.slug}`
-        };
-      }) || [];
-
-      // Calculate monthly KPIs
-      const totalClicks = channelsWithStats.reduce((sum, channel) => sum + channel.clicks, 0);
-      const totalReservations = channelsWithStats.reduce((sum, channel) => sum + channel.reservations, 0);
-      const totalCovers = channelsWithStats.reduce((sum, channel) => sum + channel.covers, 0);
-      const overallConversion = totalClicks > 0 ? Math.round((totalReservations / totalClicks) * 100) : 0;
-
-      // Calculate previous month totals for evolution
-      const prevTotalClicks = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.clicks, 0);
-      const prevTotalReservations = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.reservations, 0);
-      const prevTotalCovers = Array.from(prevChannelStatsMap.values()).reduce((sum, stats) => sum + stats.total_covers, 0);
-      const prevOverallConversion = prevTotalClicks > 0 ? Math.round((prevTotalReservations / prevTotalClicks) * 100) : 0;
-
-      const monthlyKpis: ChannelsKPIs = {
-        totalClicks,
-        totalReservations,
-        totalCovers,
-        conversion: overallConversion,
-        evolution: {
-          clicksEvolution: calculateEvolution(totalClicks, prevTotalClicks),
-          reservationsEvolution: calculateEvolution(totalReservations, prevTotalReservations),
-          coversEvolution: calculateEvolution(totalCovers, prevTotalCovers),
-          conversionEvolution: calculateEvolution(overallConversion, prevOverallConversion)
-        }
-      };
-
-      // Format reservations data
-      const formattedReservations: ReservationData[] = reservationsData?.map(reservation => ({
-        id: reservation.id,
-        customer_name: reservation.customer_name,
-        customer_email: reservation.customer_email,
-        customer_phone: reservation.customer_phone,
-        reservation_date: reservation.reservation_date,
-        reservation_time: reservation.reservation_time,
-        guests_count: reservation.guests_count,
-        status: reservation.status,
-        notes: reservation.notes,
-        created_at: reservation.created_at,
-        channel_id: reservation.channel_id,
-        channel_name: (reservation.channels as any)?.name || 'Canal inconnu'
-      })) || [];
-
-      return {
-        channels: channelsWithStats,
-        kpis: monthlyKpis,
-        reservations: formattedReservations
-      };
-
-    } catch (error) {
-      console.error('Error fetching monthly data:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    },
+    reservations
   };
+};
 
-  return { fetchMonthlyData, loading };
+export function useMonthlyData(selectedMonth: string) {
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['monthly-data', selectedMonth],
+    queryFn: () => fetchMonthlyData(selectedMonth),
+    staleTime: 60000,
+    enabled: !!selectedMonth,
+  });
+
+  return {
+    data: data || null,
+    loading,
+  };
 }
