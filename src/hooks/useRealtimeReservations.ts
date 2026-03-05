@@ -227,6 +227,18 @@ export function useRealtimeReservations() {
     };
   }, []);
 
+  const syncGoogleCalendar = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-google-calendar');
+      if (error) throw error;
+      await fetchReservations();
+      return data;
+    } catch (error) {
+      console.error('Error syncing Google Calendar:', error);
+      throw error;
+    }
+  };
+
   return { 
     reservations, 
     kpis, 
@@ -234,6 +246,7 @@ export function useRealtimeReservations() {
     updateReservationStatus,
     updateReservationNotes,
     deleteReservation,
+    syncGoogleCalendar,
     refetch: fetchReservations 
   };
 }

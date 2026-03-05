@@ -19,15 +19,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Safety timeout to prevent infinite loading
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (loading) setLoading(false);
-    }, 5000);
-    return () => clearTimeout(timeout);
-  }, [loading]);
-
-
   const fetchRole = async (userId: string) => {
     const { data } = await supabase.rpc("get_user_role", { _user_id: userId });
     setRole(data as string | null);

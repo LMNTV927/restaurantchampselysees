@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, History, RefreshCw, Trash2 } from "lucide-react";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,9 @@ export function ReservationsSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
   const { toast } = useToast();
-  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, refetch } = useRealtimeReservations();
+  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, syncGoogleCalendar, refetch } = useRealtimeReservations();
   const { role } = useAuth();
+  const [syncing, setSyncing] = useState(false);
 
   // Transform real-time reservations to match local interface
   const allReservations: Reservation[] = realtimeReservations.map(reservation => {
@@ -319,6 +320,33 @@ export function ReservationsSection() {
         </div>
         
         <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="premium-button gap-2"
+            disabled={syncing}
+            onClick={async () => {
+              setSyncing(true);
+              try {
+                const result = await syncGoogleCalendar();
+                toast({
+                  title: "Synchronisation terminée",
+                  description: `${result?.synced || 0} réservation(s) synchronisée(s) depuis Google Agenda`,
+                });
+              } catch (error) {
+                toast({
+                  title: "Erreur de synchronisation",
+                  description: "Impossible de synchroniser avec Google Agenda",
+                  variant: "destructive",
+                });
+              } finally {
+                setSyncing(false);
+              }
+            }}
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            Sync Google
+          </Button>
           <AddReservationDialog onReservationAdded={refetch} />
           {/* Filters */}
           <div className="flex items-center bg-card/50 rounded-2xl p-1 backdrop-blur-sm">
