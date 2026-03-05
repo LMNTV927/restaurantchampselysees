@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import { BookingPage } from "./pages/BookingPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
+import EmailPreviewPage from "./pages/EmailPreviewPage";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/login" element={<LoginRoute />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/book/:slug" element={<BookingPage />} />
+            <Route path="/email-preview" element={<EmailPreviewPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
