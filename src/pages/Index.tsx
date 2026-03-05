@@ -6,16 +6,26 @@ import { DashboardSection } from "@/components/Dashboard/DashboardSection";
 import { LinksSection } from "@/components/Links/LinksSection";
 import { ReservationsSection } from "@/components/Reservations/ReservationsSection";
 import { DataSection } from "@/components/Data/DataSection";
+import { useAuth } from "@/hooks/useAuth";
 
 function IndexContent() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const { role } = useAuth();
+  const isServeur = role === "serveur";
+  const [activeTab, setActiveTab] = useState(isServeur ? "reservations" : "dashboard");
 
-  // Set dark mode by default
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
 
+  // If serveur tries to access non-reservations tab, redirect
+  useEffect(() => {
+    if (isServeur && activeTab !== "reservations") {
+      setActiveTab("reservations");
+    }
+  }, [isServeur, activeTab]);
+
   const renderActiveSection = () => {
+    if (isServeur) return <ReservationsSection />;
     switch (activeTab) {
       case "dashboard":
         return <DashboardSection />;
@@ -33,7 +43,6 @@ function IndexContent() {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
-      
       <main className="container max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-8">
         {renderActiveSection()}
       </main>
