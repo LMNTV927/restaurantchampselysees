@@ -61,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending email to:", customerEmail);
 
     const emailResponse = await resend.emails.send({
-      from: `${restaurantName} <confirmation@xn--rservation-prince-palace-bfc.fr>`,
+      from: `Prince Palace <confirmation@xn--rservation-prince-palace-bfc.fr>`,
       to: [customerEmail],
       subject: `Confirmation de réservation - ${restaurantName}`,
       html,
