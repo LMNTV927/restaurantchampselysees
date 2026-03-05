@@ -48,7 +48,7 @@ export const ReservationConfirmationEmail = ({
           <table cellPadding="0" cellSpacing="0" width="100%" style={topbar}>
             <tr>
               <td align="center">
-                <Img src={logoUrl} width="200" alt={restaurantName} />
+                <Img src={logoUrl} width="280" alt={restaurantName} />
               </td>
             </tr>
           </table>
@@ -104,14 +104,13 @@ export const ReservationConfirmationEmail = ({
               </Link>
             </td></tr>
             <tr><td align="center">
-              <table cellPadding="0" cellSpacing="0" width="100%">
+              <table cellPadding="0" cellSpacing="0" width="100%" style={{ borderCollapse: 'separate' as const, borderSpacing: '10px 0' }}>
                 <tr>
-                  <td width="48%" align="center">
-                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline }}>Modifier</Link>
+                  <td width="50%" align="center" style={{ padding: '0' }}>
+                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block' as const, width: '100%' }}>Modifier</Link>
                   </td>
-                  <td width="4%"></td>
-                  <td width="48%" align="center">
-                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline }}>Annuler</Link>
+                  <td width="50%" align="center" style={{ padding: '0' }}>
+                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block' as const, width: '100%' }}>Annuler</Link>
                   </td>
                 </tr>
               </table>
