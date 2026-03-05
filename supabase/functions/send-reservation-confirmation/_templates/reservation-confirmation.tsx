@@ -11,6 +11,7 @@ import {
   Hr,
   Row,
   Column,
+  Link,
 } from 'npm:@react-email/components@0.0.22';
 import * as React from 'npm:react@18.3.1';
 
@@ -32,224 +33,353 @@ export const ReservationConfirmationEmail = ({
   guestsCount,
   customerPhone,
   notes,
-}: ReservationConfirmationEmailProps) => (
-  <Html>
-    <Head />
-    <Preview>Votre réservation chez {restaurantName} est confirmée</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Section style={logoContainer}>
-          <Img
-            src="https://rkkxsuyauwduexiutgkr.supabase.co/storage/v1/object/public/restaurant-assets/prince-palace-logo.png"
-            width="120"
-            height="120"
-            alt={`Logo ${restaurantName}`}
-            style={logo}
-          />
-        </Section>
-        
-        <Heading style={h1}>Réservation Confirmée ✓</Heading>
-        
-        <Text style={text}>
-          Bonjour <strong>{customerName}</strong>,
-        </Text>
-        
-        <Text style={text}>
-          Nous sommes ravis de confirmer votre réservation chez <strong>{restaurantName}</strong>.
-        </Text>
+}: ReservationConfirmationEmailProps) => {
+  // Build Google Calendar link
+  const calendarTitle = encodeURIComponent(`Réservation ${restaurantName}`);
+  const calendarLocation = encodeURIComponent('76 Av. des Champs-Élysées, 75008 Paris');
+  const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calendarTitle}&location=${calendarLocation}`;
 
-        <Section style={reservationBox}>
-          <Heading style={h2}>Détails de votre réservation</Heading>
-          
-          <Row style={detailRow}>
-            <Column style={labelColumn}>
-              <Text style={label}>📅 Date :</Text>
-            </Column>
-            <Column style={valueColumn}>
+  return (
+    <Html>
+      <Head>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      </Head>
+      <Preview>Votre réservation chez {restaurantName} est confirmée ✓</Preview>
+      <Body style={main}>
+        <Container style={wrap}>
+          {/* Top bar with logo */}
+          <Section style={topbar}>
+            <Img
+              src="https://rkkxsuyauwduexiutgkr.supabase.co/storage/v1/object/public/restaurant-assets/prince-palace-logo.png"
+              width="220"
+              alt={restaurantName}
+              style={{ margin: '0 auto' }}
+            />
+          </Section>
+
+          {/* Success section */}
+          <Section style={successSection}>
+            <table cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
+              <tr>
+                <td align="center">
+                  <div style={checkCircle}>
+                    <span style={{ fontSize: '22px', color: '#c9a84c' }}>✓</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <Heading style={h1}>Réservation confirmée</Heading>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <Text style={subtitle}>Merci {customerName}, on vous attend !</Text>
+                </td>
+              </tr>
+            </table>
+          </Section>
+
+          {/* Reservation details */}
+          <Section style={card}>
+            <div style={detailRow}>
+              <Text style={label}>Date</Text>
               <Text style={value}>{reservationDate}</Text>
-            </Column>
-          </Row>
-
-          <Row style={detailRow}>
-            <Column style={labelColumn}>
-              <Text style={label}>🕐 Heure :</Text>
-            </Column>
-            <Column style={valueColumn}>
+            </div>
+            <div style={detailRow}>
+              <Text style={label}>Heure</Text>
               <Text style={value}>{reservationTime}</Text>
-            </Column>
-          </Row>
-
-          <Row style={detailRow}>
-            <Column style={labelColumn}>
-              <Text style={label}>👥 Nombre de personnes :</Text>
-            </Column>
-            <Column style={valueColumn}>
+            </div>
+            <div style={{ ...detailRow, borderBottom: 'none' }}>
+              <Text style={label}>Couverts</Text>
               <Text style={value}>{guestsCount} personne{guestsCount > 1 ? 's' : ''}</Text>
-            </Column>
-          </Row>
-
-          {customerPhone && (
-            <Row style={detailRow}>
-              <Column style={labelColumn}>
-                <Text style={label}>📞 Téléphone :</Text>
-              </Column>
-              <Column style={valueColumn}>
-                <Text style={value}>{customerPhone}</Text>
-              </Column>
-            </Row>
-          )}
-
-          {notes && (
-            <Row style={detailRow}>
-              <Column style={labelColumn}>
-                <Text style={label}>📝 Notes :</Text>
-              </Column>
-              <Column style={valueColumn}>
+            </div>
+            {notes && (
+              <div style={detailRow}>
+                <Text style={label}>Notes</Text>
                 <Text style={value}>{notes}</Text>
-              </Column>
-            </Row>
-          )}
-        </Section>
+              </div>
+            )}
+          </Section>
 
-        <Hr style={hr} />
+          {/* Action buttons */}
+          <Section style={actionsSection}>
+            <Link href={calendarUrl} style={{ ...btn, ...btnGold, display: 'block', textDecoration: 'none' }}>
+              Ajouter au calendrier
+            </Link>
+            <table cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
+              <tr>
+                <td style={{ width: '48%' }}>
+                  <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block', textDecoration: 'none' }}>
+                    Modifier
+                  </Link>
+                </td>
+                <td style={{ width: '4%' }}></td>
+                <td style={{ width: '48%' }}>
+                  <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block', textDecoration: 'none' }}>
+                    Annuler
+                  </Link>
+                </td>
+              </tr>
+            </table>
+          </Section>
 
-        <Section style={infoSection}>
-          <Text style={infoText}>
-            <strong>Informations importantes :</strong>
-          </Text>
-          <Text style={infoText}>
-            • Merci d'arriver à l'heure pour profiter pleinement de votre expérience
-          </Text>
-          <Text style={infoText}>
-            • En cas d'empêchement, contactez-nous au moins 2 heures à l'avance
-          </Text>
-          <Text style={infoText}>
-            • Nous nous réjouissons de vous accueillir !
-          </Text>
-        </Section>
+          {/* Location section */}
+          <Section style={locSection}>
+            <div style={locInner}>
+              <table cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
+                <tr>
+                  <td align="center">
+                    <div style={locPin}>
+                      <span style={{ fontSize: '16px', color: '#c9a84c' }}>📍</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <Text style={locTitle}>Prince Palace</Text>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <Text style={locAddress}>76 Av. des Champs-Élysées, 75008 Paris</Text>
+                    <Text style={locAddress}>59 Rue de Ponthieu, 75008 Paris</Text>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style={{ paddingTop: '8px' }}>
+                    <Link href="tel:0159133268" style={locPhone}>01 59 13 32 68</Link>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </Section>
 
-        <Hr style={hr} />
-
-        <Text style={footer}>
-          Merci de votre confiance,<br />
-          L'équipe de <strong>{restaurantName}</strong>
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-);
+          {/* Footer */}
+          <Section style={footer}>
+            <table cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
+              <tr>
+                <td align="center" style={{ paddingBottom: '16px' }}>
+                  <Link href="https://instagram.com/princepalace.paris" style={socialLink}>
+                    <Img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="20" height="20" alt="Instagram" style={{ opacity: 0.5 }} />
+                  </Link>
+                  &nbsp;&nbsp;&nbsp;
+                  <Link href="https://facebook.com/princepalaceparis" style={socialLink}>
+                    <Img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width="20" height="20" alt="Facebook" style={{ opacity: 0.5 }} />
+                  </Link>
+                  &nbsp;&nbsp;&nbsp;
+                  <Link href="https://tiktok.com/@princepalaceparis" style={socialLink}>
+                    <Img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" width="20" height="20" alt="TikTok" style={{ opacity: 0.5 }} />
+                  </Link>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <Text style={legalText}>
+                    <Link href="https://princepalace.fr" style={legalLink}>princepalace.fr</Link>
+                  </Text>
+                  <Text style={legalText}>
+                    <Link href="#" style={legalLink}>Se désabonner</Link> · <Link href="#" style={legalLink}>Confidentialité</Link>
+                  </Text>
+                </td>
+              </tr>
+            </table>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  );
+};
 
 export default ReservationConfirmationEmail;
 
+// — Styles —
+
 const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+  backgroundColor: '#0a0908',
+  fontFamily: "'DM Sans', system-ui, -apple-system, sans-serif",
+  padding: '24px 16px',
 };
 
-const container = {
-  backgroundColor: '#ffffff',
+const wrap = {
+  maxWidth: '720px',
   margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '600px',
 };
 
-const logoContainer = {
+const topbar = {
+  backgroundColor: '#0d0b09',
+  padding: '36px 28px',
   textAlign: 'center' as const,
-  padding: '20px 0',
+  borderRadius: '16px 16px 0 0',
+  border: '1px solid rgba(201,168,76,0.12)',
+  borderBottom: 'none',
 };
 
-const logo = {
-  margin: '0 auto',
-  borderRadius: '8px',
+const successSection = {
+  backgroundColor: '#111111',
+  padding: '28px 28px 24px',
+  textAlign: 'center' as const,
+  borderLeft: '1px solid rgba(201,168,76,0.12)',
+  borderRight: '1px solid rgba(201,168,76,0.12)',
+  borderBottom: '1px solid rgba(201,168,76,0.08)',
+};
+
+const checkCircle = {
+  width: '48px',
+  height: '48px',
+  borderRadius: '50%',
+  backgroundColor: 'rgba(201,168,76,0.1)',
+  border: '1px solid rgba(201,168,76,0.25)',
+  display: 'inline-flex' as const,
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+  marginBottom: '14px',
 };
 
 const h1 = {
-  color: '#1a1a1a',
-  fontSize: '28px',
-  fontWeight: 'bold',
-  margin: '40px 0 20px',
-  padding: '0',
-  textAlign: 'center' as const,
-};
-
-const h2 = {
-  color: '#1a1a1a',
   fontSize: '20px',
-  fontWeight: 'bold',
-  margin: '0 0 20px',
-  padding: '0',
+  fontWeight: '600',
+  color: '#f2ede4',
+  margin: '0 0 4px',
 };
 
-const text = {
-  color: '#1a1a1a',
-  fontSize: '16px',
-  lineHeight: '24px',
-  margin: '16px 0',
-  padding: '0 40px',
+const subtitle = {
+  fontSize: '13.5px',
+  color: '#7a7268',
+  fontWeight: '400' as const,
+  margin: '0',
 };
 
-const reservationBox = {
-  backgroundColor: '#f8fafc',
-  border: '1px solid #e2e8f0',
-  borderRadius: '8px',
-  margin: '32px 40px',
-  padding: '24px',
+const card = {
+  backgroundColor: '#111111',
+  padding: '8px 28px',
+  textAlign: 'center' as const,
+  borderLeft: '1px solid rgba(201,168,76,0.12)',
+  borderRight: '1px solid rgba(201,168,76,0.12)',
 };
 
 const detailRow = {
-  marginBottom: '12px',
-};
-
-const labelColumn = {
-  width: '40%',
-  verticalAlign: 'top' as const,
-};
-
-const valueColumn = {
-  width: '60%',
-  verticalAlign: 'top' as const,
+  padding: '16px 0',
+  borderBottom: '1px solid rgba(255,255,255,0.06)',
 };
 
 const label = {
-  color: '#64748b',
-  fontSize: '14px',
-  fontWeight: '500',
-  margin: '0',
-  padding: '0',
+  fontSize: '12px',
+  color: '#7a7268',
+  fontWeight: '400' as const,
+  margin: '0 0 4px',
 };
 
 const value = {
-  color: '#1a1a1a',
   fontSize: '16px',
   fontWeight: '600',
+  color: '#f2ede4',
   margin: '0',
-  padding: '0',
 };
 
-const hr = {
-  borderColor: '#e2e8f0',
-  margin: '32px 40px',
+const actionsSection = {
+  backgroundColor: '#111111',
+  padding: '20px 28px 28px',
+  borderLeft: '1px solid rgba(201,168,76,0.12)',
+  borderRight: '1px solid rgba(201,168,76,0.12)',
+  borderBottom: '1px solid rgba(201,168,76,0.08)',
 };
 
-const infoSection = {
-  margin: '0 40px',
-};
-
-const infoText = {
-  color: '#64748b',
+const btn = {
+  width: '100%',
+  padding: '14px',
+  textAlign: 'center' as const,
+  fontFamily: "'DM Sans', sans-serif",
   fontSize: '14px',
-  lineHeight: '20px',
-  margin: '8px 0',
-  padding: '0',
+  fontWeight: '600',
+  borderRadius: '10px',
+  border: 'none',
+};
+
+const btnGold = {
+  backgroundColor: '#c9a84c',
+  color: '#0d0b09',
+  marginBottom: '10px',
+};
+
+const btnOutline = {
+  backgroundColor: 'transparent',
+  color: '#c9a84c',
+  border: '1.5px solid rgba(201,168,76,0.25)',
+};
+
+const locSection = {
+  backgroundColor: '#111111',
+  padding: '20px 28px 24px',
+  textAlign: 'center' as const,
+  borderLeft: '1px solid rgba(201,168,76,0.12)',
+  borderRight: '1px solid rgba(201,168,76,0.12)',
+  borderBottom: '1px solid rgba(201,168,76,0.08)',
+};
+
+const locInner = {
+  backgroundColor: 'rgba(201,168,76,0.04)',
+  border: '1px solid rgba(201,168,76,0.1)',
+  borderRadius: '10px',
+  padding: '18px',
+};
+
+const locPin = {
+  width: '36px',
+  height: '36px',
+  borderRadius: '50%',
+  backgroundColor: 'rgba(201,168,76,0.08)',
+  border: '1px solid rgba(201,168,76,0.15)',
+  display: 'inline-flex' as const,
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+  marginBottom: '8px',
+};
+
+const locTitle = {
+  fontSize: '14px',
+  fontWeight: '600',
+  color: '#f2ede4',
+  margin: '0 0 4px',
+};
+
+const locAddress = {
+  fontSize: '12.5px',
+  color: '#7a7268',
+  lineHeight: '1.6',
+  margin: '0',
+};
+
+const locPhone = {
+  color: '#c9a84c',
+  fontWeight: '500' as const,
+  textDecoration: 'none' as const,
+  fontSize: '13px',
 };
 
 const footer = {
-  color: '#1a1a1a',
-  fontSize: '16px',
-  fontWeight: '500',
-  lineHeight: '24px',
-  margin: '32px 0 0',
-  padding: '0 40px',
+  backgroundColor: '#0d0b09',
+  padding: '24px 28px',
   textAlign: 'center' as const,
+  borderRadius: '0 0 16px 16px',
+  border: '1px solid rgba(201,168,76,0.12)',
+  borderTop: 'none',
+};
+
+const socialLink = {
+  display: 'inline-block' as const,
+  textDecoration: 'none' as const,
+};
+
+const legalText = {
+  fontSize: '11px',
+  color: '#4a4440',
+  lineHeight: '1.8',
+  margin: '0',
+};
+
+const legalLink = {
+  color: '#7a7268',
+  textDecoration: 'underline' as const,
+  textUnderlineOffset: '2px',
 };
