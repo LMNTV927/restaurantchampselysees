@@ -111,11 +111,11 @@ export const ReservationConfirmationEmail = ({
                 style={{ borderCollapse: 'separate' as const, borderSpacing: '0', tableLayout: 'fixed' as const }}
               >
                 <tr>
-                  <td width="50%" align="center" style={{ padding: '0 6px 0 0' }}>
-                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block' as const, width: '100%' }}>Modifier</Link>
+                  <td width="50%" align="center" style={{ padding: '0 8px 0 0' }}>
+                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'inline-block' as const, width: '92%', maxWidth: '220px', padding: '12px 10px', fontSize: '13px' }}>Modifier</Link>
                   </td>
-                  <td width="50%" align="center" style={{ padding: '0 0 0 6px' }}>
-                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block' as const, width: '100%' }}>Annuler</Link>
+                  <td width="50%" align="center" style={{ padding: '0 0 0 8px' }}>
+                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'inline-block' as const, width: '92%', maxWidth: '220px', padding: '12px 10px', fontSize: '13px' }}>Annuler</Link>
                   </td>
                 </tr>
               </table>

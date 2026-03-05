@@ -60,13 +60,13 @@ const EmailPreviewPage = () => {
             <tr><td align="center">
               <table cellPadding={0} cellSpacing={0} width="100%" style={{ borderCollapse: 'separate', borderSpacing: 0, tableLayout: 'fixed' }}>
                 <tbody><tr>
-                  <td width="50%" align="center" style={{ padding: '0 6px 0 0' }}>
-                    <a href="#" style={{ display: 'block', width: '100%', padding: 14, boxSizing: 'border-box' as const, textAlign: 'center', fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, borderRadius: 10, textDecoration: 'none', backgroundColor: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.25)' }}>
+                  <td width="50%" align="center" style={{ padding: '0 8px 0 0' }}>
+                    <a href="#" style={{ display: 'inline-block', width: '92%', maxWidth: 220, padding: '12px 10px', boxSizing: 'border-box' as const, textAlign: 'center', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, borderRadius: 10, textDecoration: 'none', backgroundColor: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.25)' }}>
                       Modifier
                     </a>
                   </td>
-                  <td width="50%" align="center" style={{ padding: '0 0 0 6px' }}>
-                    <a href="#" style={{ display: 'block', width: '100%', padding: 14, boxSizing: 'border-box' as const, textAlign: 'center', fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, borderRadius: 10, textDecoration: 'none', backgroundColor: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.25)' }}>
+                  <td width="50%" align="center" style={{ padding: '0 0 0 8px' }}>
+                    <a href="#" style={{ display: 'inline-block', width: '92%', maxWidth: 220, padding: '12px 10px', boxSizing: 'border-box' as const, textAlign: 'center', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, borderRadius: 10, textDecoration: 'none', backgroundColor: 'transparent', color: '#c9a84c', border: '1.5px solid rgba(201,168,76,0.25)' }}>
                       Annuler
                     </a>
                   </td>
