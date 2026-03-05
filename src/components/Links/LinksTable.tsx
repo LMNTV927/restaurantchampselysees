@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Copy, QrCode, MoreHorizontal, Eye, EyeOff, Edit2, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -63,12 +64,53 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
     );
   };
 
-  const handleDeleteLink = (linkId: string) => {
-    onLinksChange(links.filter(link => link.id !== linkId));
-    toast({
-      title: "Lien supprimé",
-      description: "Le lien de tracking a été supprimé avec succès",
-    });
+  const handleDeleteLink = async (linkId: string) => {
+    try {
+      // First delete associated channel_stats
+      const { error: statsError } = await supabase
+        .from('channel_stats')
+        .delete()
+        .eq('channel_id', linkId);
+
+      if (statsError) {
+        console.error('Error deleting channel stats:', statsError);
+        toast({
+          title: "Erreur",
+          description: "Impossible de supprimer les statistiques du lien",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then delete the channel
+      const { error } = await supabase
+        .from('channels')
+        .delete()
+        .eq('id', linkId);
+
+      if (error) {
+        console.error('Error deleting channel:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de supprimer le lien",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Lien supprimé",
+        description: "Le lien de tracking a été supprimé avec succès",
+      });
+      onLinksChange(links.filter(link => link.id !== linkId));
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
