@@ -37,7 +37,6 @@ const handler = async (req: Request): Promise<Response> => {
     const {
       customerName,
       customerEmail,
-      restaurantName,
       reservationDate,
       reservationTime,
       guestsCount,
@@ -45,11 +44,13 @@ const handler = async (req: Request): Promise<Response> => {
       notes,
     } = requestData;
 
+    const brandName = "Prince Palace";
+
     // Render the React email template
     const html = await renderAsync(
       React.createElement(ReservationConfirmationEmail, {
         customerName,
-        restaurantName,
+        restaurantName: brandName,
         reservationDate,
         reservationTime,
         guestsCount,
@@ -61,9 +62,9 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending email to:", customerEmail);
 
     const emailResponse = await resend.emails.send({
-      from: `Prince Palace <confirmation@xn--rservation-prince-palace-bfc.fr>`,
+      from: `${brandName} <confirmation@xn--rservation-prince-palace-bfc.fr>`,
       to: [customerEmail],
-      subject: `Confirmation de réservation - ${restaurantName}`,
+      subject: `Confirmation de réservation - ${brandName}`,
       html,
     });
 
