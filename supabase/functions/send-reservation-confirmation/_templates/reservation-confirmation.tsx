@@ -8,9 +8,6 @@ import {
   Preview,
   Section,
   Text,
-  Hr,
-  Row,
-  Column,
   Link,
 } from 'npm:@react-email/components@0.0.22';
 import * as React from 'npm:react@18.3.1';
@@ -34,10 +31,10 @@ export const ReservationConfirmationEmail = ({
   customerPhone,
   notes,
 }: ReservationConfirmationEmailProps) => {
-  // Build Google Calendar link
   const calendarTitle = encodeURIComponent(`Réservation ${restaurantName}`);
   const calendarLocation = encodeURIComponent('76 Av. des Champs-Élysées, 75008 Paris');
   const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calendarTitle}&location=${calendarLocation}`;
+  const logoUrl = 'https://vedistbhwfdtkjaojycs.supabase.co/storage/v1/object/public/email-assets/prince-palace-logo-email.png';
 
   return (
     <Html>
@@ -47,144 +44,127 @@ export const ReservationConfirmationEmail = ({
       <Preview>Votre réservation chez {restaurantName} est confirmée ✓</Preview>
       <Body style={main}>
         <Container style={wrap}>
-          {/* Top bar with logo */}
-          <Section style={topbar}>
-            <Img
-              src="https://rkkxsuyauwduexiutgkr.supabase.co/storage/v1/object/public/restaurant-assets/prince-palace-logo.png"
-              width="220"
-              alt={restaurantName}
-              style={{ margin: '0 auto' }}
-            />
-          </Section>
+          {/* Logo */}
+          <table cellPadding="0" cellSpacing="0" width="100%" style={topbar}>
+            <tr>
+              <td align="center">
+                <Img src={logoUrl} width="200" alt={restaurantName} />
+              </td>
+            </tr>
+          </table>
 
-          {/* Success section */}
-          <Section style={successSection}>
-            <table cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
-              <tr>
-                <td align="center">
-                  <div style={checkCircle}>
-                    <span style={{ fontSize: '22px', color: '#c9a84c' }}>✓</span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td align="center">
-                  <Heading style={h1}>Réservation confirmée</Heading>
-                </td>
-              </tr>
-              <tr>
-                <td align="center">
-                  <Text style={subtitle}>Merci {customerName}, on vous attend !</Text>
-                </td>
-              </tr>
-            </table>
-          </Section>
+          {/* Success */}
+          <table cellPadding="0" cellSpacing="0" width="100%" style={successSection}>
+            <tr>
+              <td align="center" style={{ paddingBottom: '14px' }}>
+                <table cellPadding="0" cellSpacing="0"><tr><td align="center" style={checkCircle}>
+                  <span style={{ fontSize: '22px', color: '#c9a84c', lineHeight: '48px' }}>✓</span>
+                </td></tr></table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center">
+                <Heading style={h1}>Réservation confirmée</Heading>
+              </td>
+            </tr>
+            <tr>
+              <td align="center">
+                <Text style={subtitle}>Merci {customerName}, on vous attend !</Text>
+              </td>
+            </tr>
+          </table>
 
-          {/* Reservation details */}
-          <Section style={card}>
-            <div style={detailRow}>
+          {/* Details */}
+          <table cellPadding="0" cellSpacing="0" width="100%" style={card}>
+            <tr><td align="center" style={detailRow}>
               <Text style={label}>Date</Text>
               <Text style={value}>{reservationDate}</Text>
-            </div>
-            <div style={detailRow}>
+            </td></tr>
+            <tr><td align="center" style={detailRow}>
               <Text style={label}>Heure</Text>
               <Text style={value}>{reservationTime}</Text>
-            </div>
-            <div style={{ ...detailRow, borderBottom: 'none' }}>
+            </td></tr>
+            <tr><td align="center" style={detailRow}>
               <Text style={label}>Couverts</Text>
               <Text style={value}>{guestsCount} personne{guestsCount > 1 ? 's' : ''}</Text>
-            </div>
+            </td></tr>
             {notes && (
-              <div style={detailRow}>
+              <tr><td align="center" style={{ ...detailRow, borderBottom: 'none' }}>
                 <Text style={label}>Notes</Text>
                 <Text style={value}>{notes}</Text>
-              </div>
+              </td></tr>
             )}
-          </Section>
+          </table>
 
-          {/* Action buttons */}
-          <Section style={actionsSection}>
-            <Link href={calendarUrl} style={{ ...btn, ...btnGold, display: 'block', textDecoration: 'none' }}>
-              Ajouter au calendrier
-            </Link>
-            <table cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
-              <tr>
-                <td style={{ width: '48%' }}>
-                  <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block', textDecoration: 'none' }}>
-                    Modifier
-                  </Link>
-                </td>
-                <td style={{ width: '4%' }}></td>
-                <td style={{ width: '48%' }}>
-                  <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'block', textDecoration: 'none' }}>
-                    Annuler
-                  </Link>
-                </td>
-              </tr>
-            </table>
-          </Section>
-
-          {/* Location section */}
-          <Section style={locSection}>
-            <div style={locInner}>
-              <table cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
+          {/* Buttons */}
+          <table cellPadding="0" cellSpacing="0" width="100%" style={actionsSection}>
+            <tr><td align="center" style={{ paddingBottom: '10px' }}>
+              <Link href={calendarUrl} style={{ ...btn, ...btnGold }}>
+                Ajouter au calendrier
+              </Link>
+            </td></tr>
+            <tr><td align="center">
+              <table cellPadding="0" cellSpacing="0" width="100%">
                 <tr>
-                  <td align="center">
-                    <div style={locPin}>
-                      <span style={{ fontSize: '16px', color: '#c9a84c' }}>📍</span>
-                    </div>
+                  <td width="48%" align="center">
+                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline }}>Modifier</Link>
                   </td>
-                </tr>
-                <tr>
-                  <td align="center">
-                    <Text style={locTitle}>Prince Palace</Text>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center">
-                    <Text style={locAddress}>76 Av. des Champs-Élysées, 75008 Paris</Text>
-                    <Text style={locAddress}>59 Rue de Ponthieu, 75008 Paris</Text>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style={{ paddingTop: '8px' }}>
-                    <Link href="tel:0159133268" style={locPhone}>01 59 13 32 68</Link>
+                  <td width="4%"></td>
+                  <td width="48%" align="center">
+                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline }}>Annuler</Link>
                   </td>
                 </tr>
               </table>
-            </div>
-          </Section>
+            </td></tr>
+          </table>
+
+          {/* Location */}
+          <table cellPadding="0" cellSpacing="0" width="100%" style={locSection}>
+            <tr><td align="center">
+              <table cellPadding="0" cellSpacing="0" width="100%" style={locInner}>
+                <tr><td align="center" style={{ paddingBottom: '8px' }}>
+                  <table cellPadding="0" cellSpacing="0"><tr><td align="center" style={locPin}>
+                    <span style={{ fontSize: '16px', color: '#c9a84c', lineHeight: '36px' }}>📍</span>
+                  </td></tr></table>
+                </td></tr>
+                <tr><td align="center">
+                  <Text style={locTitle}>Prince Palace</Text>
+                </td></tr>
+                <tr><td align="center">
+                  <Text style={locAddress}>76 Av. des Champs-Élysées, 75008 Paris</Text>
+                  <Text style={locAddress}>59 Rue de Ponthieu, 75008 Paris</Text>
+                </td></tr>
+                <tr><td align="center" style={{ paddingTop: '8px' }}>
+                  <Link href="tel:0159133268" style={locPhone}>01 59 13 32 68</Link>
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
 
           {/* Footer */}
-          <Section style={footer}>
-            <table cellPadding="0" cellSpacing="0" style={{ width: '100%' }}>
-              <tr>
-                <td align="center" style={{ paddingBottom: '16px' }}>
-                  <Link href="https://instagram.com/princepalace.paris" style={socialLink}>
-                    <Img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="20" height="20" alt="Instagram" style={{ opacity: 0.5 }} />
-                  </Link>
-                  &nbsp;&nbsp;&nbsp;
-                  <Link href="https://facebook.com/princepalaceparis" style={socialLink}>
-                    <Img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width="20" height="20" alt="Facebook" style={{ opacity: 0.5 }} />
-                  </Link>
-                  &nbsp;&nbsp;&nbsp;
-                  <Link href="https://tiktok.com/@princepalaceparis" style={socialLink}>
-                    <Img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" width="20" height="20" alt="TikTok" style={{ opacity: 0.5 }} />
-                  </Link>
-                </td>
-              </tr>
-              <tr>
-                <td align="center">
-                  <Text style={legalText}>
-                    <Link href="https://princepalace.fr" style={legalLink}>princepalace.fr</Link>
-                  </Text>
-                  <Text style={legalText}>
-                    <Link href="#" style={legalLink}>Se désabonner</Link> · <Link href="#" style={legalLink}>Confidentialité</Link>
-                  </Text>
-                </td>
-              </tr>
-            </table>
-          </Section>
+          <table cellPadding="0" cellSpacing="0" width="100%" style={footer}>
+            <tr><td align="center" style={{ paddingBottom: '16px' }}>
+              <Link href="https://instagram.com/princepalace.paris" style={socialLink}>
+                <Img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="20" height="20" alt="Instagram" style={{ opacity: 0.5 }} />
+              </Link>
+              &nbsp;&nbsp;&nbsp;
+              <Link href="https://facebook.com/princepalaceparis" style={socialLink}>
+                <Img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width="20" height="20" alt="Facebook" style={{ opacity: 0.5 }} />
+              </Link>
+              &nbsp;&nbsp;&nbsp;
+              <Link href="https://tiktok.com/@princepalaceparis" style={socialLink}>
+                <Img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" width="20" height="20" alt="TikTok" style={{ opacity: 0.5 }} />
+              </Link>
+            </td></tr>
+            <tr><td align="center">
+              <Text style={legalText}>
+                <Link href="https://princepalace.fr" style={legalLink}>princepalace.fr</Link>
+              </Text>
+              <Text style={legalText}>
+                <Link href="#" style={legalLink}>Se désabonner</Link> · <Link href="#" style={legalLink}>Confidentialité</Link>
+              </Text>
+            </td></tr>
+          </table>
         </Container>
       </Body>
     </Html>
@@ -209,7 +189,6 @@ const wrap = {
 const topbar = {
   backgroundColor: '#0d0b09',
   padding: '36px 28px',
-  textAlign: 'center' as const,
   borderRadius: '16px 16px 0 0',
   border: '1px solid rgba(201,168,76,0.12)',
   borderBottom: 'none',
@@ -218,7 +197,6 @@ const topbar = {
 const successSection = {
   backgroundColor: '#111111',
   padding: '28px 28px 24px',
-  textAlign: 'center' as const,
   borderLeft: '1px solid rgba(201,168,76,0.12)',
   borderRight: '1px solid rgba(201,168,76,0.12)',
   borderBottom: '1px solid rgba(201,168,76,0.08)',
@@ -230,10 +208,7 @@ const checkCircle = {
   borderRadius: '50%',
   backgroundColor: 'rgba(201,168,76,0.1)',
   border: '1px solid rgba(201,168,76,0.25)',
-  display: 'inline-flex' as const,
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-  marginBottom: '14px',
+  textAlign: 'center' as const,
 };
 
 const h1 = {
@@ -252,15 +227,14 @@ const subtitle = {
 
 const card = {
   backgroundColor: '#111111',
-  padding: '8px 28px',
-  textAlign: 'center' as const,
+  padding: '0 28px',
   borderLeft: '1px solid rgba(201,168,76,0.12)',
   borderRight: '1px solid rgba(201,168,76,0.12)',
 };
 
 const detailRow = {
   padding: '16px 0',
-  borderBottom: '1px solid rgba(255,255,255,0.06)',
+  borderBottom: '1px solid rgba(201,168,76,0.08)',
 };
 
 const label = {
@@ -268,6 +242,7 @@ const label = {
   color: '#7a7268',
   fontWeight: '400' as const,
   margin: '0 0 4px',
+  textAlign: 'center' as const,
 };
 
 const value = {
@@ -275,6 +250,7 @@ const value = {
   fontWeight: '600',
   color: '#f2ede4',
   margin: '0',
+  textAlign: 'center' as const,
 };
 
 const actionsSection = {
@@ -286,6 +262,7 @@ const actionsSection = {
 };
 
 const btn = {
+  display: 'inline-block' as const,
   width: '100%',
   padding: '14px',
   textAlign: 'center' as const,
@@ -293,13 +270,12 @@ const btn = {
   fontSize: '14px',
   fontWeight: '600',
   borderRadius: '10px',
-  border: 'none',
+  textDecoration: 'none' as const,
 };
 
 const btnGold = {
   backgroundColor: '#c9a84c',
   color: '#0d0b09',
-  marginBottom: '10px',
 };
 
 const btnOutline = {
@@ -311,7 +287,6 @@ const btnOutline = {
 const locSection = {
   backgroundColor: '#111111',
   padding: '20px 28px 24px',
-  textAlign: 'center' as const,
   borderLeft: '1px solid rgba(201,168,76,0.12)',
   borderRight: '1px solid rgba(201,168,76,0.12)',
   borderBottom: '1px solid rgba(201,168,76,0.08)',
@@ -330,10 +305,7 @@ const locPin = {
   borderRadius: '50%',
   backgroundColor: 'rgba(201,168,76,0.08)',
   border: '1px solid rgba(201,168,76,0.15)',
-  display: 'inline-flex' as const,
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-  marginBottom: '8px',
+  textAlign: 'center' as const,
 };
 
 const locTitle = {
@@ -360,7 +332,6 @@ const locPhone = {
 const footer = {
   backgroundColor: '#0d0b09',
   padding: '24px 28px',
-  textAlign: 'center' as const,
   borderRadius: '0 0 16px 16px',
   border: '1px solid rgba(201,168,76,0.12)',
   borderTop: 'none',
