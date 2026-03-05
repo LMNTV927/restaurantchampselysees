@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ChannelData, ChannelsKPIs } from './useRealtimeChannelsData';
 
@@ -111,12 +112,28 @@ const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => 
 };
 
 export function useMonthlyData(selectedMonth: string) {
+  const queryClient = useQueryClient();
+
   const { data, isLoading: loading } = useQuery({
     queryKey: ['monthly-data', selectedMonth],
     queryFn: () => fetchMonthlyData(selectedMonth),
     staleTime: 60000,
     enabled: !!selectedMonth,
   });
+
+  useEffect(() => {
+    const sub = supabase
+      .channel('monthly-data-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['monthly-data'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'channel_stats' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['monthly-data'] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+  }, [queryClient]);
 
   return {
     data: data || null,
