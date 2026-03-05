@@ -1,29 +1,38 @@
 
 
-## Plan : Suppression de réservations (admin uniquement)
+# Double confirmation : Email + SMS via Twilio
 
-### Objectif
-Permettre aux administrateurs de supprimer définitivement une réservation (suppression physique de la base de données, pas juste un changement de statut). Les serveurs ne verront pas cette option.
+## Approche
 
-### Modifications
+Oui, Twilio est une excellente option pour l'envoi de SMS. Il faudra créer un compte Twilio et configurer les credentials nécessaires.
 
-**1. Migration base de données** — Ajouter une policy RLS DELETE sur la table `reservations`, limitée aux admins via `has_role()`.
+## Prérequis (action manuelle)
 
-```sql
-CREATE POLICY "Admins can delete reservations"
-ON public.reservations
-FOR DELETE
-TO authenticated
-USING (public.has_role(auth.uid(), 'admin'));
-```
+1. Créer un compte sur [twilio.com](https://www.twilio.com)
+2. Récupérer les 3 informations suivantes depuis la console Twilio :
+   - **Account SID** (identifiant du compte)
+   - **Auth Token** (token d'authentification)
+   - **Numéro de téléphone Twilio** (numéro d'envoi, format international ex: `+33xxxxxxxxx`)
 
-**2. Hook `useRealtimeReservations.ts`** — Ajouter une fonction `deleteReservation` qui exécute un `DELETE` sur la table reservations et met à jour l'état local.
+## Modifications techniques
 
-**3. Composant `ReservationsSection.tsx`** — 
-- Importer `useAuth` pour vérifier le rôle
-- Ajouter un bouton "Supprimer" (icône poubelle, rouge) visible uniquement si `role === 'admin'`
-- Ajouter un dialogue de confirmation (`AlertDialog`) avant suppression
-- Au clic, appeler `deleteReservation` puis afficher un toast de confirmation
+### 1. Ajouter 3 secrets au projet
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_AUTH_TOKEN`
+- `TWILIO_PHONE_NUMBER`
 
-Le bouton apparaîtra dans la zone d'actions au hover, à côté des boutons Show/No-show/Annuler, et aussi pour les réservations passées.
+### 2. Créer une nouvelle Edge Function `send-reservation-sms`
+- Utilise l'API REST Twilio pour envoyer un SMS
+- Message concis contenant : nom du client, date, heure, nombre de couverts
+- Exemple de message : "Bonjour [Nom], votre réservation au Prince Palace est confirmée pour le [date] à [heure] ([X] pers.). À bientôt !"
+- Gestion d'erreur silencieuse (ne bloque pas la réservation)
+
+### 3. Modifier `AddReservationDialog.tsx` et `BookingForm.tsx`
+- Après l'envoi d'email, appeler `supabase.functions.invoke('send-reservation-sms', { body: smsData })` avec le numéro de téléphone du client
+- Le SMS est envoyé systématiquement car le téléphone est obligatoire dans le formulaire
+
+## Résultat attendu
+- Chaque réservation déclenche un email (si email fourni) ET un SMS (toujours, car le téléphone est requis)
+- Les deux envois sont indépendants : si l'un échoue, l'autre fonctionne quand même
+- La réservation est créée même si les notifications échouent
 

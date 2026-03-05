@@ -189,24 +189,6 @@ export function useRealtimeReservations() {
     }
   };
 
-  const deleteReservation = async (reservationId: string) => {
-    try {
-      const { error } = await supabase
-        .from('reservations')
-        .delete()
-        .eq('id', reservationId);
-
-      if (error) throw error;
-
-      // Update local state
-      setReservations(prev => prev.filter(reservation => reservation.id !== reservationId));
-
-    } catch (error) {
-      console.error('Error deleting reservation:', error);
-      throw error;
-    }
-  };
-
   useEffect(() => {
     fetchReservations();
 
@@ -245,7 +227,6 @@ export function useRealtimeReservations() {
     loading, 
     updateReservationStatus,
     updateReservationNotes,
-    deleteReservation,
     syncGoogleCalendar,
     refetch: fetchReservations 
   };
