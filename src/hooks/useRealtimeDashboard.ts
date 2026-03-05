@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, isReservationToday, getCurrentMonthInParis } from '@/lib/dateUtils';
+import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, getCurrentMonthInParis } from '@/lib/dateUtils';
 
 export interface DashboardKPIs {
   reservations: number;
@@ -44,181 +45,138 @@ export interface DashboardData {
   alerts: Alert[];
 }
 
-export function useRealtimeDashboard() {
-  const [dashboardData, setDashboardData] = useState<DashboardData>({
-    todayKPIs: { reservations: 0, covers: 0, occupancy: 0, revenue: 0 },
-    monthlyTrend: [],
-    recentActivity: [],
-    alerts: []
-  });
-  const [loading, setLoading] = useState(true);
+const calculateEvolution = (current: number, previous: number): number | null => {
+  if (previous === 0) return current > 0 ? 100 : null;
+  return Math.round(((current - previous) / previous) * 100);
+};
 
-  const calculateEvolution = (current: number, previous: number): number | null => {
-    if (previous === 0) return current > 0 ? 100 : null;
-    return Math.round(((current - previous) / previous) * 100);
-  };
+const fetchDashboardData = async (): Promise<DashboardData> => {
+  const today = getTodayInParis();
+  const yesterday = getDaysAgoInParis(1);
+  const currentMonth = getCurrentMonthInParis();
+  const monthStart = `${currentMonth}-01`;
 
-  const fetchDashboardData = async () => {
-    try {
-      const today = getTodayInParis();
-      const yesterday = getDaysAgoInParis(1);
-      const currentMonth = getCurrentMonthInParis();
-      const monthStart = `${currentMonth}-01`;
+  const [todayRes, yesterdayRes, monthlyRes] = await Promise.all([
+    supabase
+      .from('reservations')
+      .select('guests_count, status, created_at, customer_name, channels(name)')
+      .eq('reservation_date', today),
+    supabase
+      .from('reservations')
+      .select('guests_count')
+      .eq('reservation_date', yesterday),
+    supabase
+      .from('reservations')
+      .select('reservation_date, guests_count, created_at')
+      .gte('reservation_date', monthStart)
+      .lte('reservation_date', today),
+  ]);
 
-      // Fetch today's reservations
-      console.log('Dashboard - Date du jour (Paris):', today);
-      const { data: todayReservations, error: reservationsError } = await supabase
-        .from('reservations')
-        .select('guests_count, status, created_at, customer_name, channels(name)')
-        .eq('reservation_date', today);
+  if (todayRes.error) throw todayRes.error;
+  if (yesterdayRes.error) throw yesterdayRes.error;
+  if (monthlyRes.error) throw monthlyRes.error;
 
-      console.log('Dashboard - Réservations d\'aujourd\'hui trouvées:', todayReservations?.length || 0);
+  const todayReservations = todayRes.data;
+  const yesterdayReservations = yesterdayRes.data;
+  const monthlyReservations = monthlyRes.data;
 
-      if (reservationsError) throw reservationsError;
+  const todayReservationsCount = todayReservations?.length || 0;
+  const todayCovers = todayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
+  const totalCapacity = 500;
+  const todayOccupancy = Math.round(Math.min((todayCovers / totalCapacity) * 100, 100));
+  const revenue = todayCovers * 45;
 
-      // Fetch yesterday's reservations for evolution comparison
-      const { data: yesterdayReservations, error: yesterdayError } = await supabase
-        .from('reservations')
-        .select('guests_count')
-        .eq('reservation_date', yesterday);
+  const yesterdayReservationsCount = yesterdayReservations?.length || 0;
+  const yesterdayCovers = yesterdayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
+  const yesterdayOccupancy = Math.round(Math.min((yesterdayCovers / totalCapacity) * 100, 100));
 
-      if (yesterdayError) throw yesterdayError;
-
-      // Fetch monthly data for trends
-      const { data: monthlyReservations, error: monthlyError } = await supabase
-        .from('reservations')
-        .select('reservation_date, guests_count, created_at')
-        .gte('reservation_date', monthStart)
-        .lte('reservation_date', today);
-
-      if (monthlyError) throw monthlyError;
-
-      // Calculate today's KPIs
-      const todayReservationsCount = todayReservations?.length || 0;
-      const todayCovers = todayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
-      const totalCapacity = 500; // Restaurant capacity
-      const todayOccupancy = Math.round(Math.min((todayCovers / totalCapacity) * 100, 100));
-      const avgRevenuePerCover = 45; // Average revenue per cover in euros
-      const revenue = todayCovers * avgRevenuePerCover;
-
-      // Calculate yesterday's KPIs for evolution
-      const yesterdayReservationsCount = yesterdayReservations?.length || 0;
-      const yesterdayCovers = yesterdayReservations?.reduce((sum, r) => sum + r.guests_count, 0) || 0;
-      const yesterdayOccupancy = Math.round(Math.min((yesterdayCovers / totalCapacity) * 100, 100));
-
-      // Calculate evolutions
-      const reservationsEvolution = calculateEvolution(todayReservationsCount, yesterdayReservationsCount);
-      const coversEvolution = calculateEvolution(todayCovers, yesterdayCovers);
-      const occupancyEvolution = calculateEvolution(todayOccupancy, yesterdayOccupancy);
-
-      // Calculate monthly trend
-      const monthlyTrendMap = new Map<string, { date: string; day: number; reservations: number; covers: number }>();
-      
-      // Get current month and year
-      const [year, month] = currentMonth.split('-');
-      const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
-      
-      // Initialize all days of the month
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${currentMonth}-${day.toString().padStart(2, '0')}`;
-        monthlyTrendMap.set(dateStr, { 
-          date: dateStr, 
-          day: day, 
-          reservations: 0, 
-          covers: 0 
-        });
-      }
-
-      // Populate with actual reservation data
-      monthlyReservations?.forEach(reservation => {
-        const existing = monthlyTrendMap.get(reservation.reservation_date);
-        if (existing) {
-          existing.reservations += 1;
-          existing.covers += reservation.guests_count;
-        }
-      });
-
-      const monthlyTrend: MonthlyTrendData[] = Array.from(monthlyTrendMap.values());
-
-      // Generate recent activity from reservations
-      const recentActivity: ActivityItem[] = todayReservations
-        ?.slice(0, 5)
-        .map((reservation, index) => ({
-          id: `activity-${index}`,
-          type: 'reservation' as const,
-           message: `Nouvelle réservation via ${(reservation.channels as any)?.name || 'Web'}`,
-           customer: reservation.customer_name,
-           time: getTimeAgoInParis(reservation.created_at),
-           status: reservation.status as any
-        })) || [];
-
-      // Generate alerts based on data
-      const alerts: Alert[] = [];
-      if (todayReservationsCount > 25) {
-        alerts.push({
-          id: 'high-volume',
-          type: 'warning',
-          message: `Pic d'affluence prévu ce soir (${todayReservationsCount} réservations)`,
-          priority: 'high'
-        });
-      }
-
-      setDashboardData({
-        todayKPIs: {
-          reservations: todayReservationsCount,
-          covers: todayCovers,
-          occupancy: todayOccupancy,
-          revenue,
-          evolution: {
-            reservationsEvolution,
-            coversEvolution,
-            occupancyEvolution
-          }
-        },
-        monthlyTrend,
-        recentActivity,
-        alerts
-      });
-
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
+  // Monthly trend
+  const [year, month] = currentMonth.split('-');
+  const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+  const monthlyTrendMap = new Map<string, MonthlyTrendData>();
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${currentMonth}-${day.toString().padStart(2, '0')}`;
+    monthlyTrendMap.set(dateStr, { date: dateStr, day, reservations: 0, covers: 0 });
+  }
+  monthlyReservations?.forEach(r => {
+    const existing = monthlyTrendMap.get(r.reservation_date);
+    if (existing) {
+      existing.reservations += 1;
+      existing.covers += r.guests_count;
     }
-  };
+  });
 
+  const recentActivity: ActivityItem[] = todayReservations
+    ?.slice(0, 5)
+    .map((reservation, index) => ({
+      id: `activity-${index}`,
+      type: 'reservation' as const,
+      message: `Nouvelle réservation via ${(reservation.channels as any)?.name || 'Web'}`,
+      customer: reservation.customer_name,
+      time: getTimeAgoInParis(reservation.created_at),
+      status: reservation.status as any
+    })) || [];
+
+  const alerts: Alert[] = [];
+  if (todayReservationsCount > 25) {
+    alerts.push({
+      id: 'high-volume',
+      type: 'warning',
+      message: `Pic d'affluence prévu ce soir (${todayReservationsCount} réservations)`,
+      priority: 'high'
+    });
+  }
+
+  return {
+    todayKPIs: {
+      reservations: todayReservationsCount,
+      covers: todayCovers,
+      occupancy: todayOccupancy,
+      revenue,
+      evolution: {
+        reservationsEvolution: calculateEvolution(todayReservationsCount, yesterdayReservationsCount),
+        coversEvolution: calculateEvolution(todayCovers, yesterdayCovers),
+        occupancyEvolution: calculateEvolution(todayOccupancy, yesterdayOccupancy)
+      }
+    },
+    monthlyTrend: Array.from(monthlyTrendMap.values()),
+    recentActivity,
+    alerts
+  };
+};
+
+export function useRealtimeDashboard() {
+  const queryClient = useQueryClient();
+
+  const { data: dashboardData, isLoading: loading } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: fetchDashboardData,
+    staleTime: 30000,
+    initialData: {
+      todayKPIs: { reservations: 0, covers: 0, occupancy: 0, revenue: 0 },
+      monthlyTrend: [],
+      recentActivity: [],
+      alerts: []
+    }
+  });
 
   useEffect(() => {
-    fetchDashboardData();
-
-    // Set up real-time subscriptions
-    const reservationsSubscription = supabase
+    const sub = supabase
       .channel('dashboard-reservations')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'reservations'
-      }, () => {
-        fetchDashboardData();
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'channel_stats' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       })
       .subscribe();
 
-    const statsSubscription = supabase
-      .channel('dashboard-stats')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'channel_stats'
-      }, () => {
-        fetchDashboardData();
-      })
-      .subscribe();
+    return () => { supabase.removeChannel(sub); };
+  }, [queryClient]);
 
-    return () => {
-      supabase.removeChannel(reservationsSubscription);
-      supabase.removeChannel(statsSubscription);
-    };
-  }, []);
-
-  return { dashboardData, loading, refetch: fetchDashboardData };
+  return {
+    dashboardData: dashboardData!,
+    loading,
+    refetch: () => queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+  };
 }
