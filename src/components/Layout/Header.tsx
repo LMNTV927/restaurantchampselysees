@@ -1,14 +1,15 @@
 import { motion } from "framer-motion";
-import { Crown, Moon, Sun } from "lucide-react";
+import { Moon, Sun, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
-const tabs = [
+const allTabs = [
   { id: "dashboard", label: "Dashboard" },
   { id: "links", label: "Liens" },
   { id: "reservations", label: "Réservations" },
@@ -17,9 +18,14 @@ const tabs = [
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
   const { theme, setTheme } = useTheme();
+  const { role, signOut } = useAuth();
+
+  const tabs = role === "serveur"
+    ? allTabs.filter((t) => t.id === "reservations")
+    : allTabs;
 
   return (
-    <motion.header 
+    <motion.header
       className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -28,15 +34,15 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
       <div className="container max-w-6xl mx-auto px-3 sm:px-6 py-2 sm:py-4">
         <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
           {/* Logo */}
-          <motion.div 
+          <motion.div
             className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3"
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
             <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-20 lg:h-20 rounded-xl overflow-hidden">
-              <img 
-                src="/assets/prince-palace-logo-new.png" 
-                alt="Prince Palace Logo" 
+              <img
+                src="/assets/prince-palace-logo-new.png"
+                alt="Prince Palace Logo"
                 className="w-full h-full object-contain"
               />
             </div>
@@ -45,7 +51,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                 Prince Palace
               </h1>
               <p className="text-xs text-muted-foreground">
-                Réservations & Tracking
+                {role === "serveur" ? "Espace Serveur" : "Réservations & Tracking"}
               </p>
             </div>
           </motion.div>
@@ -80,8 +86,8 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
             </div>
           </nav>
 
-          {/* Theme Toggle */}
-          <div className="flex justify-center sm:justify-end">
+          {/* Actions */}
+          <div className="flex items-center justify-center sm:justify-end gap-2">
             <Button
               variant="outline"
               size="icon"
@@ -91,6 +97,15 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
               <Sun className="h-3 w-3 sm:h-4 sm:w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-3 w-3 sm:h-4 sm:w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Toggle theme</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={signOut}
+              className="rounded-xl border-border/50 hover:bg-destructive/20 hover:text-destructive transition-all duration-300 flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+            >
+              <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="sr-only">Se déconnecter</span>
             </Button>
           </div>
         </div>
