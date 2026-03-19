@@ -76,6 +76,9 @@ const handler = async (req: Request): Promise<Response> => {
       })
     );
 
+    const RESTAURANT_EMAIL = "princepalace.champselysees@gmail.com";
+
+    // Send to customer
     const emailResponse = await resend.emails.send({
       from: `${brandName} <confirmation@xn--rservation-prince-palace-bfc.fr>`,
       to: [customerEmail],
@@ -83,7 +86,17 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email sent to customer:", emailResponse);
+
+    // Send copy to restaurant
+    const restaurantCopy = await resend.emails.send({
+      from: `${brandName} <confirmation@xn--rservation-prince-palace-bfc.fr>`,
+      to: [RESTAURANT_EMAIL],
+      subject: `[Copie] ${subject} - ${customerName}`,
+      html,
+    });
+
+    console.log("Email copy sent to restaurant:", restaurantCopy);
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       status: 200,
