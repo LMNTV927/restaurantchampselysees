@@ -111,7 +111,8 @@ export function useRealtimeReservations() {
     initialData: {
       reservations: [],
       kpis: { todayReservations: 0, todayCovers: 0, upcomingReservations: 0, occupancyRate: 0 }
-    }
+    },
+    initialDataUpdatedAt: 0
   });
 
   useEffect(() => {
