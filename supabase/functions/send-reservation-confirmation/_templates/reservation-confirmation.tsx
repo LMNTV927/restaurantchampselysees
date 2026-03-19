@@ -185,15 +185,15 @@ export const ReservationConfirmationEmail = ({
           {/* Footer */}
           <table cellPadding="0" cellSpacing="0" width="100%" style={footer}>
             <tr><td align="center" style={{ paddingBottom: '16px' }}>
-              <Link href="https://instagram.com/princepalace.paris" style={socialLink}>
+              <Link href="https://www.instagram.com/princepalace_off/" style={socialLink}>
                 <Img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="20" height="20" alt="Instagram" style={{ opacity: 0.5 }} />
               </Link>
               &nbsp;&nbsp;&nbsp;
-              <Link href="https://facebook.com/princepalaceparis" style={socialLink}>
+              <Link href="https://www.facebook.com/leprincepalace75?locale=fr_FR" style={socialLink}>
                 <Img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width="20" height="20" alt="Facebook" style={{ opacity: 0.5 }} />
               </Link>
               &nbsp;&nbsp;&nbsp;
-              <Link href="https://tiktok.com/@princepalaceparis" style={socialLink}>
+              <Link href="https://www.tiktok.com/@59princepalace" style={socialLink}>
                 <Img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" width="20" height="20" alt="TikTok" style={{ opacity: 0.5 }} />
               </Link>
             </td></tr>

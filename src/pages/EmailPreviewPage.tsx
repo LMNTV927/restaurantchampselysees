@@ -95,15 +95,15 @@ const EmailPreviewPage = () => {
         <table cellPadding={0} cellSpacing={0} width="100%" style={{ backgroundColor: '#0d0b09', padding: '24px 28px', borderRadius: '0 0 16px 16px', border: '1px solid rgba(201,168,76,0.12)', borderTop: 'none' }}>
           <tbody>
             <tr><td align="center" style={{ paddingBottom: 16 }}>
-              <a href="https://instagram.com/princepalace.paris" style={{ display: 'inline-block', textDecoration: 'none' }}>
+              <a href="https://www.instagram.com/princepalace_off/" style={{ display: 'inline-block', textDecoration: 'none' }}>
                 <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width={20} height={20} alt="Instagram" style={{ opacity: 0.5 }} />
               </a>
               &nbsp;&nbsp;&nbsp;
-              <a href="https://facebook.com/princepalaceparis" style={{ display: 'inline-block', textDecoration: 'none' }}>
+              <a href="https://www.facebook.com/leprincepalace75?locale=fr_FR" style={{ display: 'inline-block', textDecoration: 'none' }}>
                 <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width={20} height={20} alt="Facebook" style={{ opacity: 0.5 }} />
               </a>
               &nbsp;&nbsp;&nbsp;
-              <a href="https://tiktok.com/@princepalaceparis" style={{ display: 'inline-block', textDecoration: 'none' }}>
+              <a href="https://www.tiktok.com/@59princepalace" style={{ display: 'inline-block', textDecoration: 'none' }}>
                 <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" width={20} height={20} alt="TikTok" style={{ opacity: 0.5 }} />
               </a>
             </td></tr>
