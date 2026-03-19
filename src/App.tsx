@@ -39,6 +39,8 @@ const App = () => (
             <Route path="/login" element={<LoginRoute />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/book/:slug" element={<BookingPage />} />
+            <Route path="/reservation/modify/:token" element={<ModifyReservationPage />} />
+            <Route path="/reservation/cancel/:token" element={<CancelReservationPage />} />
             <Route path="/email-preview" element={<EmailPreviewPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
