@@ -1,36 +1,64 @@
 
 
-## Diagnostic
+## Plan : Boutons "Modifier" et "Annuler" fonctionnels dans l'email de confirmation
 
-Le ralentissement lors du changement d'onglet est causé par le fait que chaque section (Dashboard, Liens, Reservations, Donnees) possede son propre hook qui refait toutes les requetes a la base de donnees a chaque montage. Il n'y a aucune mise en cache : quand tu passes de "Dashboard" a "Liens", le composant Dashboard est detruit puis "Liens" est monte et relance 4-5 requetes reseau depuis zero.
+### Concept
 
-De plus, les network requests montrent que certaines requetes sont dupliquees (channels et channel_stats sont appeles 3-4 fois simultanement).
+Chaque réservation reçoit un token unique sécurisé. Les boutons de l'email pointent vers des pages publiques (`/reservation/modify/{token}` et `/reservation/cancel/{token}`) où le client peut modifier ou annuler sa réservation sans connexion. Après confirmation, il reçoit un nouvel email + SMS avec les informations mises à jour (ou l'annulation).
 
-## Solution
+### Étapes
 
-Migrer les hooks de donnees vers **React Query** (deja installe dans le projet via `@tanstack/react-query`) pour beneficier du cache automatique. Les donnees restent en memoire quand on change d'onglet, donc le retour est instantane.
+#### 1. Base de données — Ajouter un token de modification aux réservations
 
-### Modifications
+- Migration SQL : ajouter une colonne `modification_token` (UUID, unique, défaut `gen_random_uuid()`) à la table `reservations`
+- Mettre à jour les réservations existantes avec un token
+- Créer une RLS policy permettant le SELECT et UPDATE publics **uniquement via le token** (pas besoin d'être authentifié)
 
-**1. `src/hooks/useRealtimeDashboard.ts`**
-- Remplacer `useState`/`useEffect` par `useQuery` de React Query
-- La cle de cache (`queryKey`) garantit que les donnees sont gardees en memoire
-- Le realtime subscription invalide le cache au lieu de refetcher directement
-- `staleTime: 30000` (30s) pour eviter les refetch inutiles
+#### 2. Nouvelle page `/reservation/modify/:token`
 
-**2. `src/hooks/useRealtimeChannelsData.ts`**
-- Meme approche : `useQuery` avec cache
-- Les subscriptions realtime appellent `queryClient.invalidateQueries()` au lieu de refetcher
+- Page publique (même design noir/or que le formulaire de booking existant)
+- Au chargement : récupère la réservation via le token
+- Affiche les infos actuelles (date, heure, couverts, notes) dans un formulaire pré-rempli modifiable
+- Bouton "Confirmer les modifications" → met à jour la réservation en base → déclenche le renvoi de l'email + SMS de confirmation avec les nouvelles infos
+- Si token invalide → message d'erreur élégant
 
-**3. `src/hooks/useRealtimeReservations.ts`**
-- Meme approche avec `useQuery`
-- Les mutations (updateStatus, delete, etc.) invalident le cache
+#### 3. Nouvelle page `/reservation/cancel/:token`
 
-**4. `src/components/Data/DataSection.tsx`** (et `useMonthlyData.ts`)
-- Utiliser `useQuery` avec la cle incluant le mois selectionne
+- Page publique (même design)
+- Affiche un récapitulatif de la réservation + demande de confirmation d'annulation
+- Bouton "Confirmer l'annulation" → passe le statut à `cancelled` en base
+- Envoie un email + SMS d'annulation
+- Affiche une confirmation visuelle
 
-### Resultat attendu
-- Changement d'onglet instantane (donnees servies depuis le cache)
-- Les subscriptions realtime continuent de mettre a jour les donnees en arriere-plan
-- Moins de requetes reseau dupliquees
+#### 4. Mettre à jour l'email template et la preview
+
+- Dans le template React Email (`reservation-confirmation.tsx`) : remplacer les `href="#"` et `href="tel:..."` des boutons Modifier/Annuler par les vraies URLs : `https://palace-pulse.lovable.app/reservation/modify/{token}` et `.../cancel/{token}`
+- Passer le `modification_token` comme prop au template
+- Mettre à jour la preview (`EmailPreviewPage.tsx`) avec des URLs de test
+
+#### 5. Edge function — Passer le token à l'email
+
+- Dans `send-reservation-confirmation/index.ts` : accepter `modificationToken` dans le body, le passer au template
+- Modifier `BookingForm.tsx` : après l'insert, récupérer le `modification_token` généré et le passer à l'edge function
+
+#### 6. Email + SMS de modification/annulation
+
+- Créer une edge function `send-reservation-update` (ou réutiliser `send-reservation-confirmation` avec un paramètre `type: 'modification' | 'cancellation'`)
+- Template email adapté : "Réservation modifiée" ou "Réservation annulée" avec les nouvelles infos
+- SMS adapté : message confirmant la modification ou l'annulation
+
+#### 7. Routes dans App.tsx
+
+- Ajouter les routes publiques : `/reservation/modify/:token` et `/reservation/cancel/:token`
+
+### Fichiers impactés
+
+- **Migration SQL** : nouvelle colonne + RLS policies
+- `src/pages/ModifyReservationPage.tsx` (nouveau)
+- `src/pages/CancelReservationPage.tsx` (nouveau)
+- `src/App.tsx` (nouvelles routes)
+- `supabase/functions/send-reservation-confirmation/index.ts` (accepter token)
+- `supabase/functions/send-reservation-confirmation/_templates/reservation-confirmation.tsx` (URLs dynamiques)
+- `src/pages/EmailPreviewPage.tsx` (mise à jour preview)
+- `src/components/Booking/BookingForm.tsx` (récupérer token après insert)
 
