@@ -157,7 +157,8 @@ export function useRealtimeDashboard() {
       monthlyTrend: [],
       recentActivity: [],
       alerts: []
-    }
+    },
+    initialDataUpdatedAt: 0
   });
 
   useEffect(() => {

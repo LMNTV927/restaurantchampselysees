@@ -120,7 +120,8 @@ export function useRealtimeChannelsData() {
     initialData: {
       channels: [],
       kpis: { totalClicks: 0, totalReservations: 0, totalCovers: 0, conversion: 0 }
-    }
+    },
+    initialDataUpdatedAt: 0
   });
 
   useEffect(() => {
