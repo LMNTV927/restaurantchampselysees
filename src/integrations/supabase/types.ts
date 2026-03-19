@@ -107,6 +107,7 @@ export type Database = {
           external_id: string | null
           guests_count: number
           id: string
+          modification_token: string
           notes: string | null
           reservation_date: string
           reservation_time: string
@@ -122,6 +123,7 @@ export type Database = {
           external_id?: string | null
           guests_count?: number
           id?: string
+          modification_token?: string
           notes?: string | null
           reservation_date: string
           reservation_time: string
@@ -137,6 +139,7 @@ export type Database = {
           external_id?: string | null
           guests_count?: number
           id?: string
+          modification_token?: string
           notes?: string | null
           reservation_date?: string
           reservation_time?: string
