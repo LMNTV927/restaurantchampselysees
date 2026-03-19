@@ -133,7 +133,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
           const emailData = {
             customerName: bookingData.customerName,
             customerEmail: bookingData.customerEmail,
-            restaurantName: channelData?.name || 'Restaurant',
+            restaurantName: 'Prince Palace',
             reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
               weekday: 'long',
               year: 'numeric',
@@ -144,6 +144,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
             guestsCount: bookingData.guestsCount,
             customerPhone: bookingData.customerPhone,
             notes: bookingData.notes,
+            modificationToken,
           };
 
           const { error: emailError } = await supabase.functions.invoke('send-reservation-confirmation', {
