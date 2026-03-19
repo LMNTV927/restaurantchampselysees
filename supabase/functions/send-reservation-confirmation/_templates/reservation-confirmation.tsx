@@ -135,7 +135,7 @@ export const ReservationConfirmationEmail = ({
           {!isCancellation && (
             <table cellPadding="0" cellSpacing="0" width="100%" style={actionsSection}>
               <tr><td align="center" style={{ paddingBottom: '10px' }}>
-                <Link href={calendarUrl} style={{ ...btn, ...btnGold, display: 'block' as const, width: '100%' }}>
+                <Link href={calendarUrl} style={{ ...btn, ...btnGold, display: 'inline-block' as const, width: 'auto', padding: '12px 32px', fontSize: '13px' }}>
                   Ajouter au calendrier
                 </Link>
               </td></tr>
