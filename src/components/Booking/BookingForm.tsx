@@ -100,7 +100,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
       console.log('Date sélectionnée par l\'utilisateur:', bookingData.date);
       console.log('Date formatée pour la base de données:', reservationDate);
 
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('reservations')
         .insert({
           channel_id: channelId,
@@ -111,7 +111,9 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
           customer_phone: bookingData.customerPhone,
           customer_email: bookingData.customerEmail || null,
           notes: bookingData.notes || null,
-        });
+        })
+        .select('modification_token')
+        .single();
 
       if (error) {
         console.error('Booking error:', error);
@@ -123,13 +125,15 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
         return;
       }
 
+      const modificationToken = insertedData?.modification_token;
+
       // Send confirmation email if email is provided
       if (bookingData.customerEmail && bookingData.customerEmail.trim()) {
         try {
           const emailData = {
             customerName: bookingData.customerName,
             customerEmail: bookingData.customerEmail,
-            restaurantName: channelData?.name || 'Restaurant',
+            restaurantName: 'Prince Palace',
             reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
               weekday: 'long',
               year: 'numeric',
@@ -140,6 +144,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
             guestsCount: bookingData.guestsCount,
             customerPhone: bookingData.customerPhone,
             notes: bookingData.notes,
+            modificationToken,
           };
 
           const { error: emailError } = await supabase.functions.invoke('send-reservation-confirmation', {

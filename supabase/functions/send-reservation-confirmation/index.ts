@@ -20,19 +20,19 @@ interface ReservationEmailRequest {
   guestsCount: number;
   customerPhone?: string;
   notes?: string;
+  modificationToken?: string;
+  type?: 'confirmation' | 'modification' | 'cancellation';
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("Received request:", req.method);
-
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const requestData: ReservationEmailRequest = await req.json();
-    console.log("Processing reservation confirmation email:", requestData);
+    const emailType = requestData.type || 'confirmation';
+    const brandName = "Prince Palace";
 
     const {
       customerName,
@@ -42,11 +42,26 @@ const handler = async (req: Request): Promise<Response> => {
       guestsCount,
       customerPhone,
       notes,
+      modificationToken,
     } = requestData;
 
-    const brandName = "Prince Palace";
+    let subject: string;
+    let previewText: string;
 
-    // Render the React email template
+    switch (emailType) {
+      case 'modification':
+        subject = `Réservation modifiée - ${brandName}`;
+        previewText = `Votre réservation chez ${brandName} a été modifiée ✓`;
+        break;
+      case 'cancellation':
+        subject = `Réservation annulée - ${brandName}`;
+        previewText = `Votre réservation chez ${brandName} a été annulée`;
+        break;
+      default:
+        subject = `Confirmation de réservation - ${brandName}`;
+        previewText = `Votre réservation chez ${brandName} est confirmée ✓`;
+    }
+
     const html = await renderAsync(
       React.createElement(ReservationConfirmationEmail, {
         customerName,
@@ -56,15 +71,15 @@ const handler = async (req: Request): Promise<Response> => {
         guestsCount,
         customerPhone,
         notes,
+        modificationToken,
+        emailType,
       })
     );
-
-    console.log("Sending email to:", customerEmail);
 
     const emailResponse = await resend.emails.send({
       from: `${brandName} <confirmation@xn--rservation-prince-palace-bfc.fr>`,
       to: [customerEmail],
-      subject: `Confirmation de réservation - ${brandName}`,
+      subject,
       html,
     });
 
@@ -72,22 +87,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
     console.error("Error in send-reservation-confirmation function:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message || "Failed to send confirmation email" 
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      JSON.stringify({ success: false, error: error.message || "Failed to send confirmation email" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };

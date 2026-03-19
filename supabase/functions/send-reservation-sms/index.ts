@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { customerName, customerPhone, restaurantName, reservationDate, reservationTime, guestsCount } = await req.json();
+    const { customerName, customerPhone, restaurantName, reservationDate, reservationTime, guestsCount, type } = await req.json();
 
     if (!customerPhone) {
       return new Response(JSON.stringify({ error: 'Phone number is required' }), {
@@ -32,7 +32,15 @@ serve(async (req) => {
       });
     }
 
-    const message = `Cher(e) ${customerName},\n\nMerci pour votre réservation au Prince Palace le ${reservationDate} à ${reservationTime} pour ${guestsCount} personnes. Nous avons hâte de vous accueillir !\n\nPour toute question, contactez-nous au 01 59 13 32 68.\n\nÀ bientôt,\n\nL'équipe du Prince Palace`;
+    let message: string;
+
+    if (type === 'cancellation') {
+      message = `Cher(e) ${customerName},\n\nVotre réservation au Prince Palace le ${reservationDate} à ${reservationTime} pour ${guestsCount} personnes a bien été annulée.\n\nNous espérons vous revoir bientôt !\n\nPour toute question, contactez-nous au 01 59 13 32 68.\n\nL'équipe du Prince Palace`;
+    } else if (type === 'modification') {
+      message = `Cher(e) ${customerName},\n\nVotre réservation au Prince Palace a été modifiée :\n📅 ${reservationDate}\n🕐 ${reservationTime}\n👥 ${guestsCount} personnes\n\nNous avons hâte de vous accueillir !\n\nPour toute question, contactez-nous au 01 59 13 32 68.\n\nL'équipe du Prince Palace`;
+    } else {
+      message = `Cher(e) ${customerName},\n\nMerci pour votre réservation au Prince Palace le ${reservationDate} à ${reservationTime} pour ${guestsCount} personnes. Nous avons hâte de vous accueillir !\n\nPour toute question, contactez-nous au 01 59 13 32 68.\n\nÀ bientôt,\n\nL'équipe du Prince Palace`;
+    }
 
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
 
