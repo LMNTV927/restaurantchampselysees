@@ -76,23 +76,12 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
     },
   });
 
-  // Generate time slots from 11:30 to 22:00
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 11; hour <= 22; hour++) {
-      if (hour === 11) {
-        slots.push("11:30");
-      } else {
-        slots.push(`${hour.toString().padStart(2, '0')}:00`);
-        if (hour < 22) {
-          slots.push(`${hour.toString().padStart(2, '0')}:30`);
-        }
-      }
-    }
-    return slots;
-  };
-
-  const timeSlots = generateTimeSlots();
+  const timeSlots = [
+    '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
+    '20:00', '20:30', '21:00', '21:30', '22:00', '22:30',
+    '23:00', '23:30', '00:00', '00:30', '01:00', '01:30',
+    '02:00', '02:30', '03:00', '03:30', '04:00', '04:30', '05:00'
+  ];
 
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
