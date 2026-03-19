@@ -20,7 +20,11 @@ interface ReservationConfirmationEmailProps {
   guestsCount: number;
   customerPhone?: string;
   notes?: string;
+  modificationToken?: string;
+  emailType?: 'confirmation' | 'modification' | 'cancellation';
 }
+
+const BASE_URL = 'https://palace-pulse.lovable.app';
 
 export const ReservationConfirmationEmail = ({
   customerName,
@@ -30,18 +34,49 @@ export const ReservationConfirmationEmail = ({
   guestsCount,
   customerPhone,
   notes,
+  modificationToken,
+  emailType = 'confirmation',
 }: ReservationConfirmationEmailProps) => {
   const calendarTitle = encodeURIComponent(`Réservation ${restaurantName}`);
   const calendarLocation = encodeURIComponent('76 Av. des Champs-Élysées, 75008 Paris');
   const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calendarTitle}&location=${calendarLocation}`;
   const logoUrl = 'https://vedistbhwfdtkjaojycs.supabase.co/storage/v1/object/public/email-assets/prince-palace-logo-email.png';
 
+  const modifyUrl = modificationToken ? `${BASE_URL}/reservation/modify/${modificationToken}` : '#';
+  const cancelUrl = modificationToken ? `${BASE_URL}/reservation/cancel/${modificationToken}` : '#';
+
+  const isCancellation = emailType === 'cancellation';
+  const isModification = emailType === 'modification';
+
+  const headingText = isCancellation
+    ? 'Réservation annulée'
+    : isModification
+      ? 'Réservation modifiée'
+      : 'Réservation confirmée';
+
+  const subtitleText = isCancellation
+    ? `${customerName}, votre réservation a été annulée.`
+    : isModification
+      ? `${customerName}, votre réservation a été mise à jour.`
+      : `Merci ${customerName}, on vous attend !`;
+
+  const previewText = isCancellation
+    ? `Votre réservation chez ${restaurantName} a été annulée`
+    : isModification
+      ? `Votre réservation chez ${restaurantName} a été modifiée ✓`
+      : `Votre réservation chez ${restaurantName} est confirmée ✓`;
+
+  const checkIcon = isCancellation ? '✗' : '✓';
+  const checkColor = isCancellation ? '#ef4444' : '#c9a84c';
+  const checkBg = isCancellation ? 'rgba(239,68,68,0.1)' : 'rgba(201,168,76,0.1)';
+  const checkBorder = isCancellation ? 'rgba(239,68,68,0.25)' : 'rgba(201,168,76,0.25)';
+
   return (
     <Html>
       <Head>
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </Head>
-      <Preview>Votre réservation chez {restaurantName} est confirmée ✓</Preview>
+      <Preview>{previewText}</Preview>
       <Body style={main}>
         <Container style={wrap}>
           {/* Logo */}
@@ -53,23 +88,23 @@ export const ReservationConfirmationEmail = ({
             </tr>
           </table>
 
-          {/* Success */}
+          {/* Success / Status */}
           <table cellPadding="0" cellSpacing="0" width="100%" style={successSection}>
             <tr>
               <td align="center" style={{ paddingBottom: '14px' }}>
-                <table cellPadding="0" cellSpacing="0"><tr><td align="center" style={checkCircle}>
-                  <span style={{ fontSize: '22px', color: '#c9a84c', lineHeight: '48px' }}>✓</span>
+                <table cellPadding="0" cellSpacing="0"><tr><td align="center" style={{ ...checkCircle, backgroundColor: checkBg, border: `1px solid ${checkBorder}` }}>
+                  <span style={{ fontSize: '22px', color: checkColor, lineHeight: '48px' }}>{checkIcon}</span>
                 </td></tr></table>
               </td>
             </tr>
             <tr>
               <td align="center">
-                <Heading style={h1}>Réservation confirmée</Heading>
+                <Heading style={h1}>{headingText}</Heading>
               </td>
             </tr>
             <tr>
               <td align="center">
-                <Text style={subtitle}>Merci {customerName}, on vous attend !</Text>
+                <Text style={subtitle}>{subtitleText}</Text>
               </td>
             </tr>
           </table>
@@ -78,15 +113,15 @@ export const ReservationConfirmationEmail = ({
           <table cellPadding="0" cellSpacing="0" width="100%" style={card}>
             <tr><td align="center" style={detailRow}>
               <Text style={label}>Date</Text>
-              <Text style={value}>{reservationDate}</Text>
+              <Text style={{ ...value, textDecoration: isCancellation ? 'line-through' : 'none' }}>{reservationDate}</Text>
             </td></tr>
             <tr><td align="center" style={detailRow}>
               <Text style={label}>Heure</Text>
-              <Text style={value}>{reservationTime}</Text>
+              <Text style={{ ...value, textDecoration: isCancellation ? 'line-through' : 'none' }}>{reservationTime}</Text>
             </td></tr>
             <tr><td align="center" style={detailRow}>
               <Text style={label}>Couverts</Text>
-              <Text style={value}>{guestsCount} personne{guestsCount > 1 ? 's' : ''}</Text>
+              <Text style={{ ...value, textDecoration: isCancellation ? 'line-through' : 'none' }}>{guestsCount} personne{guestsCount > 1 ? 's' : ''}</Text>
             </td></tr>
             {notes && (
               <tr><td align="center" style={{ ...detailRow, borderBottom: 'none' }}>
@@ -96,31 +131,33 @@ export const ReservationConfirmationEmail = ({
             )}
           </table>
 
-          {/* Buttons */}
-          <table cellPadding="0" cellSpacing="0" width="100%" style={actionsSection}>
-            <tr><td align="center" style={{ paddingBottom: '10px' }}>
-              <Link href={calendarUrl} style={{ ...btn, ...btnGold, display: 'block' as const, width: '100%' }}>
-                Ajouter au calendrier
-              </Link>
-            </td></tr>
-            <tr><td align="center">
-              <table
-                cellPadding="0"
-                cellSpacing="0"
-                width="100%"
-                style={{ borderCollapse: 'separate' as const, borderSpacing: '0', tableLayout: 'fixed' as const }}
-              >
-                <tr>
-                  <td width="50%" align="center" style={{ padding: '0 8px 0 0' }}>
-                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'inline-block' as const, width: '92%', maxWidth: '220px', padding: '12px 10px', fontSize: '13px' }}>Modifier</Link>
-                  </td>
-                  <td width="50%" align="center" style={{ padding: '0 0 0 8px' }}>
-                    <Link href="tel:0159133268" style={{ ...btn, ...btnOutline, display: 'inline-block' as const, width: '92%', maxWidth: '220px', padding: '12px 10px', fontSize: '13px' }}>Annuler</Link>
-                  </td>
-                </tr>
-              </table>
-            </td></tr>
-          </table>
+          {/* Buttons - only show for confirmation/modification */}
+          {!isCancellation && (
+            <table cellPadding="0" cellSpacing="0" width="100%" style={actionsSection}>
+              <tr><td align="center" style={{ paddingBottom: '10px' }}>
+                <Link href={calendarUrl} style={{ ...btn, ...btnGold, display: 'block' as const, width: '100%' }}>
+                  Ajouter au calendrier
+                </Link>
+              </td></tr>
+              <tr><td align="center">
+                <table
+                  cellPadding="0"
+                  cellSpacing="0"
+                  width="100%"
+                  style={{ borderCollapse: 'separate' as const, borderSpacing: '0', tableLayout: 'fixed' as const }}
+                >
+                  <tr>
+                    <td width="50%" align="center" style={{ padding: '0 8px 0 0' }}>
+                      <Link href={modifyUrl} style={{ ...btn, ...btnOutline, display: 'inline-block' as const, width: '92%', maxWidth: '220px', padding: '12px 10px', fontSize: '13px' }}>Modifier</Link>
+                    </td>
+                    <td width="50%" align="center" style={{ padding: '0 0 0 8px' }}>
+                      <Link href={cancelUrl} style={{ ...btn, ...btnOutline, display: 'inline-block' as const, width: '92%', maxWidth: '220px', padding: '12px 10px', fontSize: '13px' }}>Annuler</Link>
+                    </td>
+                  </tr>
+                </table>
+              </td></tr>
+            </table>
+          )}
 
           {/* Location */}
           <table cellPadding="0" cellSpacing="0" width="100%" style={locSection}>
