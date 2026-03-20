@@ -16,6 +16,7 @@ const allTabs = [
   { id: "links", label: "Liens" },
   { id: "reservations", label: "Réservations" },
   { id: "data", label: "Données" },
+  { id: "assistant", label: "Assistant IA" },
 ];
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
