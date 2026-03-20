@@ -6,6 +6,7 @@ import { DashboardSection } from "@/components/Dashboard/DashboardSection";
 import { LinksSection } from "@/components/Links/LinksSection";
 import { ReservationsSection } from "@/components/Reservations/ReservationsSection";
 import { DataSection } from "@/components/Data/DataSection";
+import { AssistantSection } from "@/components/Assistant/AssistantSection";
 import { useAuth } from "@/hooks/useAuth";
 
 function IndexContent() {
@@ -35,6 +36,8 @@ function IndexContent() {
         return <ReservationsSection />;
       case "data":
         return <DataSection />;
+      case "assistant":
+        return <AssistantSection />;
       default:
         return <DashboardSection />;
     }
