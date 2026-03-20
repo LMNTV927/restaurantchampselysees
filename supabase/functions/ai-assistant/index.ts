@@ -47,6 +47,14 @@ serve(async (req) => {
     const totalCovers = reservations?.reduce((sum, r) => sum + (r.guests_count || 0), 0) || 0;
     const avgCovers = totalReservations > 0 ? (totalCovers / totalReservations).toFixed(1) : 0;
 
+    // Today's reservations
+    const todayReservations = reservations?.filter(r => r.reservation_date === today) || [];
+    const todayCount = todayReservations.length;
+    const todayCovers = todayReservations.reduce((sum, r) => sum + (r.guests_count || 0), 0);
+    const todayDetails = todayReservations.length > 0
+      ? todayReservations.map(r => `  - ${r.customer_name}, ${r.guests_count} couverts à ${r.reservation_time} (${r.status})`).join("\n")
+      : "  Aucune réservation aujourd'hui.";
+
     // Stats per channel
     const channelSummaries = (channels || []).map(ch => {
       const stats = (channelStats || []).filter(s => s.channel_id === ch.id);
