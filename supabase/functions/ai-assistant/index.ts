@@ -103,13 +103,14 @@ ${dayBreakdown}
 ${timeBreakdown}
 
 === INSTRUCTIONS ===
+- Sois **bref et concis**. Va droit à l'essentiel. Évite les longues introductions et conclusions.
+- Limite tes réponses à 3-5 points maximum, sauf si on te demande explicitement plus de détails.
 - Réponds toujours en français.
-- Base tes analyses et conseils sur les données réelles ci-dessus.
-- Propose des recommandations concrètes et actionnables.
+- Base tes analyses sur les données réelles ci-dessus.
 - Utilise des émojis pour rendre tes réponses visuelles.
 - Si on te demande des comparaisons, utilise des pourcentages et des tendances.
-- Sois proactif: suggère des pistes d'amélioration même si on ne te les demande pas directement.
-- Formate tes réponses en markdown pour une meilleure lisibilité.`;
+- Suggère 1-2 pistes d'amélioration max, pas plus.
+- Formate en markdown.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
