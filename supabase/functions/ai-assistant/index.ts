@@ -92,6 +92,11 @@ serve(async (req) => {
 
 Date d'aujourd'hui: ${today}
 
+=== AUJOURD'HUI (${today}) ===
+📌 Réservations aujourd'hui: ${todayCount}
+📌 Couverts aujourd'hui: ${todayCovers}
+${todayDetails}
+
 === DONNÉES DU RESTAURANT (90 derniers jours) ===
 
 📊 RÉSUMÉ GLOBAL:
@@ -104,7 +109,7 @@ Date d'aujourd'hui: ${today}
 📢 PERFORMANCE PAR CANAL:
 ${channelSummaries}
 
-📅 RÉSERVATIONS PAR JOUR:
+📅 RÉSERVATIONS PAR JOUR DE LA SEMAINE:
 ${dayBreakdown}
 
 ⏰ HORAIRES LES PLUS POPULAIRES:
