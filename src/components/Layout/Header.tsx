@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
-import { Moon, Sun, LogOut } from "lucide-react";
+import { Moon, Sun, LogOut, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
+import floorPlanImg from "@/assets/floor-plan.jpeg";
 
 interface HeaderProps {
   activeTab: string;
@@ -88,6 +90,24 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
 
           {/* Actions */}
           <div className="flex items-center justify-center sm:justify-end gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-xl border-border/50 hover:bg-accent/20 transition-all duration-300 flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10"
+                >
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="sr-only">Plan de salle</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Plan de salle</DialogTitle>
+                </DialogHeader>
+                <img src={floorPlanImg} alt="Plan de salle Prince Palace" className="w-full h-auto rounded-lg" />
+              </DialogContent>
+            </Dialog>
             <Button
               variant="outline"
               size="icon"
