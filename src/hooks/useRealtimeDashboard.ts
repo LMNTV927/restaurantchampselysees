@@ -148,6 +148,21 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
 export function useRealtimeDashboard() {
   const queryClient = useQueryClient();
 
+  // Trigger followup emails check on dashboard load (every hour)
+  useEffect(() => {
+    const lastCheck = sessionStorage.getItem('followup_last_check');
+    const now = Date.now();
+    const ONE_HOUR = 60 * 60 * 1000;
+    
+    if (!lastCheck || (now - parseInt(lastCheck)) > ONE_HOUR) {
+      sessionStorage.setItem('followup_last_check', now.toString());
+      supabase.functions.invoke('send-followup-thankyou').then(({ data, error }) => {
+        if (error) console.error('Followup check error:', error);
+        else console.log('Followup check:', data);
+      });
+    }
+  }, []);
+
   const { data: dashboardData, isLoading: loading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: fetchDashboardData,
