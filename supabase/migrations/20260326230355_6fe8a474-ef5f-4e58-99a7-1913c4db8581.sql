@@ -1,0 +1,1 @@
+ALTER TABLE public.reservations ADD COLUMN followup_sent boolean NOT NULL DEFAULT false;

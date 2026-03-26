@@ -105,6 +105,7 @@ export type Database = {
           customer_name: string
           customer_phone: string
           external_id: string | null
+          followup_sent: boolean
           guests_count: number
           id: string
           modification_token: string
@@ -121,6 +122,7 @@ export type Database = {
           customer_name: string
           customer_phone: string
           external_id?: string | null
+          followup_sent?: boolean
           guests_count?: number
           id?: string
           modification_token?: string
@@ -137,6 +139,7 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           external_id?: string | null
+          followup_sent?: boolean
           guests_count?: number
           id?: string
           modification_token?: string
