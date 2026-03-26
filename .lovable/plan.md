@@ -1,17 +1,37 @@
 
 
-## Plan : Rendre les réponses de l'Assistant IA plus brèves
+## Plan : Email de remerciement automatique 3h après la réservation
 
-### Changement
+### Concept
 
-Modifier le system prompt dans `supabase/functions/ai-assistant/index.ts` (lignes 105-112) pour ajouter des instructions de concision :
+Une Edge Function `send-followup-thankyou` vérifie toutes les heures les réservations confirmées dont l'heure est passée depuis 3h. Elle envoie uniquement un **email** de remerciement avec un lien vers la fiche Google pour laisser un avis. Pas de SMS.
 
-- Ajouter : "Sois **bref et concis**. Va droit à l'essentiel."
-- Ajouter : "Limite tes réponses à 3-5 points maximum sauf si on te demande plus de détails."
-- Modifier l'instruction proactive pour ne suggérer qu'1-2 pistes max au lieu d'être systématiquement exhaustif.
-- Ajouter : "Évite les longues introductions et conclusions."
+**Contrainte** : pg_cron a été refusé précédemment. L'alternative est de déclencher la vérification depuis le dashboard (à chaque chargement) ou d'utiliser un service cron externe gratuit (comme cron-job.org) qui appelle la fonction toutes les heures.
 
-### Fichier modifié
-- `supabase/functions/ai-assistant/index.ts` — section `=== INSTRUCTIONS ===` du system prompt
-- Redéploiement de la edge function
+### Étapes
+
+1. **Migration SQL** : Ajouter colonne `followup_sent` (boolean, default false) à la table `reservations`
+
+2. **Nouvelle Edge Function `send-followup-thankyou`** :
+   - Cherche les réservations où `status = 'confirmed'`, `followup_sent = false`, et date+heure + 3h < maintenant (timezone Europe/Paris)
+   - Envoie un **email** via Resend : template noir/or Prince Palace avec remerciement + bouton "Laisser un avis sur Google"
+   - Met à jour `followup_sent = true`
+   - Copie à `princepalace.champselysees@gmail.com`
+
+3. **Template email de remerciement** : Design cohérent avec les emails existants (noir/or, logo, réseaux sociaux Instagram/Facebook/TikTok)
+
+4. **Déclenchement automatique** : Deux options possibles :
+   - **Option A** : Appel depuis le dashboard à chaque chargement (simple mais nécessite que quelqu'un ouvre le dashboard)
+   - **Option B** : Service cron externe gratuit (cron-job.org) qui appelle l'URL de la fonction toutes les heures (fiable, autonome)
+
+### Fichiers
+
+- Migration SQL : ajout colonne `followup_sent`
+- `supabase/functions/send-followup-thankyou/index.ts` (nouveau)
+- Template email remerciement dans la fonction
+- `src/hooks/useRealtimeDashboard.ts` ou composant Dashboard (si option A)
+
+### Prérequis
+
+- **Lien Google Avis** à fournir par vous
 
