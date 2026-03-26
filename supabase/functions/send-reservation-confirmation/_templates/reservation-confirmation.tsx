@@ -24,7 +24,7 @@ interface ReservationConfirmationEmailProps {
   emailType?: 'confirmation' | 'modification' | 'cancellation';
 }
 
-const BASE_URL = 'https://palace-pulse.lovable.app';
+const BASE_URL = 'https://resa-princepalace-paris-dashboard.lovable.app';
 
 export const ReservationConfirmationEmail = ({
   customerName,
