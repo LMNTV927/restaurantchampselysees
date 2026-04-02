@@ -30,24 +30,62 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
         Choisissez votre créneau horaire préféré
       </p>
       
-      <div className="grid grid-cols-3 gap-3">
-        {timeSlots.map((time) => (
-          <motion.button
-            key={time}
-            onClick={() => handleTimeSelect(time)}
-            className={`
-              p-3 rounded-lg border-2 transition-all duration-200 font-medium
-              ${data.time === time
-                ? 'border-primary bg-primary text-primary-foreground shadow-soft'
-                : 'border-border bg-background hover:border-primary/50 text-foreground hover:bg-primary/5'
-              }
-            `}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {time}
-          </motion.button>
-        ))}
+      {/* Restauration */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#F4B183' }}></div>
+          <span className="text-sm font-medium text-muted-foreground">Restauration</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {restaurantSlots.map((time) => (
+            <motion.button
+              key={time}
+              onClick={() => handleTimeSelect(time)}
+              className={`p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
+                data.time === time
+                  ? 'shadow-soft text-foreground'
+                  : 'border-border bg-background text-foreground hover:opacity-80'
+              }`}
+              style={{
+                borderColor: data.time === time ? '#F4B183' : undefined,
+                backgroundColor: data.time === time ? 'rgba(244, 177, 131, 0.2)' : undefined,
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {time}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Club */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#C8A2FF' }}></div>
+          <span className="text-sm font-medium text-muted-foreground">Club</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {clubSlots.map((time) => (
+            <motion.button
+              key={time}
+              onClick={() => handleTimeSelect(time)}
+              className={`p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
+                data.time === time
+                  ? 'shadow-soft text-foreground'
+                  : 'border-border bg-background text-foreground hover:opacity-80'
+              }`}
+              style={{
+                borderColor: data.time === time ? '#C8A2FF' : undefined,
+                backgroundColor: data.time === time ? 'rgba(200, 162, 255, 0.2)' : undefined,
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {time}
+            </motion.button>
+          ))}
+        </div>
       </div>
       
     </div>
