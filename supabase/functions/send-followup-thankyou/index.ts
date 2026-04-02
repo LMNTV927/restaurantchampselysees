@@ -13,69 +13,65 @@ const GOOGLE_REVIEW_LINK = "https://g.page/r/CWh1Fw303_ybEAE/review";
 const RESTAURANT_EMAIL = "princepalace.champselysees@gmail.com";
 const BRAND_NAME = "Prince Palace";
 const FROM_EMAIL = `${BRAND_NAME} <confirmation@xn--rservation-prince-palace-bfc.fr>`;
-const LOGO_URL = "https://dd89562d-9168-4ff4-946e-c0abb6097cdc.lovableproject.com/prince-palace-logo-new.png";
+const LOGO_URL = "https://vedistbhwfdtkjaojycs.supabase.co/storage/v1/object/public/email-assets/prince-palace-logo-thankyou.png";
 
 function buildThankYouEmailHtml(customerName: string): string {
   return `<!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background-color:#000000;font-family:Georgia,'Times New Roman',serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#000000;padding:40px 20px;">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body style="margin:0;padding:0;background-color:#0a0908;font-family:'DM Sans',system-ui,-apple-system,sans-serif;padding:24px 16px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0908;">
 <tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;border:1px solid #c9a84c;border-radius:8px;">
+<table width="720" cellpadding="0" cellspacing="0" style="max-width:720px;margin:0 auto;">
 
 <!-- Logo -->
-<tr><td align="center" style="padding:30px 20px 10px;">
-<img src="${LOGO_URL}" alt="${BRAND_NAME}" width="160" style="display:block;" />
+<tr><td align="center" style="background-color:#0d0b09;padding:36px 28px;border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.12);border-bottom:none;">
+<img src="${LOGO_URL}" alt="${BRAND_NAME}" width="280" style="display:block;" />
 </td></tr>
 
-<!-- Divider -->
-<tr><td align="center" style="padding:0 40px;">
-<hr style="border:none;border-top:1px solid #c9a84c;margin:10px 0 20px;" />
-</td></tr>
-
-<!-- Title -->
-<tr><td align="center" style="padding:0 30px;">
-<h1 style="color:#c9a84c;font-size:24px;margin:0 0 10px;font-weight:normal;font-family:Georgia,'Times New Roman',serif;">
-Merci pour votre visite !
-</h1>
+<!-- Star icon + Title -->
+<tr><td align="center" style="background-color:#111111;padding:28px 28px 24px;border-left:1px solid rgba(201,168,76,0.12);border-right:1px solid rgba(201,168,76,0.12);border-bottom:1px solid rgba(201,168,76,0.08);">
+<table cellpadding="0" cellspacing="0"><tr><td align="center" style="width:48px;height:48px;border-radius:50%;background-color:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);text-align:center;">
+<span style="font-size:22px;color:#c9a84c;line-height:48px;">⭐</span>
+</td></tr></table>
+<h1 style="font-size:20px;font-weight:600;color:#f2ede4;margin:14px 0 4px;font-family:'DM Sans',system-ui,sans-serif;">Merci pour votre visite !</h1>
+<p style="font-size:13.5px;color:#7a7268;font-weight:400;margin:0;">${customerName}, votre avis compte pour nous</p>
 </td></tr>
 
 <!-- Message -->
-<tr><td style="padding:20px 40px;color:#ffffff;font-size:15px;line-height:1.7;">
-<p style="margin:0 0 15px;">Cher(e) ${customerName},</p>
-<p style="margin:0 0 15px;">Toute l'équipe du <strong style="color:#c9a84c;">${BRAND_NAME}</strong> vous remercie chaleureusement pour votre visite. Nous espérons que vous avez passé un agréable moment.</p>
-<p style="margin:0 0 25px;">Votre avis compte beaucoup pour nous ! Si vous avez apprécié votre expérience, nous serions ravis que vous partagiez votre ressenti sur Google.</p>
+<tr><td style="background-color:#111111;padding:24px 28px;border-left:1px solid rgba(201,168,76,0.12);border-right:1px solid rgba(201,168,76,0.12);border-bottom:1px solid rgba(201,168,76,0.08);">
+<table cellpadding="0" cellspacing="0" width="100%" style="background-color:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.1);border-radius:10px;padding:18px;">
+<tr><td style="padding:18px;">
+<p style="color:#f2ede4;font-size:14.5px;line-height:1.7;margin:0 0 12px;">Toute l'équipe du <strong style="color:#c9a84c;">${BRAND_NAME}</strong> vous remercie chaleureusement pour votre visite.</p>
+<p style="color:#f2ede4;font-size:14.5px;line-height:1.7;margin:0;">Nous espérons que vous avez passé un agréable moment. Si vous avez apprécié votre expérience, nous serions ravis que vous partagiez votre ressenti sur Google.</p>
+</td></tr>
+</table>
 </td></tr>
 
 <!-- CTA Button -->
-<tr><td align="center" style="padding:0 40px 30px;">
-<a href="${GOOGLE_REVIEW_LINK}" target="_blank" style="display:inline-block;background-color:#c9a84c;color:#000000;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:15px;font-weight:bold;font-family:Georgia,'Times New Roman',serif;">
+<tr><td align="center" style="background-color:#111111;padding:20px 28px 28px;border-left:1px solid rgba(201,168,76,0.12);border-right:1px solid rgba(201,168,76,0.12);border-bottom:1px solid rgba(201,168,76,0.08);">
+<a href="${GOOGLE_REVIEW_LINK}" target="_blank" style="display:inline-block;background-color:#c9a84c;color:#0d0b09;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:14px;font-weight:600;font-family:'DM Sans',system-ui,sans-serif;">
 ⭐ Laisser un avis sur Google
 </a>
 </td></tr>
 
-<!-- Divider -->
-<tr><td align="center" style="padding:0 40px;">
-<hr style="border:none;border-top:1px solid #c9a84c;margin:0 0 20px;" />
-</td></tr>
-
-<!-- Social Links -->
-<tr><td align="center" style="padding:0 20px 20px;">
-<table cellpadding="0" cellspacing="0"><tr>
-<td style="padding:0 8px;"><a href="https://www.instagram.com/princepalace_off/" target="_blank" style="color:#c9a84c;text-decoration:none;font-size:13px;">Instagram</a></td>
-<td style="color:#c9a84c;">•</td>
-<td style="padding:0 8px;"><a href="https://www.facebook.com/leprincepalace75?locale=fr_FR" target="_blank" style="color:#c9a84c;text-decoration:none;font-size:13px;">Facebook</a></td>
-<td style="color:#c9a84c;">•</td>
-<td style="padding:0 8px;"><a href="https://www.tiktok.com/@59princepalace" target="_blank" style="color:#c9a84c;text-decoration:none;font-size:13px;">TikTok</a></td>
-</tr></table>
-</td></tr>
-
 <!-- Footer -->
-<tr><td align="center" style="padding:0 20px 25px;">
-<p style="color:#666666;font-size:11px;margin:0;font-family:Arial,sans-serif;">
-${BRAND_NAME} — 16 Rue de Marignan, 75008 Paris
-</p>
+<tr><td style="background-color:#0d0b09;padding:24px 28px;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.12);border-top:none;">
+<table cellpadding="0" cellspacing="0" width="100%">
+<tr><td align="center" style="padding-bottom:16px;">
+<a href="https://www.instagram.com/princepalace_off/" target="_blank" style="display:inline-block;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="20" height="20" alt="Instagram" style="opacity:0.5;" /></a>
+&nbsp;&nbsp;&nbsp;
+<a href="https://www.facebook.com/leprincepalace75?locale=fr_FR" target="_blank" style="display:inline-block;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width="20" height="20" alt="Facebook" style="opacity:0.5;" /></a>
+&nbsp;&nbsp;&nbsp;
+<a href="https://www.tiktok.com/@59princepalace" target="_blank" style="display:inline-block;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" width="20" height="20" alt="TikTok" style="opacity:0.5;" /></a>
+</td></tr>
+<tr><td align="center">
+<p style="font-size:11px;color:#4a4440;line-height:1.8;margin:0;"><a href="https://princepalace.fr" style="color:#7a7268;text-decoration:underline;text-underline-offset:2px;">princepalace.fr</a></p>
+<p style="font-size:11px;color:#4a4440;line-height:1.8;margin:0;">Prince Palace — 76 Av. des Champs-Élysées, 75008 Paris</p>
+</td></tr>
+</table>
 </td></tr>
 
 </table>
