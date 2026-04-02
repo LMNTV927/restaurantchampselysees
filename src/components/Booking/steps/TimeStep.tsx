@@ -13,22 +13,26 @@ const allSlots = [
   '02:00', '02:30', '03:00', '03:30', '04:00', '04:30', '05:00'
 ];
 
-function isWeekend(date: Date | null): boolean {
-  if (!date) return false;
+function getDayType(date: Date | null): 'weekday' | 'friday' | 'weekend' {
+  if (!date) return 'weekday';
   const day = date.getDay();
-  return day === 5 || day === 6 || day === 0; // Vendredi, Samedi, Dimanche
+  if (day === 5) return 'friday'; // Vendredi
+  if (day === 6 || day === 0) return 'weekend'; // Samedi, Dimanche
+  return 'weekday'; // Lundi-Jeudi
 }
 
-function getSlotCategory(time: string, weekend: boolean): 'restaurant' | 'club' {
-  // Semaine: restaurant 17h-23h (dernier créneau 22:30), club à partir de 23h
-  // Weekend: restaurant 17h-00h (dernier créneau 23:30), club à partir de 00h
-  const [h] = time.split(':').map(Number);
+function getSlotCategory(time: string, dayType: 'weekday' | 'friday' | 'weekend'): 'restaurant' | 'club' {
+  const [h, m] = time.split(':').map(Number);
+  const totalMin = h * 60 + m;
   
-  if (weekend) {
-    // Weekend: 17-23 = restaurant, 00-05 = club
-    return h >= 17 ? 'restaurant' : 'club';
+  if (dayType === 'weekend') {
+    // Sam/Dim: restaurant 17h-00h00, club à partir de 00h30
+    return (h >= 17) || (h === 0 && m === 0) ? 'restaurant' : 'club';
+  } else if (dayType === 'friday') {
+    // Vendredi: restaurant 17h-23h00, club à partir de 23h30
+    return h >= 17 && h <= 23 && !(h === 23 && m === 30) ? 'restaurant' : 'club';
   } else {
-    // Semaine: 17-22 = restaurant, 23+ et 00-05 = club
+    // Semaine (Lun-Jeu): restaurant 17h-22h30, club à partir de 23h
     return h >= 17 && h <= 22 ? 'restaurant' : 'club';
   }
 }
