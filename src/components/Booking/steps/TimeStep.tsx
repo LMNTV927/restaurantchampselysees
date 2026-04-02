@@ -42,9 +42,9 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
     onUpdate({ time });
   };
 
-  const weekend = isWeekend(data.date);
-  const restaurantSlots = allSlots.filter(t => getSlotCategory(t, weekend) === 'restaurant');
-  const clubSlots = allSlots.filter(t => getSlotCategory(t, weekend) === 'club');
+  const dayType = getDayType(data.date);
+  const restaurantSlots = allSlots.filter(t => getSlotCategory(t, dayType) === 'restaurant');
+  const clubSlots = allSlots.filter(t => getSlotCategory(t, dayType) === 'club');
 
   return (
     <div className="text-center">
