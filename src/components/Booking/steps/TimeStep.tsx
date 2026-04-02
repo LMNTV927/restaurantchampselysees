@@ -6,20 +6,41 @@ interface TimeStepProps {
   onUpdate: (updates: Partial<BookingData>) => void;
 }
 
-const restaurantSlots = [
+const allSlots = [
   '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
-  '20:00', '20:30', '21:00', '21:30', '22:00'
-];
-
-const clubSlots = [
-  '22:30', '23:00', '23:30', '00:00', '00:30', '01:00', '01:30',
+  '20:00', '20:30', '21:00', '21:30', '22:00', '22:30',
+  '23:00', '23:30', '00:00', '00:30', '01:00', '01:30',
   '02:00', '02:30', '03:00', '03:30', '04:00', '04:30', '05:00'
 ];
+
+function isWeekend(date: Date | null): boolean {
+  if (!date) return false;
+  const day = date.getDay();
+  return day === 5 || day === 6 || day === 0; // Vendredi, Samedi, Dimanche
+}
+
+function getSlotCategory(time: string, weekend: boolean): 'restaurant' | 'club' {
+  // Semaine: restaurant 17h-23h (dernier créneau 22:30), club à partir de 23h
+  // Weekend: restaurant 17h-00h (dernier créneau 23:30), club à partir de 00h
+  const [h] = time.split(':').map(Number);
+  
+  if (weekend) {
+    // Weekend: 17-23 = restaurant, 00-05 = club
+    return h >= 17 ? 'restaurant' : 'club';
+  } else {
+    // Semaine: 17-22 = restaurant, 23+ et 00-05 = club
+    return h >= 17 && h <= 22 ? 'restaurant' : 'club';
+  }
+}
 
 export function TimeStep({ data, onUpdate }: TimeStepProps) {
   const handleTimeSelect = (time: string) => {
     onUpdate({ time });
   };
+
+  const weekend = isWeekend(data.date);
+  const restaurantSlots = allSlots.filter(t => getSlotCategory(t, weekend) === 'restaurant');
+  const clubSlots = allSlots.filter(t => getSlotCategory(t, weekend) === 'club');
 
   return (
     <div className="text-center">
