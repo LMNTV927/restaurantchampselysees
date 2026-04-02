@@ -112,6 +112,3 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
     </div>
   );
 }
-    </div>
-  );
-}
