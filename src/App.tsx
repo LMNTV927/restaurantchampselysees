@@ -8,6 +8,7 @@ import { BookingPage } from "./pages/BookingPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 import EmailPreviewPage from "./pages/EmailPreviewPage";
+import ThankYouEmailPreviewPage from "./pages/ThankYouEmailPreviewPage";
 import ModifyReservationPage from "./pages/ModifyReservationPage";
 import CancelReservationPage from "./pages/CancelReservationPage";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/reservation/modify/:token" element={<ModifyReservationPage />} />
             <Route path="/reservation/cancel/:token" element={<CancelReservationPage />} />
             <Route path="/email-preview" element={<EmailPreviewPage />} />
+            <Route path="/email-preview-thankyou" element={<ThankYouEmailPreviewPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
