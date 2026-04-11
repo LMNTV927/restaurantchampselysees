@@ -43,6 +43,7 @@ const App = () => (
             <Route path="/reservation/modify/:token" element={<ModifyReservationPage />} />
             <Route path="/reservation/cancel/:token" element={<CancelReservationPage />} />
             <Route path="/email-preview" element={<EmailPreviewPage />} />
+            <Route path="/email-preview-thankyou" element={<ThankYouEmailPreviewPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
