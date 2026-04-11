@@ -519,7 +519,7 @@ export function ReservationsSection() {
                           className="premium-button"
                           onClick={() => handleUpdateReservationStatus(reservation.id, "show")}
                         >
-                          Show
+                          Présent
                         </Button>
                         <Button 
                           variant="outline" 
@@ -527,7 +527,7 @@ export function ReservationsSection() {
                           className="premium-button"
                           onClick={() => handleUpdateReservationStatus(reservation.id, "no_show")}
                         >
-                          No-show
+                          Absent
                         </Button>
                         <Button 
                           variant="outline" 
