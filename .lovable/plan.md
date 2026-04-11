@@ -1,15 +1,16 @@
 
 
-## Plan : Traduire les boutons Show / No-show en français
+## Plan : Ajouter une route de prévisualisation du mail de remerciement
 
-### Changement
+Je vais simplement ajouter une route `/email-preview-thankyou` qui reproduit le template HTML exact du mail de remerciement (celui envoyé 3h après la réservation), avec des données de test. Même approche que `/email-preview` qui existe déjà pour le mail de confirmation.
 
-Dans `src/components/Reservations/ReservationsSection.tsx`, ligne 522 et 530 :
-- **"Show"** → **"Présent"**
-- **"No-show"** → **"Absent"**
+### Fichiers modifiés
 
-Les labels dans `StatusBadge.tsx` sont déjà en français ("Présent" / "Absent"), donc aucun autre fichier à modifier.
+1. **`src/pages/ThankYouEmailPreviewPage.tsx`** (nouveau) — Reproduit en React le même HTML que `buildThankYouEmailHtml()` dans l'Edge Function, avec le nom test "Jean Dupont". Inclut : logo, étoile, message de remerciement, bouton Google, footer réseaux sociaux.
 
-### Fichier modifié
-- `src/components/Reservations/ReservationsSection.tsx` (2 lignes)
+2. **`src/App.tsx`** — Ajout de la route `/email-preview-thankyou` (publique, pas protégée).
+
+### Accès
+
+Vous pourrez voir le rendu en allant sur `/email-preview-thankyou` dans le navigateur et me dire les corrections à apporter.
 
