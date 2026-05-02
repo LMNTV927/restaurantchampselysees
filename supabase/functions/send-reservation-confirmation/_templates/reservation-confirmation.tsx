@@ -407,3 +407,20 @@ const legalLink = {
   textDecoration: 'underline' as const,
   textUnderlineOffset: '2px',
 };
+
+const disclaimerSection = {
+  backgroundColor: '#111111',
+  padding: '0 28px 18px',
+  borderLeft: '1px solid rgba(201,168,76,0.12)',
+  borderRight: '1px solid rgba(201,168,76,0.12)',
+  borderBottom: '1px solid rgba(201,168,76,0.08)',
+};
+
+const disclaimerText = {
+  fontSize: '10.5px',
+  color: '#7a7268',
+  lineHeight: '1.5',
+  fontStyle: 'italic' as const,
+  margin: '0',
+  textAlign: 'center' as const,
+};
