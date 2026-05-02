@@ -182,6 +182,17 @@ export const ReservationConfirmationEmail = ({
             </td></tr>
           </table>
 
+          {/* Disclaimer */}
+          {!isCancellation && (
+            <table cellPadding="0" cellSpacing="0" width="100%" style={disclaimerSection}>
+              <tr><td align="center">
+                <Text style={disclaimerText}>
+                  Cette confirmation de réservation ne garantit pas automatiquement une place dans notre établissement, notamment lors d'événements ou d'occasions spéciales.
+                </Text>
+              </td></tr>
+            </table>
+          )}
+
           {/* Footer */}
           <table cellPadding="0" cellSpacing="0" width="100%" style={footer}>
             <tr><td align="center" style={{ paddingBottom: '16px' }}>
@@ -395,4 +406,21 @@ const legalLink = {
   color: '#7a7268',
   textDecoration: 'underline' as const,
   textUnderlineOffset: '2px',
+};
+
+const disclaimerSection = {
+  backgroundColor: '#111111',
+  padding: '0 28px 18px',
+  borderLeft: '1px solid rgba(201,168,76,0.12)',
+  borderRight: '1px solid rgba(201,168,76,0.12)',
+  borderBottom: '1px solid rgba(201,168,76,0.08)',
+};
+
+const disclaimerText = {
+  fontSize: '10.5px',
+  color: '#7a7268',
+  lineHeight: '1.5',
+  fontStyle: 'italic' as const,
+  margin: '0',
+  textAlign: 'center' as const,
 };
