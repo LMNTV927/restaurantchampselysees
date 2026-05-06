@@ -182,17 +182,6 @@ export const ReservationConfirmationEmail = ({
             </td></tr>
           </table>
 
-          {/* Disclaimer */}
-          {!isCancellation && (
-            <table cellPadding="0" cellSpacing="0" width="100%" style={disclaimerSection}>
-              <tr><td align="center">
-                <Text style={disclaimerText}>
-                  Cette confirmation de réservation ne garantit pas automatiquement une place dans notre établissement, notamment lors d'événements ou d'occasions spéciales.
-                </Text>
-              </td></tr>
-            </table>
-          )}
-
           {/* Footer */}
           <table cellPadding="0" cellSpacing="0" width="100%" style={footer}>
             <tr><td align="center" style={{ paddingBottom: '16px' }}>

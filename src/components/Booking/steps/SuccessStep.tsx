@@ -79,9 +79,6 @@ export function SuccessStep({ bookingData }: SuccessStepProps) {
           <p>📍 76 Av. Des Champs Elysées, 75008 Paris</p>
           <p>📍 59 Rue de Ponthieu, 75008</p>
         </div>
-        <p className="text-xs text-muted-foreground/80 italic mt-4 px-2">
-          Cette confirmation de réservation ne garantit pas automatiquement une place dans notre établissement, notamment lors d'événements ou d'occasions spéciales.
-        </p>
       </div>
     </motion.div>
   );
