@@ -347,6 +347,20 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
 
             <FormField
               control={form.control}
+              name="source"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Via (source de la réservation)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: Téléphone, Instagram, Sur place..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="notes"
               render={({ field }) => (
                 <FormItem>
