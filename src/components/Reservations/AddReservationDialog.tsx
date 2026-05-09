@@ -73,6 +73,7 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
       customerPhone: "",
       customerEmail: "",
       guestsCount: 2,
+      source: "",
       notes: "",
     },
   });
