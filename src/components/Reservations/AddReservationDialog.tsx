@@ -51,6 +51,7 @@ const formSchema = z.object({
   }),
   reservationTime: z.string().min(1, "Veuillez sélectionner une heure"),
   guestsCount: z.number().min(1, "Au moins 1 invité requis").max(20, "Maximum 20 invités"),
+  source: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -72,6 +73,7 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
       customerPhone: "",
       customerEmail: "",
       guestsCount: 2,
+      source: "",
       notes: "",
     },
   });
@@ -113,6 +115,7 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
           customer_phone: values.customerPhone,
           customer_email: values.customerEmail || null,
           notes: values.notes || null,
+          source: values.source?.trim() || null,
           status: 'confirmed'
         });
 
@@ -281,7 +284,11 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date()}
+                          disabled={(date) => {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            return date < today;
+                          }}
                           initialFocus
                           className={cn("p-3 pointer-events-auto")}
                         />
@@ -337,6 +344,20 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="source"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Via (source de la réservation)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: Téléphone, Instagram, Sur place..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
