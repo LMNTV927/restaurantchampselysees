@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { getBookingUrl } from "@/lib/bookingLinks";
 
 interface Link {
   id: string;
@@ -45,7 +46,7 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopyLink = async (link: Link) => {
-    const fullUrl = `${window.location.origin}${link.shortUrl}`;
+    const fullUrl = link.redirectUrl || getBookingUrl(link.shortUrl.replace(/^\/book\//, ""));
     await navigator.clipboard.writeText(fullUrl);
     setCopiedId(link.id);
     setTimeout(() => setCopiedId(null), 2000);

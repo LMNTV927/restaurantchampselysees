@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, MousePointer, Calendar, Users } from "lucide-react";
 import { useRealtimeChannelsData, ChannelData } from "@/hooks/useRealtimeChannelsData";
+import { getBookingPath, getBookingUrl } from "@/lib/bookingLinks";
 
 interface Link {
   id: string;
@@ -32,8 +33,8 @@ export function LinksSection() {
   const links: Link[] = channels.map(channel => ({
     id: channel.id,
     channel: channel.name,
-    shortUrl: `/book/${channel.slug}`,
-    redirectUrl: `${window.location.origin}/book/${channel.slug}`,
+    shortUrl: getBookingPath(channel.slug),
+    redirectUrl: getBookingUrl(channel.slug),
     clicks: channel.clicks,
     reservations: channel.reservations,
     covers: channel.covers,
