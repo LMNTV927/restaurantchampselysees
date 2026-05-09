@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentMonthInParis } from '@/lib/dateUtils';
+import { getBookingUrl } from '@/lib/bookingLinks';
 
 export interface ChannelData {
   id: string;
@@ -82,7 +83,7 @@ const fetchChannelsAndStats = async (): Promise<ChannelsResult> => {
       description: channel.description, isActive: channel.is_active,
       clicks: stats.clicks, reservations: stats.reservations,
       covers: stats.total_covers, conversion,
-      shortUrl: `${window.location.origin}/book/${channel.slug}`
+      shortUrl: getBookingUrl(channel.slug)
     };
   }) || [];
 
