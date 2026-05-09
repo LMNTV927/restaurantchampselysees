@@ -53,7 +53,7 @@ export function ReservationsSection() {
       occasion: '', // We don't have occasion in our data model yet
       notes: reservation.notes || '',
       status: reservation.status,
-      source: reservation.channelName
+      source: reservation.source || reservation.channelName
     };
   });
 
@@ -92,7 +92,7 @@ export function ReservationsSection() {
         occasion: '',
         notes: reservation.notes || '',
         status: reservation.status,
-        source: reservation.channelName,
+        source: reservation.source || reservation.channelName,
         reservationDate: reservation.reservationDate, // Keep original date string
         reservationTime: reservation.reservationTime  // Keep original time string
       };
@@ -187,7 +187,7 @@ export function ReservationsSection() {
         occasion: '',
         notes: reservation.notes || '',
         status: reservation.status,
-        source: reservation.channelName,
+        source: reservation.source || reservation.channelName,
         reservationDate: reservation.reservationDate,
         reservationTime: reservation.reservationTime
       };
