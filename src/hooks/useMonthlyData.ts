@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ChannelData, ChannelsKPIs } from './useRealtimeChannelsData';
+import { getBookingUrl } from '@/lib/bookingLinks';
 
 interface ReservationData {
   id: string;
@@ -75,7 +76,7 @@ const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => 
       description: channel.description, isActive: channel.is_active,
       clicks: stats.clicks, reservations: stats.reservations,
       covers: stats.total_covers, conversion,
-      shortUrl: `${window.location.origin}/book/${channel.slug}`
+      shortUrl: getBookingUrl(channel.slug)
     };
   }) || [];
 
