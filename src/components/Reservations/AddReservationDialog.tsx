@@ -115,6 +115,7 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
           customer_phone: values.customerPhone,
           customer_email: values.customerEmail || null,
           notes: values.notes || null,
+          source: values.source?.trim() || null,
           status: 'confirmed'
         });
 
