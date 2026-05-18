@@ -465,10 +465,10 @@ export function ReservationsSection() {
                   <div className="flex items-center gap-4">
                     <div className="text-center">
                       <p className="text-lg font-semibold text-foreground">
-                        {reservation.startAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        {(reservation as any).reservationTime?.slice(0, 5) ?? reservation.startAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {reservation.startAt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                        {(reservation as any).reservationDate ? `${(reservation as any).reservationDate.slice(8, 10)}/${(reservation as any).reservationDate.slice(5, 7)}` : reservation.startAt.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', timeZone: 'Europe/Paris' })}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {reservation.partySize} pers.
