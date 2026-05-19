@@ -48,7 +48,9 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
 
   const isChampionsLeagueFinal =
     data.date !== null &&
-    data.date.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' }) === '2026-05-30';
+    data.date.getFullYear() === 2026 &&
+    data.date.getMonth() === 4 && // mai (0-indexé)
+    data.date.getDate() === 30;
 
   return (
     <div className="text-center">
