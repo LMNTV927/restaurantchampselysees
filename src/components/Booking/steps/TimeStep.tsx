@@ -46,6 +46,10 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
   const restaurantSlots = allSlots.filter(t => getSlotCategory(t, dayType) === 'restaurant');
   const clubSlots = allSlots.filter(t => getSlotCategory(t, dayType) === 'club');
 
+  const isChampionsLeagueFinal =
+    data.date !== null &&
+    data.date.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' }) === '2026-05-30';
+
   return (
     <div className="text-center">
       <h4 className="text-xl font-playfair font-semibold text-foreground mb-2">
