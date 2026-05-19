@@ -116,7 +116,26 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
           ))}
         </div>
       </div>
-      
+
+      {isChampionsLeagueFinal && (
+        <div
+          className="mt-6 p-4 rounded-lg border-2 text-left"
+          style={{
+            borderColor: '#c9a84c',
+            backgroundColor: 'rgba(201, 168, 76, 0.1)',
+          }}
+        >
+          <p className="text-sm font-semibold mb-1" style={{ color: '#c9a84c' }}>
+            ⚽ Finale de la Ligue des Champions
+          </p>
+          <p className="text-sm text-foreground">
+            Pour la diffusion de la finale de la Ligue des Champions le 30 mai 2026,
+            nous ne prenons pas de réservations. Merci de vous déplacer directement
+            à l'avance pour garantir votre place lors de cet événement diffusé chez nous.
+          </p>
+        </div>
+      )}
+
     </div>
   );
 }
