@@ -11,6 +11,7 @@ import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
 import { useAuth } from "@/hooks/useAuth";
 import { AddReservationDialog } from "./AddReservationDialog";
 import { EditCommentDialog } from "./EditCommentDialog";
+import { EditReservationDialog } from "./EditReservationDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis, createDateTimeInParis } from "@/lib/dateUtils";
 
@@ -539,6 +540,26 @@ export function ReservationsSection() {
                         </Button>
                       </>
                     )}
+                    {(() => {
+                      const r = realtimeReservations.find(x => x.id === reservation.id);
+                      if (!r) return null;
+                      return (
+                        <EditReservationDialog
+                          reservation={{
+                            id: r.id,
+                            customerName: r.customerName,
+                            customerPhone: r.customerPhone,
+                            customerEmail: r.customerEmail,
+                            reservationDate: r.reservationDate,
+                            reservationTime: r.reservationTime,
+                            guestsCount: r.guestsCount,
+                            source: r.source,
+                            notes: r.notes,
+                          }}
+                          onUpdated={refetch}
+                        />
+                      );
+                    })()}
                     {role === 'admin' && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
