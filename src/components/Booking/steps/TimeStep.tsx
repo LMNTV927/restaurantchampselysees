@@ -76,7 +76,7 @@ export function TimeStep({ data, onUpdate, onAdvance }: TimeStepProps) {
             <motion.button
               key={time}
               onClick={() => handleTimeSelect(time)}
-              className={`p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
+              className={`min-h-[44px] p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
                 data.time === time
                   ? 'shadow-soft text-foreground'
                   : 'border-border bg-background text-foreground hover:opacity-80'
@@ -105,7 +105,7 @@ export function TimeStep({ data, onUpdate, onAdvance }: TimeStepProps) {
             <motion.button
               key={time}
               onClick={() => handleTimeSelect(time)}
-              className={`p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
+              className={`min-h-[44px] p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
                 data.time === time
                   ? 'shadow-soft text-foreground'
                   : 'border-border bg-background text-foreground hover:opacity-80'
