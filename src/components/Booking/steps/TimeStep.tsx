@@ -39,10 +39,12 @@ function getSlotCategory(time: string, dayType: 'weekday' | 'friday' | 'weekend'
   }
 }
 
-export function TimeStep({ data, onUpdate }: TimeStepProps) {
+export function TimeStep({ data, onUpdate, onAdvance }: TimeStepProps) {
   const handleTimeSelect = (time: string) => {
     onUpdate({ time });
+    if (onAdvance) setTimeout(onAdvance, 200);
   };
+
 
   const dayType = getDayType(data.date);
   const restaurantSlots = allSlots.filter(t => getSlotCategory(t, dayType) === 'restaurant');
