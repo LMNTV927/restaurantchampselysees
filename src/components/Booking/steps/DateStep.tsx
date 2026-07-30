@@ -6,12 +6,18 @@ import { fr } from 'date-fns/locale';
 interface DateStepProps {
   data: BookingData;
   onUpdate: (updates: Partial<BookingData>) => void;
+  onAdvance?: () => void;
 }
 
-export function DateStep({ data, onUpdate }: DateStepProps) {
+export function DateStep({ data, onUpdate, onAdvance }: DateStepProps) {
   const handleDateSelect = (date: Date | undefined) => {
     onUpdate({ date: date || null });
+    if (date && onAdvance) {
+      // Move on automatically once a date is picked (less friction on mobile)
+      setTimeout(onAdvance, 200);
+    }
   };
+
 
   // Don't allow past dates or dates more than 2 months in advance
   const disabledDates = (date: Date) => {

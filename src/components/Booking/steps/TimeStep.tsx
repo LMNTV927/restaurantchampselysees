@@ -4,7 +4,9 @@ import { BookingData } from '../BookingForm';
 interface TimeStepProps {
   data: BookingData;
   onUpdate: (updates: Partial<BookingData>) => void;
+  onAdvance?: () => void;
 }
+
 
 const allSlots = [
   '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
@@ -37,10 +39,12 @@ function getSlotCategory(time: string, dayType: 'weekday' | 'friday' | 'weekend'
   }
 }
 
-export function TimeStep({ data, onUpdate }: TimeStepProps) {
+export function TimeStep({ data, onUpdate, onAdvance }: TimeStepProps) {
   const handleTimeSelect = (time: string) => {
     onUpdate({ time });
+    if (onAdvance) setTimeout(onAdvance, 200);
   };
+
 
   const dayType = getDayType(data.date);
   const restaurantSlots = allSlots.filter(t => getSlotCategory(t, dayType) === 'restaurant');
@@ -72,7 +76,7 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
             <motion.button
               key={time}
               onClick={() => handleTimeSelect(time)}
-              className={`p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
+              className={`min-h-[44px] p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
                 data.time === time
                   ? 'shadow-soft text-foreground'
                   : 'border-border bg-background text-foreground hover:opacity-80'
@@ -101,7 +105,7 @@ export function TimeStep({ data, onUpdate }: TimeStepProps) {
             <motion.button
               key={time}
               onClick={() => handleTimeSelect(time)}
-              className={`p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
+              className={`min-h-[44px] p-3 rounded-lg border-2 transition-all duration-200 font-medium ${
                 data.time === time
                   ? 'shadow-soft text-foreground'
                   : 'border-border bg-background text-foreground hover:opacity-80'

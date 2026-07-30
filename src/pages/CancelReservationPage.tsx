@@ -6,13 +6,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { ImageCarousel } from '@/components/Booking/ImageCarousel';
-import dish1 from '@/assets/dish-1.jpg';
-import dish2 from '@/assets/dish-2.jpg';
-import dish3 from '@/assets/dish-3.jpg';
-import dish4 from '@/assets/dish-4.jpg';
+import { dishImages } from '@/lib/dishImages';
 
-const princePalaceLogo = "/lovable-uploads/ce9ac516-0580-4c36-b708-89f1a0a13c29.png";
-const dishImages = [dish1, dish2, dish3, dish4];
+const princePalaceLogo = "/prince-palace-logo-128.webp";
+
 
 interface ReservationData {
   id: string;
