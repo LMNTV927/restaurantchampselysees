@@ -4,7 +4,9 @@ import { BookingData } from '../BookingForm';
 interface TimeStepProps {
   data: BookingData;
   onUpdate: (updates: Partial<BookingData>) => void;
+  onAdvance?: () => void;
 }
+
 
 const allSlots = [
   '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
