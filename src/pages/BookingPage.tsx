@@ -4,15 +4,12 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/Booking/BookingForm";
 import { ImageCarousel } from "@/components/Booking/ImageCarousel";
+import { dishImages } from "@/lib/dishImages";
 const princePalaceLogo = "/prince-palace-logo-128.webp";
 // Build-time optimised backgrounds (WebP, resized) — ~9.8 MB of JPEG originals
 // become a few hundred KB total.
-import dish1 from "@/assets/dish-1.jpg?w=1280&format=webp&quality=68";
-import dish2 from "@/assets/dish-2.jpg?w=1280&format=webp&quality=68";
-import dish3 from "@/assets/dish-3.jpg?w=1280&format=webp&quality=68";
-import dish4 from "@/assets/dish-4.jpg?w=1280&format=webp&quality=68";
 
-const dishImages = [dish1, dish2, dish3, dish4];
+
 
 export function BookingPage() {
   const { slug } = useParams<{ slug: string }>();
