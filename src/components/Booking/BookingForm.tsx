@@ -215,11 +215,12 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
 
     switch (currentStep) {
       case 0:
-        return <DateStep data={bookingData} onUpdate={updateBookingData} />;
+        return <DateStep data={bookingData} onUpdate={updateBookingData} onAdvance={() => setCurrentStep(1)} />;
       case 1:
-        return <TimeStep data={bookingData} onUpdate={updateBookingData} />;
+        return <TimeStep data={bookingData} onUpdate={updateBookingData} onAdvance={() => setCurrentStep(2)} />;
       case 2:
         return <GuestsStep data={bookingData} onUpdate={updateBookingData} />;
+
       case 3:
         return <ContactStep data={bookingData} onUpdate={updateBookingData} />;
       case 4:
