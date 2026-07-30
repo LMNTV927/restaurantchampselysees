@@ -215,12 +215,11 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
 
     switch (currentStep) {
       case 0:
-        return <DateStep data={bookingData} onUpdate={updateBookingData} onAdvance={() => setCurrentStep(1)} />;
+        return <DateStep data={bookingData} onUpdate={updateBookingData} />;
       case 1:
-        return <TimeStep data={bookingData} onUpdate={updateBookingData} onAdvance={() => setCurrentStep(2)} />;
+        return <TimeStep data={bookingData} onUpdate={updateBookingData} />;
       case 2:
         return <GuestsStep data={bookingData} onUpdate={updateBookingData} />;
-
       case 3:
         return <ContactStep data={bookingData} onUpdate={updateBookingData} />;
       case 4:
@@ -257,10 +256,10 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
             const isCompleted = index < currentStep;
             
             return (
-              <div key={step.id} className="flex items-center flex-1 last:flex-none">
+              <div key={step.id} className="flex items-center">
                 <motion.div
                   className={`
-                    w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-full flex items-center justify-center border-2 transition-all duration-300
+                    w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300
                     ${isActive 
                       ? 'bg-primary border-primary text-primary-foreground' 
                       : isCompleted 
@@ -275,7 +274,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
                 </motion.div>
                 {index < steps.length - 1 && (
                   <div className={`
-                    flex-1 h-0.5 mx-1.5 md:mx-2 transition-colors duration-300
+                    w-8 h-0.5 mx-2 transition-colors duration-300
                     ${isCompleted ? 'bg-success' : 'bg-border'}
                   `} />
                 )}

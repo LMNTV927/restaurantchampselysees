@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/Booking/BookingForm";
 import { ImageCarousel } from "@/components/Booking/ImageCarousel";
-import { dishImages } from "@/lib/dishImages";
-const princePalaceLogo = "/prince-palace-logo-128.webp";
-// Build-time optimised backgrounds (WebP, resized) — ~9.8 MB of JPEG originals
-// become a few hundred KB total.
+const princePalaceLogo = "/lovable-uploads/ce9ac516-0580-4c36-b708-89f1a0a13c29.png";
+import dish1 from "@/assets/dish-1.jpg";
+import dish2 from "@/assets/dish-2.jpg";
+import dish3 from "@/assets/dish-3.jpg";
+import dish4 from "@/assets/dish-4.jpg";
 
-
+const dishImages = [dish1, dish2, dish3, dish4];
 
 export function BookingPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -27,13 +28,16 @@ export function BookingPage() {
       }
 
       try {
-        // Fetch channel info first — click tracking must never delay the form.
+        // Increment clicks
+        await supabase.rpc('increment_channel_clicks', { channel_slug: slug });
+
+        // Fetch channel info
         const { data, error } = await supabase
           .from('channels')
-          .select('id, name, slug')
+          .select('*')
           .eq('slug', slug)
           .eq('is_active', true)
-          .maybeSingle();
+          .single();
 
         if (error || !data) {
           setError("Lien de réservation introuvable ou inactif");
@@ -45,11 +49,6 @@ export function BookingPage() {
         setError("Erreur lors du chargement");
       } finally {
         setLoading(false);
-        // Fire-and-forget click tracking
-        supabase.rpc('increment_channel_clicks', { channel_slug: slug }).then(
-          () => undefined,
-          (e) => console.error('Click tracking error:', e)
-        );
       }
     };
 
@@ -64,6 +63,7 @@ export function BookingPage() {
         covers_count: reservationData.guestsCount
       });
     }
+    // You could redirect to a success page here
   };
 
   if (loading) {
@@ -108,8 +108,7 @@ export function BookingPage() {
       {/* Background Carousel */}
       <div className="absolute inset-0 z-0">
         <ImageCarousel images={dishImages} />
-        {/* Plain overlay (no full-screen backdrop blur — very costly on mobile GPUs) */}
-        <div className="absolute inset-0 bg-black/65"></div>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
       </div>
 
       {/* Logo Overlay */}
@@ -117,20 +116,17 @@ export function BookingPage() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.5, duration: 0.6 }}
-        className="absolute top-5 left-5 md:top-8 md:left-8 z-20"
+        className="absolute top-8 left-8 z-20"
       >
-        <img
-          src={princePalaceLogo}
-          alt="Prince Palace"
-          width={64}
-          height={64}
-          decoding="async"
+        <img 
+          src={princePalaceLogo} 
+          alt="Prince Palace" 
           className="h-16 w-16 object-cover rounded-2xl shadow-gold"
         />
       </motion.div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 pt-28 md:pt-4">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -146,8 +142,8 @@ export function BookingPage() {
             </p>
           </div>
 
-          <BookingForm
-            channelId={channel.id}
+          <BookingForm 
+            channelId={channel.id} 
             onSuccess={handleBookingSuccess}
           />
         </motion.div>

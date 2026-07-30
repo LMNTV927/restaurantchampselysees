@@ -28,15 +28,12 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
           <Input
             id="name"
             type="text"
-            autoComplete="name"
-            enterKeyHint="next"
             placeholder="Votre nom et prénom"
             value={data.customerName}
             onChange={(e) => onUpdate({ customerName: e.target.value })}
             className="premium-input mt-1"
             required
           />
-
         </div>
         
         <div>
@@ -46,16 +43,12 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
           <Input
             id="phone"
             type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            enterKeyHint="next"
             placeholder="+33 6 12 34 56 78"
             value={data.customerPhone}
             onChange={(e) => onUpdate({ customerPhone: e.target.value })}
             className="premium-input mt-1"
             required
           />
-
           <p className="text-xs text-muted-foreground mt-1">
             Nous vous contacterons uniquement en cas de besoin concernant votre réservation
           </p>
@@ -68,15 +61,11 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
           <Input
             id="email"
             type="email"
-            inputMode="email"
-            autoComplete="email"
-            autoCapitalize="none"
             placeholder="votre@email.com"
             value={data.customerEmail || ''}
             onChange={(e) => onUpdate({ customerEmail: e.target.value })}
             className="premium-input mt-1"
           />
-
         </div>
         
         <div>
