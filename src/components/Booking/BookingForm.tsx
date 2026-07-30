@@ -257,10 +257,10 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
             const isCompleted = index < currentStep;
             
             return (
-              <div key={step.id} className="flex items-center">
+              <div key={step.id} className="flex items-center flex-1 last:flex-none">
                 <motion.div
                   className={`
-                    w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300
+                    w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-full flex items-center justify-center border-2 transition-all duration-300
                     ${isActive 
                       ? 'bg-primary border-primary text-primary-foreground' 
                       : isCompleted 
@@ -275,7 +275,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
                 </motion.div>
                 {index < steps.length - 1 && (
                   <div className={`
-                    w-8 h-0.5 mx-2 transition-colors duration-300
+                    flex-1 h-0.5 mx-1.5 md:mx-2 transition-colors duration-300
                     ${isCompleted ? 'bg-success' : 'bg-border'}
                   `} />
                 )}

@@ -117,7 +117,7 @@ export function BookingPage() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.5, duration: 0.6 }}
-        className="absolute top-8 left-8 z-20"
+        className="absolute top-5 left-5 md:top-8 md:left-8 z-20"
       >
         <img
           src={princePalaceLogo}
@@ -130,7 +130,7 @@ export function BookingPage() {
       </motion.div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 pt-28 md:pt-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
