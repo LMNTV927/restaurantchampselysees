@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/Booking/BookingForm";
 import { ImageCarousel } from "@/components/Booking/ImageCarousel";
-const princePalaceLogo = "/lovable-uploads/ce9ac516-0580-4c36-b708-89f1a0a13c29.png";
-import dish1 from "@/assets/dish-1.jpg";
-import dish2 from "@/assets/dish-2.jpg";
-import dish3 from "@/assets/dish-3.jpg";
-import dish4 from "@/assets/dish-4.jpg";
+import { DISH_IMAGES, PRINCE_PALACE_LOGO } from "@/lib/dishImages";
 
-const dishImages = [dish1, dish2, dish3, dish4];
+const princePalaceLogo = PRINCE_PALACE_LOGO;
+const dishImages = DISH_IMAGES;
+
 
 export function BookingPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -20,6 +18,8 @@ export function BookingPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchChannel = async () => {
       if (!slug) {
         setError("Lien de réservation invalide");
@@ -27,17 +27,21 @@ export function BookingPage() {
         return;
       }
 
-      try {
-        // Increment clicks
-        await supabase.rpc('increment_channel_clicks', { channel_slug: slug });
+      // Le comptage du clic part en parallèle et ne bloque jamais l'affichage
+      supabase.rpc('increment_channel_clicks', { channel_slug: slug }).then(
+        () => {},
+        () => {}
+      );
 
-        // Fetch channel info
+      try {
         const { data, error } = await supabase
           .from('channels')
-          .select('*')
+          .select('id, name, slug, is_active')
           .eq('slug', slug)
           .eq('is_active', true)
-          .single();
+          .maybeSingle();
+
+        if (cancelled) return;
 
         if (error || !data) {
           setError("Lien de réservation introuvable ou inactif");
@@ -45,14 +49,16 @@ export function BookingPage() {
           setChannel(data);
         }
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching channel:', err);
         setError("Erreur lors du chargement");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchChannel();
+    return () => { cancelled = true; };
   }, [slug]);
 
   const handleBookingSuccess = async (reservationData: any) => {
@@ -66,18 +72,9 @@ export function BookingPage() {
     // You could redirect to a success page here
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <div className="animate-pulse text-center">
-          <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Chargement...</p>
-        </div>
-      </div>
-    );
-  }
 
-  if (error || !channel) {
+
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
         <motion.div
@@ -108,19 +105,21 @@ export function BookingPage() {
       {/* Background Carousel */}
       <div className="absolute inset-0 z-0">
         <ImageCarousel images={dishImages} />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-black/65"></div>
       </div>
 
       {/* Logo Overlay */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5, duration: 0.6 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
         className="absolute top-8 left-8 z-20"
       >
         <img 
           src={princePalaceLogo} 
           alt="Prince Palace" 
+          width={64}
+          height={64}
           className="h-16 w-16 object-cover rounded-2xl shadow-gold"
         />
       </motion.div>
@@ -128,9 +127,9 @@ export function BookingPage() {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.3 }}
           className="w-full max-w-lg"
         >
           <div className="text-center mb-8">
@@ -143,7 +142,7 @@ export function BookingPage() {
           </div>
 
           <BookingForm 
-            channelId={channel.id} 
+            channelId={channel?.id ?? ''} 
             onSuccess={handleBookingSuccess}
           />
         </motion.div>
