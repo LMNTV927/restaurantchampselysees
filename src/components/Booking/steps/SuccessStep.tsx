@@ -1,14 +1,45 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Calendar, Clock, Users, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { BookingData } from '../BookingForm';
 
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
 interface SuccessStepProps {
   bookingData: BookingData;
 }
 
 export function SuccessStep({ bookingData }: SuccessStepProps) {
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    hasTracked.current = true;
+
+    const key = `gads_conv_${bookingData.customerPhone}_${
+      bookingData.date ? format(bookingData.date, 'yyyy-MM-dd') : ''
+    }_${bookingData.time}`;
+
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch {
+      // sessionStorage indisponible : on envoie quand même
+    }
+
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        send_to: 'AW-17923951263/vSa2CKCC4NkcEJ-V5-JC',
+      });
+    }
+  }, [bookingData.customerPhone, bookingData.date, bookingData.time]);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
