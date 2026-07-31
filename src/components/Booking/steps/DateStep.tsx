@@ -40,8 +40,11 @@ export function DateStep({ data, onUpdate }: DateStepProps) {
           locale={fr}
           className="rounded-xl border border-border bg-background p-4 pointer-events-auto"
           classNames={{
+            day: "h-9 w-9 p-0 font-normal text-foreground opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
             day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
             day_today: "",
+            day_disabled: "text-foreground opacity-100",
+            day_outside: "text-foreground opacity-100",
           }}
         />
       </div>
