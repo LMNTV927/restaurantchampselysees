@@ -145,8 +145,6 @@ export function BookingPage() {
             channelId={channel?.id ?? ''} 
             onSuccess={handleBookingSuccess}
           />
-
-          />
         </motion.div>
       </div>
     </div>
