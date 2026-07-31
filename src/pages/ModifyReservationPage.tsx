@@ -11,13 +11,10 @@ import { ImageCarousel } from '@/components/Booking/ImageCarousel';
 import { DateStep } from '@/components/Booking/steps/DateStep';
 import { TimeStep } from '@/components/Booking/steps/TimeStep';
 import { GuestsStep } from '@/components/Booking/steps/GuestsStep';
-import dish1 from '@/assets/dish-1.jpg';
-import dish2 from '@/assets/dish-2.jpg';
-import dish3 from '@/assets/dish-3.jpg';
-import dish4 from '@/assets/dish-4.jpg';
+import { DISH_IMAGES, PRINCE_PALACE_LOGO } from '@/lib/dishImages';
 
-const princePalaceLogo = "/lovable-uploads/ce9ac516-0580-4c36-b708-89f1a0a13c29.png";
-const dishImages = [dish1, dish2, dish3, dish4];
+const princePalaceLogo = PRINCE_PALACE_LOGO;
+const dishImages = DISH_IMAGES;
 
 interface ReservationData {
   id: string;
@@ -149,7 +146,7 @@ export default function ModifyReservationPage() {
       <div className="min-h-screen relative overflow-hidden">
         <div className="absolute inset-0 z-0">
           <ImageCarousel images={dishImages} />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/65" />
         </div>
         <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
@@ -167,7 +164,7 @@ export default function ModifyReservationPage() {
       <div className="min-h-screen relative overflow-hidden">
         <div className="absolute inset-0 z-0">
           <ImageCarousel images={dishImages} />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/65" />
         </div>
         <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="premium-card p-8 text-center max-w-md mx-auto backdrop-blur-md bg-card/90">
@@ -193,7 +190,7 @@ export default function ModifyReservationPage() {
     <div className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 z-0">
         <ImageCarousel images={dishImages} />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-black/65" />
       </div>
 
       <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5, duration: 0.6 }} className="absolute top-8 left-8 z-20">
