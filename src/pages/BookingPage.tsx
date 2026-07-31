@@ -18,6 +18,8 @@ export function BookingPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchChannel = async () => {
       if (!slug) {
         setError("Lien de réservation invalide");
@@ -25,17 +27,21 @@ export function BookingPage() {
         return;
       }
 
-      try {
-        // Increment clicks
-        await supabase.rpc('increment_channel_clicks', { channel_slug: slug });
+      // Le comptage du clic part en parallèle et ne bloque jamais l'affichage
+      supabase.rpc('increment_channel_clicks', { channel_slug: slug }).then(
+        () => {},
+        () => {}
+      );
 
-        // Fetch channel info
+      try {
         const { data, error } = await supabase
           .from('channels')
-          .select('*')
+          .select('id, name, slug, is_active')
           .eq('slug', slug)
           .eq('is_active', true)
-          .single();
+          .maybeSingle();
+
+        if (cancelled) return;
 
         if (error || !data) {
           setError("Lien de réservation introuvable ou inactif");
@@ -43,14 +49,16 @@ export function BookingPage() {
           setChannel(data);
         }
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching channel:', err);
         setError("Erreur lors du chargement");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchChannel();
+    return () => { cancelled = true; };
   }, [slug]);
 
   const handleBookingSuccess = async (reservationData: any) => {
@@ -64,16 +72,7 @@ export function BookingPage() {
     // You could redirect to a success page here
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <div className="animate-pulse text-center">
-          <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Chargement...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   if (error || !channel) {
     return (
