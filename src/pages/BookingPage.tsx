@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/Booking/BookingForm";
 import { ImageCarousel } from "@/components/Booking/ImageCarousel";
-const princePalaceLogo = "/lovable-uploads/ce9ac516-0580-4c36-b708-89f1a0a13c29.png";
-import dish1 from "@/assets/dish-1.jpg";
-import dish2 from "@/assets/dish-2.jpg";
-import dish3 from "@/assets/dish-3.jpg";
-import dish4 from "@/assets/dish-4.jpg";
+import { DISH_IMAGES, PRINCE_PALACE_LOGO } from "@/lib/dishImages";
 
-const dishImages = [dish1, dish2, dish3, dish4];
+const princePalaceLogo = PRINCE_PALACE_LOGO;
+const dishImages = DISH_IMAGES;
+
 
 export function BookingPage() {
   const { slug } = useParams<{ slug: string }>();
