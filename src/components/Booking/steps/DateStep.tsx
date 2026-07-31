@@ -10,17 +10,14 @@ interface DateStepProps {
 
 export function DateStep({ data, onUpdate }: DateStepProps) {
   const handleDateSelect = (date: Date | undefined) => {
-    onUpdate({ date: date || null });
+    if (!date) return;
+    onUpdate({ date });
   };
 
-  // Don't allow past dates or dates more than 2 months in advance
-  const disabledDates = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const maxDate = addDays(today, 60);
-    
-    return date < today || date > maxDate;
-  };
+  // Bornes : aujourd'hui -> +60 jours
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const maxDate = addDays(today, 60);
 
   return (
     <div className="text-center">
@@ -30,25 +27,27 @@ export function DateStep({ data, onUpdate }: DateStepProps) {
       <p className="text-muted-foreground mb-6">
         Sélectionnez le jour souhaité pour votre réservation
       </p>
-      
+
       <div className="flex justify-center">
         <Calendar
           mode="single"
           selected={data.date || undefined}
           onSelect={handleDateSelect}
-          disabled={disabledDates}
+          defaultMonth={data.date || today}
+          fromDate={today}
+          toDate={maxDate}
           locale={fr}
           className="rounded-xl border border-border bg-background p-4 pointer-events-auto"
           classNames={{
-            day: "h-9 w-9 p-0 font-normal text-foreground opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
-            day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+            day: "h-9 w-9 p-0 font-normal text-foreground opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer",
+            day_selected:
+              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
             day_today: "",
-            day_disabled: "text-foreground opacity-100",
-            day_outside: "text-foreground opacity-100",
+            day_disabled: "text-muted-foreground/40 opacity-100 cursor-not-allowed",
+            day_outside: "invisible",
           }}
         />
       </div>
-      
     </div>
   );
 }
