@@ -1,44 +1,58 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { DishImage } from '@/lib/dishImages';
 
 interface ImageCarouselProps {
-  images: string[];
+  images: DishImage[];
   autoPlayInterval?: number;
 }
 
 export function ImageCarousel({ images, autoPlayInterval = 5000 }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  // On ne monte le carrousel (et donc les images suivantes) qu'après le premier rendu
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const id = window.setTimeout(() => setReady(true), 300);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    if (!ready || images.length < 2) return;
+    const interval = window.setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, autoPlayInterval);
+    return () => window.clearInterval(interval);
+  }, [ready, images.length, autoPlayInterval]);
 
-    return () => clearInterval(interval);
-  }, [images.length, autoPlayInterval]);
+  const image = images[currentIndex];
 
   return (
     <div className="absolute inset-0 overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
           className="absolute inset-0"
         >
           <img
-            src={images[currentIndex]}
-            alt={`Plat ${currentIndex + 1}`}
+            src={image.src}
+            srcSet={`${image.srcSm} 800w, ${image.src} 1600w`}
+            sizes="100vw"
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+            loading={currentIndex === 0 ? 'eager' : 'lazy'}
+            // @ts-expect-error attribut HTML standard non typé par React
+            fetchpriority={currentIndex === 0 ? 'high' : 'low'}
             className="w-full h-full object-cover object-center"
-            style={{ 
-              filter: 'contrast(1.05) brightness(1.02)'
-            }}
           />
         </motion.div>
       </AnimatePresence>
-      
+
       {/* Subtle indicators */}
       <div className="absolute bottom-8 right-8 flex space-x-2">
         {images.map((_, index) => (
