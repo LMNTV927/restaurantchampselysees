@@ -74,7 +74,7 @@ export function BookingPage() {
 
 
 
-  if (error || !channel) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
         <motion.div
@@ -105,19 +105,21 @@ export function BookingPage() {
       {/* Background Carousel */}
       <div className="absolute inset-0 z-0">
         <ImageCarousel images={dishImages} />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-black/65"></div>
       </div>
 
       {/* Logo Overlay */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5, duration: 0.6 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
         className="absolute top-8 left-8 z-20"
       >
         <img 
           src={princePalaceLogo} 
           alt="Prince Palace" 
+          width={64}
+          height={64}
           className="h-16 w-16 object-cover rounded-2xl shadow-gold"
         />
       </motion.div>
@@ -125,9 +127,9 @@ export function BookingPage() {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.3 }}
           className="w-full max-w-lg"
         >
           <div className="text-center mb-8">
@@ -140,8 +142,10 @@ export function BookingPage() {
           </div>
 
           <BookingForm 
-            channelId={channel.id} 
+            channelId={channel?.id ?? ''} 
             onSuccess={handleBookingSuccess}
+          />
+
           />
         </motion.div>
       </div>
