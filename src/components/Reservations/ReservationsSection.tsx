@@ -511,22 +511,21 @@ export function ReservationsSection() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {selectedFilter !== "past" && (
-                      <>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <>
                         <Button 
-                          variant="outline" 
+                          variant={reservation.status === "show" ? "default" : "outline"}
                           size="sm" 
                           className="premium-button"
-                          onClick={() => handleUpdateReservationStatus(reservation.id, "show")}
+                          onClick={() => handleUpdateReservationStatus(reservation.id, reservation.status === "show" ? "confirmed" : "show")}
                         >
                           Présent
                         </Button>
                         <Button 
-                          variant="outline" 
+                          variant={reservation.status === "no_show" ? "destructive" : "outline"}
                           size="sm" 
                           className="premium-button"
-                          onClick={() => handleUpdateReservationStatus(reservation.id, "no_show")}
+                          onClick={() => handleUpdateReservationStatus(reservation.id, reservation.status === "no_show" ? "confirmed" : "no_show")}
                         >
                           Absent
                         </Button>
@@ -534,12 +533,12 @@ export function ReservationsSection() {
                           variant="outline" 
                           size="sm" 
                           className="premium-button"
-                          onClick={() => handleUpdateReservationStatus(reservation.id, "cancelled")}
+                          onClick={() => handleUpdateReservationStatus(reservation.id, reservation.status === "cancelled" ? "confirmed" : "cancelled")}
                         >
-                          Annuler
+                          {reservation.status === "cancelled" ? "Rétablir" : "Annuler"}
                         </Button>
                       </>
-                    )}
+
                     {(() => {
                       const r = realtimeReservations.find(x => x.id === reservation.id);
                       if (!r) return null;
