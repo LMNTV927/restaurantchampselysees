@@ -130,42 +130,77 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const rawKey = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_KEY");
-    const calendarId = Deno.env.get("GOOGLE_CALENDAR_ID");
-    if (!rawKey || !calendarId) {
-      return new Response(
-        JSON.stringify({ error: "Google Agenda non configuré (clé de service ou identifiant d'agenda manquant)" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    const rawKey = (Deno.env.get("GOOGLE_SERVICE_ACCOUNT_KEY") ?? "").trim();
+    const calendarId = (Deno.env.get("GOOGLE_CALENDAR_ID") ?? "").trim();
+    const icsUrl = [rawKey, calendarId].find((v) => v.startsWith("http") && /\.ics(\?|$)/i.test(v));
+
+    const timeMin = new Date(Date.now() - 24 * 3600 * 1000);
+    const timeMax = new Date(Date.now() + SYNC_DAYS_AHEAD * 24 * 3600 * 1000);
+
+    let events: any[];
+
+    if (icsUrl) {
+      // Private iCal feed (read-only)
+      const icsRes = await fetch(icsUrl);
+      const ics = await icsRes.text();
+      if (!icsRes.ok) {
+        console.error(`iCal fetch error [${icsRes.status}]: ${ics.slice(0, 300)}`);
+        return new Response(
+          JSON.stringify({ error: "Lecture de l'agenda impossible", status: icsRes.status }),
+          { status: icsRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      events = parseIcs(ics).filter((e) => {
+        const start = e.start?.dateTime ?? e.start?.date;
+        if (!start) return false;
+        const d = new Date(start);
+        return d >= timeMin && d <= timeMax;
+      });
+    } else {
+      if (!rawKey || !calendarId) {
+        return new Response(
+          JSON.stringify({ error: "Google Agenda non configuré (clé de service ou identifiant d'agenda manquant)" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      let serviceAccount: any;
+      try {
+        serviceAccount = JSON.parse(rawKey);
+      } catch {
+        return new Response(
+          JSON.stringify({
+            error:
+              "La clé Google enregistrée n'est ni un compte de service (JSON) ni une adresse iCal privée (.ics). Merci de fournir l'une des deux.",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const accessToken = await getAccessToken(serviceAccount);
+      const url = new URL(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
       );
+      url.searchParams.set("timeMin", timeMin.toISOString());
+      url.searchParams.set("timeMax", timeMax.toISOString());
+      url.searchParams.set("singleEvents", "true");
+      url.searchParams.set("orderBy", "startTime");
+      url.searchParams.set("maxResults", "250");
+
+      const eventsRes = await fetch(url.toString(), {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const eventsBody = await eventsRes.text();
+      if (!eventsRes.ok) {
+        console.error(`Google Calendar error [${eventsRes.status}]: ${eventsBody}`);
+        return new Response(
+          JSON.stringify({ error: "Lecture Google Agenda impossible", status: eventsRes.status, details: eventsBody }),
+          { status: eventsRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      events = (JSON.parse(eventsBody).items ?? []) as any[];
     }
 
-    const serviceAccount = JSON.parse(rawKey);
-    const accessToken = await getAccessToken(serviceAccount);
-
-    const timeMin = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-    const timeMax = new Date(Date.now() + SYNC_DAYS_AHEAD * 24 * 3600 * 1000).toISOString();
-
-    const url = new URL(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
-    );
-    url.searchParams.set("timeMin", timeMin);
-    url.searchParams.set("timeMax", timeMax);
-    url.searchParams.set("singleEvents", "true");
-    url.searchParams.set("orderBy", "startTime");
-    url.searchParams.set("maxResults", "250");
-
-    const eventsRes = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const eventsBody = await eventsRes.text();
-    if (!eventsRes.ok) {
-      console.error(`Google Calendar error [${eventsRes.status}]: ${eventsBody}`);
-      return new Response(
-        JSON.stringify({ error: "Lecture Google Agenda impossible", status: eventsRes.status, details: eventsBody }),
-        { status: eventsRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-    const events = (JSON.parse(eventsBody).items ?? []) as any[];
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
