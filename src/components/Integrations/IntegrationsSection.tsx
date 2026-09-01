@@ -21,6 +21,8 @@ interface SetupResult {
   webhook_url?: string;
   webhook_id?: string | null;
   next_steps?: string[];
+  restriction?: string;
+  automated?: boolean;
   error?: string;
   details?: string;
 }
