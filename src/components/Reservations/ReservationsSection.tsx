@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, History, Trash2, RefreshCw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,32 @@ export function ReservationsSection() {
   const { toast } = useToast();
   const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncGoogleAgenda = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-google-calendar");
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const { imported = 0, updated = 0 } = (data as any) ?? {};
+      toast({
+        title: "Google Agenda synchronisé",
+        description: `${imported} nouvelle(s) réservation(s), ${updated} mise(s) à jour.`,
+      });
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Synchronisation impossible",
+        description: err?.message ?? "Vérifiez la configuration de Google Agenda.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+
 
   // Transform real-time reservations to match local interface
   const allReservations: Reservation[] = realtimeReservations.map(reservation => {
@@ -321,6 +348,15 @@ export function ReservationsSection() {
         
         <div className="flex items-center gap-4">
           <AddReservationDialog onReservationAdded={refetch} />
+          <Button
+            variant="outline"
+            onClick={handleSyncGoogleAgenda}
+            disabled={syncing}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Synchronisation…" : "Synchroniser Google Agenda"}
+          </Button>
           {/* Filters */}
           <div className="flex items-center bg-card/50 rounded-2xl p-1 backdrop-blur-sm">
             {filters.map((filter) => (

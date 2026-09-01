@@ -163,6 +163,26 @@ export function useRealtimeDashboard() {
     }
   }, []);
 
+  // Import Google Agenda reservations (read-only) at most once per hour
+  useEffect(() => {
+    const lastSync = sessionStorage.getItem('gcal_last_sync');
+    const now = Date.now();
+    const ONE_HOUR = 60 * 60 * 1000;
+
+    if (!lastSync || (now - parseInt(lastSync)) > ONE_HOUR) {
+      sessionStorage.setItem('gcal_last_sync', now.toString());
+      supabase.functions.invoke('sync-google-calendar').then(({ data, error }) => {
+        if (error) console.error('Google Agenda sync error:', error);
+        else {
+          console.log('Google Agenda sync:', data);
+          queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+          queryClient.invalidateQueries({ queryKey: ['reservations'] });
+        }
+      });
+    }
+  }, [queryClient]);
+
+
   const { data: dashboardData, isLoading: loading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: fetchDashboardData,
