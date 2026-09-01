@@ -114,6 +114,42 @@ function extractPhone(text: string): string | null {
   return m ? m[1] : null;
 }
 
+// Parses structured descriptions like:
+//   Nom : Ileka
+//   Nombre de personnes : 6
+//   Occasion : Anniversaire
+//   Contact : +33646250736
+//   Date et Heure de l'appel : ...
+function parseStructuredDescription(desc: string): {
+  isStructured: boolean;
+  guests: number | null;
+  phone: string | null;
+  occasion: string | null;
+} {
+  const result = { isStructured: false, guests: null as number | null, phone: null as string | null, occasion: null as string | null };
+  if (!desc) return result;
+  for (const line of desc.split(/\r?\n/)) {
+    const m = line.match(/^\s*([^:\n]{1,40})\s*:\s*(.*)$/);
+    if (!m) continue;
+    const key = m[1].toLowerCase().trim();
+    const value = m[2].trim();
+    if (/^nombre de personnes/.test(key)) {
+      const n = parseInt(value, 10);
+      if (n > 0 && n <= 500) result.guests = n;
+      result.isStructured = true;
+    } else if (/^occasion/.test(key)) {
+      if (value) result.occasion = value;
+      result.isStructured = true;
+    } else if (/^(contact|t[eé]l)/.test(key)) {
+      result.phone = extractPhone(value) ?? result.phone;
+      result.isStructured = true;
+    } else if (/^nom\b/.test(key) || /^date et heure de l'appel/.test(key)) {
+      result.isStructured = true;
+    }
+  }
+  return result;
+}
+
 function cleanName(summary: string): string {
   return (
     summary
@@ -330,16 +366,24 @@ serve(async (req) => {
         ? parisParts(startIso)
         : { date: startDateOnly!, time: "19:00" };
 
-      const haystack = `${ev.summary ?? ""} ${ev.description ?? ""}`;
+      const rawDesc = ev.description ? String(ev.description) : "";
+      const structured = parseStructuredDescription(rawDesc);
+      const haystack = `${ev.summary ?? ""} ${rawDesc}`;
       const payload = {
         channel_id: channel.id,
         customer_name: cleanName(ev.summary ?? ""),
-        customer_phone: extractPhone(haystack) ?? "",
+        customer_phone: structured.isStructured
+          ? structured.phone ?? ""
+          : extractPhone(haystack) ?? "",
         customer_email: ev.attendees?.[0]?.email ?? null,
         reservation_date: date,
         reservation_time: time,
-        guests_count: extractGuests(haystack) ?? 2,
-        notes: ev.description ? String(ev.description).slice(0, 500) : null,
+        guests_count: structured.guests ?? extractGuests(haystack) ?? 2,
+        notes: structured.isStructured
+          ? structured.occasion
+          : rawDesc
+            ? rawDesc.slice(0, 500)
+            : null,
         status: "confirmed",
         source: GOOGLE_SOURCE,
         external_id: ev.id,
