@@ -43,7 +43,7 @@ const formSchema = z.object({
   customerEmail: z.string().email("Email invalide").optional().or(z.literal("")),
   reservationDate: z.date({ required_error: "Veuillez sélectionner une date" }),
   reservationTime: z.string().min(1, "Veuillez sélectionner une heure"),
-  guestsCount: z.number().min(1).max(20),
+  guestsCount: z.number().min(1).max(500),
   source: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -264,7 +264,7 @@ export function EditReservationDialog({ reservation, onUpdated }: EditReservatio
                     <FormLabel>Nombre d'invités</FormLabel>
                     <FormControl>
                       <Input
-                        type="number" min="1" max="20"
+                        type="number" min="1" max="500"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                       />
