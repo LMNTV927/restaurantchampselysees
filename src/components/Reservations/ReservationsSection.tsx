@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, History, Trash2, RefreshCw } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
 
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
@@ -37,21 +37,7 @@ export function ReservationsSection() {
   const { toast } = useToast();
   const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
-  const { syncing, lastSyncAt } = useGoogleCalendarAutoSync();
-  const [nowTick, setNowTick] = useState(Date.now());
-
-  useEffect(() => {
-    const t = setInterval(() => setNowTick(Date.now()), 60000);
-    return () => clearInterval(t);
-  }, []);
-
-  const syncLabel = (() => {
-    if (syncing) return "Synchronisation de l'agenda…";
-    if (!lastSyncAt) return "Agenda en attente de synchronisation";
-    const mins = Math.max(0, Math.floor((nowTick - lastSyncAt) / 60000));
-    if (mins < 1) return "Agenda synchronisé à l'instant";
-    return `Agenda synchronisé il y a ${mins} min`;
-  })();
+  useGoogleCalendarAutoSync();
 
 
 
@@ -341,10 +327,7 @@ export function ReservationsSection() {
         
         <div className="flex items-center gap-4">
           <AddReservationDialog onReservationAdded={refetch} />
-          <span className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
-            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-            {syncLabel}
-          </span>
+
 
           {/* Filters */}
           <div className="flex items-center bg-card/50 rounded-2xl p-1 backdrop-blur-sm">
