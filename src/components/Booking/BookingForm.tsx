@@ -186,6 +186,29 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
         console.error('SMS sending error:', smsError);
       }
 
+      // Alerte interne pour grandes réservations / événements
+      try {
+        await supabase.functions.invoke('notify-large-reservation', {
+          body: {
+            customerName: bookingData.customerName,
+            customerPhone: bookingData.customerPhone,
+            reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            reservationTime: bookingData.time,
+            guestsCount: bookingData.guestsCount,
+            notes: bookingData.notes,
+            source: channelData?.name,
+          }
+        });
+      } catch (alertError) {
+        console.error('Large reservation alert error:', alertError);
+      }
+
+
       // Success!
       setIsSuccess(true);
       onSuccess(bookingData);
