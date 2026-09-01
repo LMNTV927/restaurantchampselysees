@@ -21,10 +21,14 @@ interface ResendInboundEvent {
   };
 }
 
+function getResendKey(): string | null {
+  return Deno.env.get("RESEND_INBOUND_API_KEY") ?? Deno.env.get("RESEND_API_KEY");
+}
+
 async function fetchResendEmail(emailId: string): Promise<{ subject: string; html?: string | null; text?: string | null } | null> {
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  const resendApiKey = getResendKey();
   if (!resendApiKey) {
-    console.error("RESEND_API_KEY missing");
+    console.error("Aucune clé Resend configurée");
     return null;
   }
 
