@@ -124,6 +124,91 @@ function cleanName(summary: string): string {
   );
 }
 
+/* ---------- iCal (.ics) parsing ---------- */
+
+function icsDateToIso(value: string, params: string): { dateTime?: string; date?: string } {
+  if (/VALUE=DATE/i.test(params) || /^\d{8}$/.test(value)) {
+    return { date: `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}` };
+  }
+  const m = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z)?$/);
+  if (!m) return {};
+  if (m[7]) {
+    return { dateTime: `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}Z` };
+  }
+  // Floating / TZID time: interpreted as Paris local time
+  const tzMatch = params.match(/TZID=([^;:]+)/i);
+  const tz = tzMatch ? tzMatch[1] : "Europe/Paris";
+  const naive = `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`;
+  const guess = new Date(`${naive}Z`);
+  const offsetMin = tzOffsetMinutes(guess, tz);
+  return { dateTime: new Date(guess.getTime() - offsetMin * 60000).toISOString() };
+}
+
+function tzOffsetMinutes(date: Date, timeZone: string): number {
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const p = Object.fromEntries(dtf.formatToParts(date).map((x) => [x.type, x.value])) as any;
+  const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+  return (asUTC - date.getTime()) / 60000;
+}
+
+function unescapeIcs(v: string): string {
+  return v.replace(/\\n/gi, "\n").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\");
+}
+
+function parseIcs(ics: string): any[] {
+  const lines = ics.replace(/\r\n/g, "\n").replace(/\n[ \t]/g, "").split("\n");
+  const events: any[] = [];
+  let current: any = null;
+
+  for (const line of lines) {
+    if (line.startsWith("BEGIN:VEVENT")) {
+      current = { start: {}, status: "confirmed" };
+      continue;
+    }
+    if (line.startsWith("END:VEVENT")) {
+      if (current?.id && (current.start.dateTime || current.start.date)) events.push(current);
+      current = null;
+      continue;
+    }
+    if (!current) continue;
+
+    const idx = line.indexOf(":");
+    if (idx === -1) continue;
+    const left = line.slice(0, idx);
+    const value = line.slice(idx + 1);
+    const [name, ...paramParts] = left.split(";");
+    const params = paramParts.join(";");
+
+    switch (name.toUpperCase()) {
+      case "UID":
+        current.id = value.trim();
+        break;
+      case "SUMMARY":
+        current.summary = unescapeIcs(value);
+        break;
+      case "DESCRIPTION":
+        current.description = unescapeIcs(value);
+        break;
+      case "DTSTART":
+        current.start = icsDateToIso(value.trim(), params);
+        break;
+      case "STATUS":
+        if (/CANCELLED/i.test(value)) current.status = "cancelled";
+        break;
+    }
+  }
+  return events;
+}
+
 /* ---------- Handler ---------- */
 
 serve(async (req) => {
