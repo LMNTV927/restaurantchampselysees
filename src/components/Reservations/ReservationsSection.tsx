@@ -12,6 +12,7 @@ import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
 import { useGoogleCalendarAutoSync } from "@/hooks/useGoogleCalendarAutoSync";
 import { useAuth } from "@/hooks/useAuth";
 import { AddReservationDialog } from "./AddReservationDialog";
+import { ImportOpenTableDialog } from "./ImportOpenTableDialog";
 import { EditCommentDialog } from "./EditCommentDialog";
 import { EditReservationDialog } from "./EditReservationDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
