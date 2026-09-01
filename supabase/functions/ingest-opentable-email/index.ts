@@ -81,19 +81,19 @@ function parseDate(text: string): string | null {
 }
 
 function parseTime(text: string): string | null {
+  // 8:30 PM / 8 PM (checked first: AM/PM overrides plain 24h reading)
+  let m = text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(AM|PM)\b/i);
+  if (m) {
+    let h = +m[1] % 12;
+    if (m[3].toUpperCase() === "PM") h += 12;
+    return `${pad(h)}:${m[2] ?? "00"}`;
+  }
   // 20h30 / 20 h 30 / 20:30
-  let m = text.match(/\b(\d{1,2})\s*[h:]\s*(\d{2})\b/i);
+  m = text.match(/\b(\d{1,2})\s*[h:]\s*(\d{2})\b/i);
   if (m) return `${pad(+m[1])}:${m[2]}`;
   // 20h
   m = text.match(/\b(\d{1,2})\s*h\b/i);
   if (m) return `${pad(+m[1])}:00`;
-  // 8:30 PM
-  m = text.match(/\b(\d{1,2}):(\d{2})\s*(AM|PM)\b/i);
-  if (m) {
-    let h = +m[1] % 12;
-    if (m[3].toUpperCase() === "PM") h += 12;
-    return `${pad(h)}:${m[2]}`;
-  }
   return null;
 }
 
