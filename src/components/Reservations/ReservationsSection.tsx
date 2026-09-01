@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, History, Trash2, RefreshCw } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
 
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
