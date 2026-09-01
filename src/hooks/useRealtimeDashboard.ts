@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, getCurrentMonthInParis } from '@/lib/dateUtils';
+import { useGoogleCalendarAutoSync } from './useGoogleCalendarAutoSync';
 
 export interface DashboardKPIs {
   reservations: number;
