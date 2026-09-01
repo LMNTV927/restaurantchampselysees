@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const GOOGLE_SOURCE = "Google Agenda";
+const GOOGLE_SOURCE = "IA";
 const CHANNEL_SLUG = "google-agenda";
 const SYNC_DAYS_AHEAD = 60;
 
@@ -156,7 +156,7 @@ function cleanName(summary: string): string {
       .replace(/\(?\b\d{1,3}\s*(?:pers(?:onnes?)?|pax|couverts?|convives?)\b\)?/gi, "")
       .replace(/\bx\s*\d{1,3}\b/gi, "")
       .replace(/^[\s\-–—•]+|[\s\-–—•]+$/g, "")
-      .trim() || "Réservation Google Agenda"
+      .trim() || "Réservation IA"
   );
 }
 
