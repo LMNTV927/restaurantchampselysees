@@ -334,7 +334,7 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
                       <Input
                         type="number"
                         min="1"
-                        max="20"
+                        max="500"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                       />

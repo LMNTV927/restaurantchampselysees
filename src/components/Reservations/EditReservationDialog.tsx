@@ -264,7 +264,7 @@ export function EditReservationDialog({ reservation, onUpdated }: EditReservatio
                     <FormLabel>Nombre d'invités</FormLabel>
                     <FormControl>
                       <Input
-                        type="number" min="1" max="20"
+                        type="number" min="1" max="500"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                       />
