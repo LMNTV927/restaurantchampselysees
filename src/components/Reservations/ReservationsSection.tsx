@@ -348,6 +348,15 @@ export function ReservationsSection() {
         
         <div className="flex items-center gap-4">
           <AddReservationDialog onReservationAdded={refetch} />
+          <Button
+            variant="outline"
+            onClick={handleSyncGoogleAgenda}
+            disabled={syncing}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Synchronisation…" : "Synchroniser Google Agenda"}
+          </Button>
           {/* Filters */}
           <div className="flex items-center bg-card/50 rounded-2xl p-1 backdrop-blur-sm">
             {filters.map((filter) => (
