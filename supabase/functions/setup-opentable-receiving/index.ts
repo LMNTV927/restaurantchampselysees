@@ -38,21 +38,37 @@ serve(async (req) => {
     });
     if (roleError || !isAdmin) return json({ error: "forbidden" }, 403);
 
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendApiKey) return json({ error: "RESEND_API_KEY manquant" }, 500);
+    const resendApiKey = Deno.env.get("RESEND_INBOUND_API_KEY") ?? Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) return json({ error: "RESEND_INBOUND_API_KEY ou RESEND_API_KEY manquant" }, 500);
 
     const ingestToken = Deno.env.get("OPENTABLE_INGEST_TOKEN");
     if (!ingestToken) return json({ error: "OPENTABLE_INGEST_TOKEN manquant" }, 500);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const webhookUrl = `${supabaseUrl}/functions/v1/ingest-opentable-email?token=${ingestToken}`;
+    const receivingEmail = `${MAILBOX}@${DEFAULT_DOMAIN}`;
+
+    const manualInstructions = [
+      "Dans Resend, activez la réception d'e-mails pour le domaine xn--rservation-prince-palace-bfc.fr (capacité receiving + enregistrement MX).",
+      "Ajoutez un webhook Resend de type email.received pointant sur l'URL affichée ci-dessous.",
+      "Dans Yahoo Mail, créez une règle de transfert des notifications OpenTable vers l'adresse de réception affichée.",
+    ];
 
     /* ---------- List domains ---------- */
     const listRes = await fetch("https://api.resend.com/domains", {
       headers: { Authorization: `Bearer ${resendApiKey}` },
     });
     if (!listRes.ok) {
-      return json({ error: "impossible de lister les domaines Resend", details: await listRes.text() }, 502);
+      const details = await listRes.text();
+      console.warn("Resend list domains failed:", listRes.status, details);
+      return json({
+        ok: true,
+        receiving_email: receivingEmail,
+        webhook_url: webhookUrl,
+        automated: false,
+        restriction: "La clé Resend n'a pas les droits de gestion des domaines/webhooks. Utilisez une clé avec tous les droits (RESEND_INBOUND_API_KEY) ou configurez manuellement.",
+        next_steps: manualInstructions,
+      });
     }
     const domainsList = await listRes.json();
     const domains = Array.isArray(domainsList?.data) ? domainsList.data : [];
@@ -85,16 +101,20 @@ serve(async (req) => {
         }),
       });
       if (!createRes.ok) {
-        return json(
-          { error: "impossible de créer le domaine de réception", details: await createRes.text() },
-          502,
-        );
+        console.warn("Resend create domain failed:", createRes.status, await createRes.text());
+        return json({
+          ok: true,
+          receiving_email: receivingEmail,
+          webhook_url: webhookUrl,
+          automated: false,
+          next_steps: manualInstructions,
+        });
       }
       created = true;
       domain = await createRes.json();
     }
 
-    const receivingEmail = `${MAILBOX}@${domain.name}`;
+    const effectiveReceivingEmail = domain ? `${MAILBOX}@${domain.name}` : receivingEmail;
 
     /* ---------- List webhooks ---------- */
     const webhooksRes = await fetch("https://api.resend.com/webhooks", {
@@ -122,25 +142,26 @@ serve(async (req) => {
         }),
       });
       if (!createWebhookRes.ok) {
-        return json(
-          { error: "impossible de créer le webhook Resend", details: await createWebhookRes.text() },
-          502,
-        );
+        console.warn("Resend create webhook failed:", createWebhookRes.status, await createWebhookRes.text());
+      } else {
+        const wh = await createWebhookRes.json();
+        webhookId = wh.id ?? null;
       }
-      const wh = await createWebhookRes.json();
-      webhookId = wh.id ?? null;
     }
 
     return json({
       ok: true,
-      domain: {
-        id: domain.id,
-        name: domain.name,
-        status: domain.status,
-        created,
-        records: domain.records ?? null,
-      },
-      receiving_email: receivingEmail,
+      automated: true,
+      domain: domain
+        ? {
+            id: domain.id,
+            name: domain.name,
+            status: domain.status,
+            created,
+            records: domain.records ?? null,
+          }
+        : null,
+      receiving_email: effectiveReceivingEmail,
       webhook_url: webhookUrl,
       webhook_id: webhookId,
       next_steps: created
