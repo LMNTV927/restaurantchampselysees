@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, getCurrentMonthInParis } from '@/lib/dateUtils';
+import { useGoogleCalendarAutoSync } from './useGoogleCalendarAutoSync';
 
 export interface DashboardKPIs {
   reservations: number;
@@ -148,12 +149,15 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
 export function useRealtimeDashboard() {
   const queryClient = useQueryClient();
 
-  // Background tasks on dashboard load (at most once per hour)
+  // Google Agenda auto-sync (every 5 min, no manual action needed)
+  useGoogleCalendarAutoSync();
+
+  // Trigger followup emails check on dashboard load (every hour)
   useEffect(() => {
+    const lastCheck = sessionStorage.getItem('followup_last_check');
     const now = Date.now();
     const ONE_HOUR = 60 * 60 * 1000;
 
-    const lastCheck = sessionStorage.getItem('followup_last_check');
     if (!lastCheck || (now - parseInt(lastCheck)) > ONE_HOUR) {
       sessionStorage.setItem('followup_last_check', now.toString());
       supabase.functions.invoke('send-followup-thankyou').then(({ data, error }) => {
@@ -161,20 +165,9 @@ export function useRealtimeDashboard() {
         else console.log('Followup check:', data);
       });
     }
+  }, []);
 
-    const lastSync = sessionStorage.getItem('gcal_last_sync');
-    if (!lastSync || (now - parseInt(lastSync)) > ONE_HOUR) {
-      sessionStorage.setItem('gcal_last_sync', now.toString());
-      supabase.functions.invoke('sync-google-calendar').then(({ data, error }) => {
-        if (error) console.error('Google Agenda sync error:', error);
-        else {
-          console.log('Google Agenda sync:', data);
-          queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-          queryClient.invalidateQueries({ queryKey: ['reservations'] });
-        }
-      });
-    }
-  }, [queryClient]);
+
 
 
 
