@@ -148,12 +148,12 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
 export function useRealtimeDashboard() {
   const queryClient = useQueryClient();
 
-  // Trigger followup emails check on dashboard load (every hour)
+  // Background tasks on dashboard load (at most once per hour)
   useEffect(() => {
-    const lastCheck = sessionStorage.getItem('followup_last_check');
     const now = Date.now();
     const ONE_HOUR = 60 * 60 * 1000;
-    
+
+    const lastCheck = sessionStorage.getItem('followup_last_check');
     if (!lastCheck || (now - parseInt(lastCheck)) > ONE_HOUR) {
       sessionStorage.setItem('followup_last_check', now.toString());
       supabase.functions.invoke('send-followup-thankyou').then(({ data, error }) => {
@@ -161,14 +161,8 @@ export function useRealtimeDashboard() {
         else console.log('Followup check:', data);
       });
     }
-  }, []);
 
-  // Import Google Agenda reservations (read-only) at most once per hour
-  useEffect(() => {
     const lastSync = sessionStorage.getItem('gcal_last_sync');
-    const now = Date.now();
-    const ONE_HOUR = 60 * 60 * 1000;
-
     if (!lastSync || (now - parseInt(lastSync)) > ONE_HOUR) {
       sessionStorage.setItem('gcal_last_sync', now.toString());
       supabase.functions.invoke('sync-google-calendar').then(({ data, error }) => {
@@ -181,6 +175,8 @@ export function useRealtimeDashboard() {
       });
     }
   }, [queryClient]);
+
+
 
 
   const { data: dashboardData, isLoading: loading } = useQuery({
