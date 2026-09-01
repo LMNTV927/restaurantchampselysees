@@ -36,6 +36,32 @@ export function ReservationsSection() {
   const { toast } = useToast();
   const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncGoogleAgenda = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-google-calendar");
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const { imported = 0, updated = 0 } = (data as any) ?? {};
+      toast({
+        title: "Google Agenda synchronisé",
+        description: `${imported} nouvelle(s) réservation(s), ${updated} mise(s) à jour.`,
+      });
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Synchronisation impossible",
+        description: err?.message ?? "Vérifiez la configuration de Google Agenda.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+
 
   // Transform real-time reservations to match local interface
   const allReservations: Reservation[] = realtimeReservations.map(reservation => {
