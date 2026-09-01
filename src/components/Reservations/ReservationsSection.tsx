@@ -327,6 +327,7 @@ export function ReservationsSection() {
         
         <div className="flex items-center gap-4">
           <AddReservationDialog onReservationAdded={refetch} />
+          {role === 'admin' && <ImportOpenTableDialog onImported={refetch} />}
 
 
           {/* Filters */}
