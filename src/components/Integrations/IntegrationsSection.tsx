@@ -21,6 +21,8 @@ interface SetupResult {
   webhook_url?: string;
   webhook_id?: string | null;
   next_steps?: string[];
+  restriction?: string;
+  automated?: boolean;
   error?: string;
   details?: string;
 }
@@ -139,6 +141,13 @@ export function IntegrationsSection() {
 
           {!loading && setup?.ok && (
             <div className="space-y-4">
+              {setup.restriction && (
+                <div className="rounded-xl border border-primary/30 bg-primary/10 p-4 flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-foreground">{setup.restriction}</p>
+                </div>
+              )}
+
               {setup.domain?.created && (
                 <div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
                   <p className="text-sm font-medium text-foreground mb-2">
