@@ -36,30 +36,22 @@ export function ReservationsSection() {
   const { toast } = useToast();
   const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
-  const [syncing, setSyncing] = useState(false);
+  const { syncing, lastSyncAt } = useGoogleCalendarAutoSync();
+  const [nowTick, setNowTick] = useState(Date.now());
 
-  const handleSyncGoogleAgenda = async () => {
-    setSyncing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("sync-google-calendar");
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      const { imported = 0, updated = 0 } = (data as any) ?? {};
-      toast({
-        title: "Google Agenda synchronisé",
-        description: `${imported} nouvelle(s) réservation(s), ${updated} mise(s) à jour.`,
-      });
-      refetch();
-    } catch (err: any) {
-      toast({
-        title: "Synchronisation impossible",
-        description: err?.message ?? "Vérifiez la configuration de Google Agenda.",
-        variant: "destructive",
-      });
-    } finally {
-      setSyncing(false);
-    }
-  };
+  useEffect(() => {
+    const t = setInterval(() => setNowTick(Date.now()), 60000);
+    return () => clearInterval(t);
+  }, []);
+
+  const syncLabel = (() => {
+    if (syncing) return "Synchronisation de l'agenda…";
+    if (!lastSyncAt) return "Agenda en attente de synchronisation";
+    const mins = Math.max(0, Math.floor((nowTick - lastSyncAt) / 60000));
+    if (mins < 1) return "Agenda synchronisé à l'instant";
+    return `Agenda synchronisé il y a ${mins} min`;
+  })();
+
 
 
 
