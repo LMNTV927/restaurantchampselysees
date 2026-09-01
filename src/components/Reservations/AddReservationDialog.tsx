@@ -50,7 +50,7 @@ const formSchema = z.object({
     required_error: "Veuillez sélectionner une date",
   }),
   reservationTime: z.string().min(1, "Veuillez sélectionner une heure"),
-  guestsCount: z.number().min(1, "Au moins 1 invité requis").max(20, "Maximum 20 invités"),
+  guestsCount: z.number().min(1, "Au moins 1 invité requis").max(500, "Maximum 500 invités"),
   source: z.string().optional(),
   notes: z.string().optional(),
 });
