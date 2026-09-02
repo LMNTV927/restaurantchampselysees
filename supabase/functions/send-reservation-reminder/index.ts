@@ -33,8 +33,8 @@ function buildReminderHtml(opts: {
   guests: number;
   token: string;
 }): string {
-  const modifyUrl = `${BASE_URL}/modifier/${opts.token}`;
-  const cancelUrl = `${BASE_URL}/annuler/${opts.token}`;
+  const modifyUrl = `${BASE_URL}/reservation/modify/${opts.token}`;
+  const cancelUrl = `${BASE_URL}/reservation/cancel/${opts.token}`;
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -173,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
       if (r.customer_phone) {
         await sendSms(
           r.customer_phone,
-          `Cher(e) ${r.customer_name},\n\nRappel de votre réservation au Prince Palace :\n📅 ${formatFrenchDate(r.reservation_date)}\n🕐 ${r.reservation_time}\n👥 ${r.guests_count} personne${r.guests_count > 1 ? "s" : ""}\n\nModifier ou annuler : ${BASE_URL}/modifier/${r.modification_token}\n\nÀ très bientôt,\nL'équipe du Prince Palace`,
+          `Cher(e) ${r.customer_name},\n\nRappel de votre réservation au Prince Palace :\n📅 ${formatFrenchDate(r.reservation_date)}\n🕐 ${r.reservation_time}\n👥 ${r.guests_count} personne${r.guests_count > 1 ? "s" : ""}\n\nModifier ou annuler : ${BASE_URL}/reservation/modify/${r.modification_token}\n\nÀ très bientôt,\nL'équipe du Prince Palace`,
         );
       }
 
