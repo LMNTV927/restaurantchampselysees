@@ -314,7 +314,11 @@ export function ReservationsSection() {
     { id: "upcoming", label: "Prochains 7 jours" },
     { id: "all", label: "Tout à venir" },
     { id: "past", label: "Réservations passées" },
+    ...(role === 'admin' && duplicates.length > 0
+      ? [{ id: "duplicates", label: `Doublons (${duplicates.length})` }]
+      : []),
   ];
+
 
   return (
     <motion.div
