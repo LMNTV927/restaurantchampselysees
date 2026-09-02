@@ -161,13 +161,26 @@ export function useRealtimeReservations() {
     queryClient.invalidateQueries({ queryKey: ['channels'] });
   };
 
+  const restoreReservation = async (reservationId: string) => {
+    const { error } = await supabase
+      .from('reservations')
+      .update({ is_duplicate: false, duplicate_of: null })
+      .eq('id', reservationId);
+    if (error) throw error;
+    queryClient.invalidateQueries({ queryKey: ['reservations'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+  };
+
   return {
     reservations: data!.reservations,
+    duplicates: data!.duplicates,
     kpis: data!.kpis,
     loading,
     updateReservationStatus,
     updateReservationNotes,
     deleteReservation,
+    restoreReservation,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['reservations'] })
   };
 }
+
