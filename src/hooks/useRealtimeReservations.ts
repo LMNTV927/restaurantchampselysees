@@ -121,8 +121,10 @@ export function useRealtimeReservations() {
     staleTime: 30000,
     initialData: {
       reservations: [],
+      duplicates: [],
       kpis: { todayReservations: 0, todayCovers: 0, upcomingReservations: 0, occupancyRate: 0 }
     },
+
     initialDataUpdatedAt: 0
   });
 
