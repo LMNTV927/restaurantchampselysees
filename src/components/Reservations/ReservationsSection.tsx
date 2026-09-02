@@ -267,6 +267,9 @@ export function ReservationsSection() {
         return "Réservations à venir";
       case "past":
         return "Réservations passées";
+      case "duplicates":
+        return "Doublons détectés (masqués) — la réservation la plus récente est conservée";
+
       default:
         return "Réservations";
     }
