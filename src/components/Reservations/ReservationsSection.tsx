@@ -36,7 +36,7 @@ export function ReservationsSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
   const { toast } = useToast();
-  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, refetch } = useRealtimeReservations();
+  const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
   useGoogleCalendarAutoSync();
 
