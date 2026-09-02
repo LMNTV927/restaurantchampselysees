@@ -83,7 +83,8 @@ export function ReservationsSection() {
     const nextWeekString = nextWeek.toISOString().split('T')[0];
     
     // Use original reservation data for filtering (avoid timezone conversion issues)
-    const reservationsWithOriginalData = realtimeReservations.map(reservation => {
+    const sourceList = selectedFilter === 'duplicates' ? duplicates : realtimeReservations;
+    const reservationsWithOriginalData = sourceList.map(reservation => {
       const nameParts = reservation.customerName.split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
@@ -105,6 +106,13 @@ export function ReservationsSection() {
         reservationTime: reservation.reservationTime  // Keep original time string
       };
     });
+
+    if (selectedFilter === 'duplicates') {
+      return reservationsWithOriginalData.sort((a, b) =>
+        `${b.reservationDate}${b.reservationTime}`.localeCompare(`${a.reservationDate}${a.reservationTime}`)
+      );
+    }
+
 
     switch (selectedFilter) {
       case "today":
