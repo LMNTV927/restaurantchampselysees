@@ -1,41 +1,45 @@
-# Lire automatiquement la boîte Yahoo et importer les réservations OpenTable
+# Rappels de réservation + détection de doublons
 
-Oui, c'est possible — et c'est plus simple que la redirection d'e-mails : le logiciel se connecte directement à votre boîte Yahoo, lit les nouveaux messages OpenTable, et une IA en extrait les informations de réservation.
+## 1. Rappel de réservation (24h avant)
 
-## Comment ça marchera
+Objectif : relancer uniquement les clients qui ont réservé bien en avance.
 
-1. Vous générez dans Yahoo un « mot de passe d'application » (Yahoo → Sécurité du compte → Mots de passe d'application). C'est un code dédié qui donne un accès lecture à la boîte sans exposer votre vrai mot de passe.
-2. Ce code est enregistré comme secret dans le backend (jamais visible dans l'application).
-3. Une fonction serveur se connecte à la boîte Yahoo, cherche les e-mails non traités provenant d'OpenTable, et récupère leur contenu.
-4. Chaque e-mail est envoyé à l'IA, qui renvoie les champs structurés : nom du client, date, heure, nombre de couverts, téléphone, e-mail, occasion/notes, numéro de réservation OpenTable, et s'il s'agit d'une annulation.
-5. La réservation est créée (ou mise à jour si le numéro OpenTable existe déjà) avec la source « OpenTable », et apparaît immédiatement dans la page Réservations avec la mention « Via OpenTable ».
-6. Aucun e-mail ni SMS n'est envoyé au client pour ces imports (OpenTable l'a déjà fait). L'alerte SMS grande réservation reste active si vous le souhaitez.
+Règles d'envoi :
+- La réservation a été créée **plus de 30h avant** l'heure de la réservation (les réservations de dernière minute ne reçoivent rien).
+- Il reste **environ 24h ou moins** avant l'heure de la réservation.
+- Statut = confirmée, non annulée, non marquée comme doublon.
+- Un seul rappel par réservation (marqueur en base).
 
-## Déclenchement
+Contenu :
+- **Email** (design Noir & Or, même identité que la confirmation) : rappel du nom, date, heure, nombre de personnes, adresse, plus les liens Modifier / Annuler existants (jeton de modification). Copie à l'établissement.
+- **SMS** (Twilio) : version courte avec date, heure, nombre de personnes et lien de gestion.
 
-Conformément à votre contrainte « pas de tâche planifiée en base », la lecture se déclenche :
-- automatiquement à l'ouverture du dashboard, au maximum une fois toutes les 5 minutes ;
-- manuellement via un bouton « Relever les e-mails OpenTable » à côté du bouton d'import existant, réservé aux admins.
+Déclenchement : sans cron base de données (contrainte projet). Une fonction serveur `send-reservation-reminder` est appelée automatiquement à l'ouverture du dashboard (même mécanisme que les remerciements 3h), et un bouton manuel n'est pas nécessaire.
 
-L'import manuel par copier-coller reste disponible en secours.
+## 2. Détection de doublons
 
-## Sécurité et fiabilité
+Critère de doublon : **même numéro de téléphone (normalisé)** + **même date** + horaires proches (**≤ 2h d'écart**).
 
-- Le mot de passe d'application Yahoo est stocké côté serveur uniquement.
-- Chaque e-mail traité est mémorisé (identifiant du message) pour ne jamais créer de doublon, même si la boîte est relue.
-- Les e-mails non reconnus sont journalisés sans bloquer les autres.
+Traitement :
+- On garde **uniquement la réservation créée le plus récemment**.
+- Les autres sont **marquées comme doublon** (masquées des listes, KPI, rappels et e-mails) — **aucune suppression**, **aucun message d'annulation envoyé au client**.
+- Un filtre « Doublons » réservé aux admins permet de consulter les entrées masquées et de restaurer une entrée en cas d'erreur.
+
+La détection tourne :
+- à la création d'une réservation (dashboard, lien public, IA, OpenTable) ;
+- lors d'un balayage global au chargement du dashboard, pour nettoyer l'existant.
 
 ## Détails techniques
 
-- Secrets à ajouter : `YAHOO_IMAP_USER` (adresse complète) et `YAHOO_APP_PASSWORD`.
-- Nouvelle table `email_ingest_log` (`message_id` unique, `status`, `error`, `created_at`) avec RLS + GRANT (lecture admin, écriture service_role) pour l'idempotence et le diagnostic.
-- Nouvelle Edge Function `poll-yahoo-opentable` : connexion IMAP TLS à `imap.mail.yahoo.com:993` via `npm:imapflow`, recherche des messages récents dont l'expéditeur contient `opentable`, extraction texte/HTML.
-- Extraction par IA via Lovable AI Gateway (`google/gemini-2.5-flash`, sortie JSON structurée) ; repli sur le parser existant `_shared/opentable-parser.ts` si l'IA échoue.
-- Upsert dans `reservations` avec `source = 'OpenTable'`, `external_id` = numéro OpenTable (sinon clé nom+date+heure), rattaché au canal `opentable` existant.
-- Frontend : hook `useOpenTableAutoSync` calqué sur `useGoogleCalendarAutoSync`, bouton de relève dans `ReservationsSection`, invalidation des caches React Query.
-- Étape de validation : après déploiement, un test sur un vrai e-mail OpenTable de votre boîte pour vérifier l'extraction ; ajustement du prompt si besoin.
+Base de données (migration) :
+- `reservations`: ajout de `reminder_sent boolean not null default false`, `is_duplicate boolean not null default false`, `duplicate_of uuid null references reservations(id)`.
+- Index sur `(customer_phone, reservation_date)` pour la recherche de doublons.
 
-## Prérequis de votre part
+Fonctions serveur :
+- `send-reservation-reminder` : sélectionne les réservations éligibles (created_at ≤ reservation - 30h, reservation dans les prochaines 24h, `reminder_sent = false`, `is_duplicate = false`, statut confirmé), envoie email (Resend) + SMS (Twilio), BCC/copie à princepalace.champselysees@gmail.com, puis passe `reminder_sent = true`.
+- `dedupe-reservations` : normalise les téléphones (E.164 FR), regroupe par téléphone + date, compare les heures (≤ 120 min), marque toutes les entrées sauf la plus récente avec `is_duplicate = true` et `duplicate_of`.
 
-- Générer le mot de passe d'application Yahoo et me le transmettre via le formulaire sécurisé de secrets.
-- Vérifier qu'IMAP est activé sur le compte Yahoo (actif par défaut).
+Front :
+- `useRealtimeReservations` / `useRealtimeDashboard` : filtrer `is_duplicate = false` dans les requêtes et les KPI.
+- Appel de `send-reservation-reminder` et `dedupe-reservations` au chargement du dashboard (throttle localStorage, comme le suivi 3h).
+- `ReservationsSection` : filtre admin « Doublons » avec action « Restaurer ».
