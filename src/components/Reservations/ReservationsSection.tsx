@@ -537,7 +537,27 @@ export function ReservationsSection() {
                   </div>
                   
                   <div className="flex items-center gap-2 flex-wrap">
-                    <>
+                    {selectedFilter === 'duplicates' ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="premium-button"
+                        onClick={async () => {
+                          try {
+                            await restoreReservation(reservation.id);
+                            toast({
+                              title: "Réservation restaurée",
+                              description: `La réservation de ${reservation.customer.firstName} ${reservation.customer.lastName} est de nouveau active.`,
+                            });
+                          } catch {
+                            toast({ title: "Erreur", description: "Impossible de restaurer la réservation", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        Restaurer
+                      </Button>
+                    ) : (
+                      <>
                         <Button 
                           variant={reservation.status === "show" ? "default" : "outline"}
                           size="sm" 
@@ -563,6 +583,8 @@ export function ReservationsSection() {
                           {reservation.status === "cancelled" ? "Rétablir" : "Annuler"}
                         </Button>
                       </>
+                    )}
+
 
                     {(() => {
                       const r = realtimeReservations.find(x => x.id === reservation.id);
