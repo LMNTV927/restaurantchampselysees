@@ -17,7 +17,9 @@ export interface ReservationData {
   createdAt: string;
   source: string | null;
   externalId: string | null;
+  isDuplicate?: boolean;
 }
+
 
 export interface ReservationsKPIs {
   todayReservations: number;
