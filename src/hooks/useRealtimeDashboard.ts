@@ -61,17 +61,21 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
     supabase
       .from('reservations')
       .select('guests_count, status, created_at, customer_name, channels(name)')
-      .eq('reservation_date', today),
+      .eq('reservation_date', today)
+      .eq('is_duplicate', false),
     supabase
       .from('reservations')
       .select('guests_count')
-      .eq('reservation_date', yesterday),
+      .eq('reservation_date', yesterday)
+      .eq('is_duplicate', false),
     supabase
       .from('reservations')
       .select('reservation_date, guests_count, created_at')
       .gte('reservation_date', monthStart)
-      .lte('reservation_date', today),
+      .lte('reservation_date', today)
+      .eq('is_duplicate', false),
   ]);
+
 
   if (todayRes.error) throw todayRes.error;
   if (yesterdayRes.error) throw yesterdayRes.error;
@@ -166,6 +170,35 @@ export function useRealtimeDashboard() {
       });
     }
   }, []);
+
+  // Rappels 24h + détection de doublons (max 1 fois par heure)
+  useEffect(() => {
+    const ONE_HOUR = 60 * 60 * 1000;
+    const now = Date.now();
+
+    const lastDedupe = localStorage.getItem('dedupe_last_check');
+    if (!lastDedupe || (now - parseInt(lastDedupe)) > ONE_HOUR) {
+      localStorage.setItem('dedupe_last_check', now.toString());
+      supabase.functions.invoke('dedupe-reservations').then(({ data, error }) => {
+        if (error) console.error('Dedupe error:', error);
+        else {
+          console.log('Dedupe:', data);
+          queryClient.invalidateQueries({ queryKey: ['reservations'] });
+          queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        }
+      });
+    }
+
+    const lastReminder = localStorage.getItem('reminder_last_check');
+    if (!lastReminder || (now - parseInt(lastReminder)) > ONE_HOUR) {
+      localStorage.setItem('reminder_last_check', now.toString());
+      supabase.functions.invoke('send-reservation-reminder').then(({ data, error }) => {
+        if (error) console.error('Reminder error:', error);
+        else console.log('Reminders:', data);
+      });
+    }
+  }, [queryClient]);
+
 
 
 

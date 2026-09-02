@@ -191,6 +191,9 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
         console.error('Erreur alerte grande réservation:', alertError);
       }
 
+      // Détection de doublons (marquage uniquement, aucune suppression)
+      supabase.functions.invoke('dedupe-reservations').catch(() => {});
+
 
       toast({
         title: "Réservation créée",

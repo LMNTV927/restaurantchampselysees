@@ -36,7 +36,7 @@ export function ReservationsSection() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
   const { toast } = useToast();
-  const { reservations: realtimeReservations, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, refetch } = useRealtimeReservations();
+  const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
   useGoogleCalendarAutoSync();
 
@@ -83,7 +83,8 @@ export function ReservationsSection() {
     const nextWeekString = nextWeek.toISOString().split('T')[0];
     
     // Use original reservation data for filtering (avoid timezone conversion issues)
-    const reservationsWithOriginalData = realtimeReservations.map(reservation => {
+    const sourceList = selectedFilter === 'duplicates' ? duplicates : realtimeReservations;
+    const reservationsWithOriginalData = sourceList.map(reservation => {
       const nameParts = reservation.customerName.split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
@@ -105,6 +106,13 @@ export function ReservationsSection() {
         reservationTime: reservation.reservationTime  // Keep original time string
       };
     });
+
+    if (selectedFilter === 'duplicates') {
+      return reservationsWithOriginalData.sort((a, b) =>
+        `${b.reservationDate}${b.reservationTime}`.localeCompare(`${a.reservationDate}${a.reservationTime}`)
+      );
+    }
+
 
     switch (selectedFilter) {
       case "today":
@@ -259,6 +267,9 @@ export function ReservationsSection() {
         return "Réservations à venir";
       case "past":
         return "Réservations passées";
+      case "duplicates":
+        return "Doublons détectés (masqués) — la réservation la plus récente est conservée";
+
       default:
         return "Réservations";
     }
@@ -306,7 +317,11 @@ export function ReservationsSection() {
     { id: "upcoming", label: "Prochains 7 jours" },
     { id: "all", label: "Tout à venir" },
     { id: "past", label: "Réservations passées" },
+    ...(role === 'admin' && duplicates.length > 0
+      ? [{ id: "duplicates", label: `Doublons (${duplicates.length})` }]
+      : []),
   ];
+
 
   return (
     <motion.div
@@ -522,7 +537,27 @@ export function ReservationsSection() {
                   </div>
                   
                   <div className="flex items-center gap-2 flex-wrap">
-                    <>
+                    {selectedFilter === 'duplicates' ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="premium-button"
+                        onClick={async () => {
+                          try {
+                            await restoreReservation(reservation.id);
+                            toast({
+                              title: "Réservation restaurée",
+                              description: `La réservation de ${reservation.customer.firstName} ${reservation.customer.lastName} est de nouveau active.`,
+                            });
+                          } catch {
+                            toast({ title: "Erreur", description: "Impossible de restaurer la réservation", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        Restaurer
+                      </Button>
+                    ) : (
+                      <>
                         <Button 
                           variant={reservation.status === "show" ? "default" : "outline"}
                           size="sm" 
@@ -548,6 +583,8 @@ export function ReservationsSection() {
                           {reservation.status === "cancelled" ? "Rétablir" : "Annuler"}
                         </Button>
                       </>
+                    )}
+
 
                     {(() => {
                       const r = realtimeReservations.find(x => x.id === reservation.id);

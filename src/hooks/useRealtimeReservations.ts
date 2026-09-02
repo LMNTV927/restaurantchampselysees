@@ -17,7 +17,9 @@ export interface ReservationData {
   createdAt: string;
   source: string | null;
   externalId: string | null;
+  isDuplicate?: boolean;
 }
+
 
 export interface ReservationsKPIs {
   todayReservations: number;
@@ -38,8 +40,26 @@ const calculateEvolution = (current: number, previous: number): number | null =>
 
 interface ReservationsResult {
   reservations: ReservationData[];
+  duplicates: ReservationData[];
   kpis: ReservationsKPIs;
 }
+
+const mapRow = (r: any): ReservationData => ({
+  id: r.id,
+  customerName: r.customer_name,
+  customerPhone: r.customer_phone,
+  customerEmail: r.customer_email,
+  reservationDate: r.reservation_date,
+  reservationTime: r.reservation_time,
+  guestsCount: r.guests_count,
+  notes: r.notes,
+  status: r.status as any,
+  channelName: (r.channels as any)?.name || null,
+  createdAt: r.created_at,
+  source: r.source || null,
+  externalId: r.external_id || null,
+  isDuplicate: !!r.is_duplicate,
+});
 
 const fetchReservations = async (): Promise<ReservationsResult> => {
   const today = getTodayInParis();
@@ -48,33 +68,22 @@ const fetchReservations = async (): Promise<ReservationsResult> => {
   const [allRes, yesterdayRes] = await Promise.all([
     supabase
       .from('reservations')
-      .select('id, customer_name, customer_phone, customer_email, reservation_date, reservation_time, guests_count, notes, status, created_at, source, external_id, channels(name)')
+      .select('id, customer_name, customer_phone, customer_email, reservation_date, reservation_time, guests_count, notes, status, created_at, source, external_id, is_duplicate, channels(name)')
       .order('reservation_date', { ascending: true })
       .order('reservation_time', { ascending: true }),
     supabase
       .from('reservations')
       .select('reservation_date, guests_count')
-      .eq('reservation_date', yesterday),
+      .eq('reservation_date', yesterday)
+      .eq('is_duplicate', false),
   ]);
 
   if (allRes.error) throw allRes.error;
   if (yesterdayRes.error) throw yesterdayRes.error;
 
-  const reservations: ReservationData[] = allRes.data?.map(r => ({
-    id: r.id,
-    customerName: r.customer_name,
-    customerPhone: r.customer_phone,
-    customerEmail: r.customer_email,
-    reservationDate: r.reservation_date,
-    reservationTime: r.reservation_time,
-    guestsCount: r.guests_count,
-    notes: r.notes,
-    status: r.status as any,
-    channelName: (r.channels as any)?.name || null,
-    createdAt: r.created_at,
-    source: (r as any).source || null,
-    externalId: (r as any).external_id || null,
-  })) || [];
+  const allMapped: ReservationData[] = allRes.data?.map(mapRow) || [];
+  const reservations = allMapped.filter(r => !r.isDuplicate);
+  const duplicates = allMapped.filter(r => r.isDuplicate);
 
   const todayFiltered = reservations.filter(r => isReservationToday(r.reservationDate));
   const todayReservations = todayFiltered.length;
@@ -88,6 +97,7 @@ const fetchReservations = async (): Promise<ReservationsResult> => {
 
   return {
     reservations,
+    duplicates,
     kpis: {
       todayReservations, todayCovers,
       upcomingReservations: reservations.length,
@@ -101,6 +111,7 @@ const fetchReservations = async (): Promise<ReservationsResult> => {
   };
 };
 
+
 export function useRealtimeReservations() {
   const queryClient = useQueryClient();
 
@@ -110,8 +121,10 @@ export function useRealtimeReservations() {
     staleTime: 30000,
     initialData: {
       reservations: [],
+      duplicates: [],
       kpis: { todayReservations: 0, todayCovers: 0, upcomingReservations: 0, occupancyRate: 0 }
     },
+
     initialDataUpdatedAt: 0
   });
 
@@ -148,13 +161,26 @@ export function useRealtimeReservations() {
     queryClient.invalidateQueries({ queryKey: ['channels'] });
   };
 
+  const restoreReservation = async (reservationId: string) => {
+    const { error } = await supabase
+      .from('reservations')
+      .update({ is_duplicate: false, duplicate_of: null })
+      .eq('id', reservationId);
+    if (error) throw error;
+    queryClient.invalidateQueries({ queryKey: ['reservations'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+  };
+
   return {
     reservations: data!.reservations,
+    duplicates: data!.duplicates,
     kpis: data!.kpis,
     loading,
     updateReservationStatus,
     updateReservationNotes,
     deleteReservation,
+    restoreReservation,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['reservations'] })
   };
 }
+

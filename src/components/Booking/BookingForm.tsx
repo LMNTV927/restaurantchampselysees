@@ -208,6 +208,9 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
         console.error('Large reservation alert error:', alertError);
       }
 
+      // Détection de doublons (marquage uniquement, aucune suppression)
+      supabase.functions.invoke('dedupe-reservations').catch(() => {});
+
 
       // Success!
       setIsSuccess(true);

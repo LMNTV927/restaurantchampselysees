@@ -104,12 +104,15 @@ export type Database = {
           customer_email: string | null
           customer_name: string
           customer_phone: string
+          duplicate_of: string | null
           external_id: string | null
           followup_sent: boolean
           guests_count: number
           id: string
+          is_duplicate: boolean
           modification_token: string
           notes: string | null
+          reminder_sent: boolean
           reservation_date: string
           reservation_time: string
           source: string | null
@@ -121,12 +124,15 @@ export type Database = {
           customer_email?: string | null
           customer_name: string
           customer_phone: string
+          duplicate_of?: string | null
           external_id?: string | null
           followup_sent?: boolean
           guests_count?: number
           id?: string
+          is_duplicate?: boolean
           modification_token?: string
           notes?: string | null
+          reminder_sent?: boolean
           reservation_date: string
           reservation_time: string
           source?: string | null
@@ -138,12 +144,15 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string
           customer_phone?: string
+          duplicate_of?: string | null
           external_id?: string | null
           followup_sent?: boolean
           guests_count?: number
           id?: string
+          is_duplicate?: boolean
           modification_token?: string
           notes?: string | null
+          reminder_sent?: boolean
           reservation_date?: string
           reservation_time?: string
           source?: string | null
@@ -155,6 +164,13 @@ export type Database = {
             columns: ["channel_id"]
             isOneToOne: false
             referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_duplicate_of_fkey"
+            columns: ["duplicate_of"]
+            isOneToOne: false
+            referencedRelation: "reservations"
             referencedColumns: ["id"]
           },
         ]
