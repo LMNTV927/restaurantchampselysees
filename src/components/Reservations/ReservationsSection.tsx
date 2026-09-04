@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
@@ -16,7 +18,10 @@ import { ImportOpenTableDialog } from "./ImportOpenTableDialog";
 import { EditCommentDialog } from "./EditCommentDialog";
 import { EditReservationDialog } from "./EditReservationDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis, createDateTimeInParis } from "@/lib/dateUtils";
+import { cn } from "@/lib/utils";
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
 
