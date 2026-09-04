@@ -39,6 +39,7 @@ interface Reservation {
 export function ReservationsSection() {
   const [selectedFilter, setSelectedFilter] = useState("today");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPastDate, setSelectedPastDate] = useState<Date | undefined>(undefined);
   const ITEMS_PER_PAGE = 5;
   const { toast } = useToast();
   const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
