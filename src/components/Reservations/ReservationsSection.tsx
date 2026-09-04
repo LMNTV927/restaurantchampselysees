@@ -201,6 +201,9 @@ export function ReservationsSection() {
   const getTotalPastReservations = () => {
     const todayString = getTodayInParis();
     const currentTime = getCurrentTimeInParis();
+    const selectedPastDateString = selectedPastDate
+      ? selectedPastDate.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' })
+      : null;
     
     const reservationsWithOriginalData = realtimeReservations.map(reservation => {
       const nameParts = reservation.customerName.split(' ');
@@ -229,16 +232,20 @@ export function ReservationsSection() {
       const isPast = reservation.reservationDate < todayString || 
                     (reservation.reservationDate === todayString && 
                      reservation.reservationTime < currentTime);
+      if (selectedPastDateString) {
+        return isPast && reservation.reservationDate === selectedPastDateString;
+      }
       return isPast;
     }).length;
   };
 
   const totalPastReservations = selectedFilter === "past" ? getTotalPastReservations() : 0;
-  const totalPages = Math.ceil(totalPastReservations / ITEMS_PER_PAGE);
+  const totalPages = selectedPastDate ? 1 : Math.ceil(totalPastReservations / ITEMS_PER_PAGE);
 
-  // Reset à la page 1 si on change de filtre
+  // Reset à la page 1 et au jour sélectionné si on change de filtre
   useEffect(() => {
     setCurrentPage(1);
+    setSelectedPastDate(undefined);
   }, [selectedFilter]);
 
   const handleUpdateReservationStatus = async (reservationId: string, newStatus: ReservationStatus) => {
