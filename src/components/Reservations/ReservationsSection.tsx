@@ -397,6 +397,48 @@ export function ReservationsSection() {
               </motion.button>
             ))}
           </div>
+
+          {/* Sélecteur de jour pour les réservations passées */}
+          {selectedFilter === "past" && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[200px] justify-start text-left font-normal bg-card/50 border-border/50 hover:bg-card",
+                    !selectedPastDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                  {selectedPastDate
+                    ? format(selectedPastDate, "dd/MM/yyyy", { locale: fr })
+                    : "Choisir un jour"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 pointer-events-auto" align="end">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedPastDate}
+                  onSelect={setSelectedPastDate}
+                  defaultMonth={selectedPastDate || new Date()}
+                  toDate={new Date()}
+                  locale={fr}
+                  className="p-3"
+                />
+              </PopoverContent>
+            </Popover>
+          )}
+
+          {selectedFilter === "past" && selectedPastDate && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={() => setSelectedPastDate(undefined)}
+            >
+              Tout voir
+            </Button>
+          )}
         </div>
       </div>
 
