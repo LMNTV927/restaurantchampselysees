@@ -140,27 +140,37 @@ export function ReservationsSection() {
           reservation.reservationDate >= nextWeekString
         );
       
-      case "past":
-        // Toutes les réservations passées avec pagination
+      case "past": {
+        // Filtre par jour sélectionné si défini, sinon toutes les réservations passées paginées
+        const selectedPastDateString = selectedPastDate
+          ? selectedPastDate.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' })
+          : null;
+
         const allPastReservations = reservationsWithOriginalData.filter(reservation => {
-          // Vérifier si la réservation est passée
           const isPast = reservation.reservationDate < todayString || 
                         (reservation.reservationDate === todayString && 
                          reservation.reservationTime < currentTime);
           
+          if (selectedPastDateString) {
+            return isPast && reservation.reservationDate === selectedPastDateString;
+          }
           return isPast;
         }).sort((a, b) => {
-          // Tri chronologique inverse (plus récentes en premier)
           if (a.reservationDate !== b.reservationDate) {
             return b.reservationDate.localeCompare(a.reservationDate);
           }
           return b.reservationTime.localeCompare(a.reservationTime);
         });
         
+        if (selectedPastDateString) {
+          return allPastReservations;
+        }
+        
         // Pagination - afficher seulement ITEMS_PER_PAGE réservations
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE;
         return allPastReservations.slice(startIndex, endIndex);
+      }
       
       default:
         return reservationsWithOriginalData;
