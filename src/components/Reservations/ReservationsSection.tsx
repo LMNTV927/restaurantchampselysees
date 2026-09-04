@@ -487,22 +487,30 @@ export function ReservationsSection() {
               <div className="flex flex-col items-center text-center space-y-3 sm:space-y-2 sm:flex-row sm:text-left sm:items-center sm:justify-between">
                 <div className="space-y-1 sm:space-y-2 order-2 sm:order-1 w-full sm:w-auto">
                   <p className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
-                    {kpiTitles.occupancy}
+                    {selectedPastDate ? "Jour sélectionné" : kpiTitles.occupancy}
                   </p>
                   <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <Button
-                        key={page}
-                        variant={currentPage === page ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(page)}
-                        className="h-8 w-8 p-0 text-xs"
-                      >
-                        {page}
-                      </Button>
-                    ))}
-                    {totalPages === 0 && (
-                      <span className="text-xs text-muted-foreground">Aucune page</span>
+                    {selectedPastDate ? (
+                      <span className="text-sm font-semibold text-foreground">
+                        {format(selectedPastDate, "dd/MM/yyyy", { locale: fr })}
+                      </span>
+                    ) : (
+                      <>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="h-8 w-8 p-0 text-xs"
+                          >
+                            {page}
+                          </Button>
+                        ))}
+                        {totalPages === 0 && (
+                          <span className="text-xs text-muted-foreground">Aucune page</span>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
