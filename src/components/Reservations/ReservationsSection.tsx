@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
@@ -16,7 +18,10 @@ import { ImportOpenTableDialog } from "./ImportOpenTableDialog";
 import { EditCommentDialog } from "./EditCommentDialog";
 import { EditReservationDialog } from "./EditReservationDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis, createDateTimeInParis } from "@/lib/dateUtils";
+import { cn } from "@/lib/utils";
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
 
@@ -34,6 +39,7 @@ interface Reservation {
 export function ReservationsSection() {
   const [selectedFilter, setSelectedFilter] = useState("today");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPastDate, setSelectedPastDate] = useState<Date | undefined>(undefined);
   const ITEMS_PER_PAGE = 5;
   const { toast } = useToast();
   const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
@@ -134,27 +140,37 @@ export function ReservationsSection() {
           reservation.reservationDate >= nextWeekString
         );
       
-      case "past":
-        // Toutes les réservations passées avec pagination
+      case "past": {
+        // Filtre par jour sélectionné si défini, sinon toutes les réservations passées paginées
+        const selectedPastDateString = selectedPastDate
+          ? selectedPastDate.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' })
+          : null;
+
         const allPastReservations = reservationsWithOriginalData.filter(reservation => {
-          // Vérifier si la réservation est passée
           const isPast = reservation.reservationDate < todayString || 
                         (reservation.reservationDate === todayString && 
                          reservation.reservationTime < currentTime);
           
+          if (selectedPastDateString) {
+            return isPast && reservation.reservationDate === selectedPastDateString;
+          }
           return isPast;
         }).sort((a, b) => {
-          // Tri chronologique inverse (plus récentes en premier)
           if (a.reservationDate !== b.reservationDate) {
             return b.reservationDate.localeCompare(a.reservationDate);
           }
           return b.reservationTime.localeCompare(a.reservationTime);
         });
         
+        if (selectedPastDateString) {
+          return allPastReservations;
+        }
+        
         // Pagination - afficher seulement ITEMS_PER_PAGE réservations
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE;
         return allPastReservations.slice(startIndex, endIndex);
+      }
       
       default:
         return reservationsWithOriginalData;
@@ -185,6 +201,9 @@ export function ReservationsSection() {
   const getTotalPastReservations = () => {
     const todayString = getTodayInParis();
     const currentTime = getCurrentTimeInParis();
+    const selectedPastDateString = selectedPastDate
+      ? selectedPastDate.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' })
+      : null;
     
     const reservationsWithOriginalData = realtimeReservations.map(reservation => {
       const nameParts = reservation.customerName.split(' ');
@@ -213,16 +232,20 @@ export function ReservationsSection() {
       const isPast = reservation.reservationDate < todayString || 
                     (reservation.reservationDate === todayString && 
                      reservation.reservationTime < currentTime);
+      if (selectedPastDateString) {
+        return isPast && reservation.reservationDate === selectedPastDateString;
+      }
       return isPast;
     }).length;
   };
 
   const totalPastReservations = selectedFilter === "past" ? getTotalPastReservations() : 0;
-  const totalPages = Math.ceil(totalPastReservations / ITEMS_PER_PAGE);
+  const totalPages = selectedPastDate ? 1 : Math.ceil(totalPastReservations / ITEMS_PER_PAGE);
 
-  // Reset à la page 1 si on change de filtre
+  // Reset à la page 1 et au jour sélectionné si on change de filtre
   useEffect(() => {
     setCurrentPage(1);
+    setSelectedPastDate(undefined);
   }, [selectedFilter]);
 
   const handleUpdateReservationStatus = async (reservationId: string, newStatus: ReservationStatus) => {
@@ -266,6 +289,9 @@ export function ReservationsSection() {
       case "all":
         return "Réservations à venir";
       case "past":
+        if (selectedPastDate) {
+          return `Réservations du ${format(selectedPastDate, 'dd/MM/yyyy', { locale: fr })}`;
+        }
         return "Réservations passées";
       case "duplicates":
         return "Doublons détectés (masqués) — la réservation la plus récente est conservée";
@@ -371,6 +397,48 @@ export function ReservationsSection() {
               </motion.button>
             ))}
           </div>
+
+          {/* Sélecteur de jour pour les réservations passées */}
+          {selectedFilter === "past" && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[200px] justify-start text-left font-normal bg-card/50 border-border/50 hover:bg-card",
+                    !selectedPastDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                  {selectedPastDate
+                    ? format(selectedPastDate, "dd/MM/yyyy", { locale: fr })
+                    : "Choisir un jour"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 pointer-events-auto" align="end">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedPastDate}
+                  onSelect={setSelectedPastDate}
+                  defaultMonth={selectedPastDate || new Date()}
+                  toDate={new Date()}
+                  locale={fr}
+                  className="p-3"
+                />
+              </PopoverContent>
+            </Popover>
+          )}
+
+          {selectedFilter === "past" && selectedPastDate && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={() => setSelectedPastDate(undefined)}
+            >
+              Tout voir
+            </Button>
+          )}
         </div>
       </div>
 
@@ -419,22 +487,30 @@ export function ReservationsSection() {
               <div className="flex flex-col items-center text-center space-y-3 sm:space-y-2 sm:flex-row sm:text-left sm:items-center sm:justify-between">
                 <div className="space-y-1 sm:space-y-2 order-2 sm:order-1 w-full sm:w-auto">
                   <p className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
-                    {kpiTitles.occupancy}
+                    {selectedPastDate ? "Jour sélectionné" : kpiTitles.occupancy}
                   </p>
                   <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <Button
-                        key={page}
-                        variant={currentPage === page ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(page)}
-                        className="h-8 w-8 p-0 text-xs"
-                      >
-                        {page}
-                      </Button>
-                    ))}
-                    {totalPages === 0 && (
-                      <span className="text-xs text-muted-foreground">Aucune page</span>
+                    {selectedPastDate ? (
+                      <span className="text-sm font-semibold text-foreground">
+                        {format(selectedPastDate, "dd/MM/yyyy", { locale: fr })}
+                      </span>
+                    ) : (
+                      <>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="h-8 w-8 p-0 text-xs"
+                          >
+                            {page}
+                          </Button>
+                        ))}
+                        {totalPages === 0 && (
+                          <span className="text-xs text-muted-foreground">Aucune page</span>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
