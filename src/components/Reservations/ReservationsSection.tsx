@@ -289,6 +289,9 @@ export function ReservationsSection() {
       case "all":
         return "Réservations à venir";
       case "past":
+        if (selectedPastDate) {
+          return `Réservations du ${format(selectedPastDate, 'dd/MM/yyyy', { locale: fr })}`;
+        }
         return "Réservations passées";
       case "duplicates":
         return "Doublons détectés (masqués) — la réservation la plus récente est conservée";
