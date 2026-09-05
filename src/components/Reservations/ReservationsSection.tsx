@@ -76,14 +76,21 @@ export function ReservationsSection() {
     ? format(selectedPastDate, 'yyyy-MM-dd')
     : null;
 
-  const allPastReservations = realtimeReservations
+  const allPastReservationsBase = realtimeReservations
     .map(mapReservation)
     .filter(reservation => {
       const isPast = reservation.reservationDate < todayString ||
         (reservation.reservationDate === todayString && reservation.reservationTime < currentTime);
 
-      return isPast && (!selectedPastDateString || reservation.reservationDate === selectedPastDateString);
-    })
+      return isPast;
+    });
+
+  const currentMonth = getCurrentMonthInParis();
+  const currentMonthPastReservations = allPastReservationsBase
+    .filter(reservation => reservation.reservationDate.startsWith(currentMonth));
+
+  const allPastReservations = allPastReservationsBase
+    .filter(reservation => !selectedPastDateString || reservation.reservationDate === selectedPastDateString)
     .sort((a, b) => {
       if (a.reservationDate !== b.reservationDate) {
         return a.reservationDate.localeCompare(b.reservationDate);
@@ -150,7 +157,7 @@ export function ReservationsSection() {
 
   // Calculate KPIs based on filtered reservations
   const getFilteredKPIs = () => {
-    const reservationsForTotals = selectedFilter === "past" ? allPastReservations : reservations;
+    const reservationsForTotals = selectedFilter === "past" ? currentMonthPastReservations : reservations;
     const totalReservations = reservationsForTotals.length;
     const totalCovers = reservationsForTotals.reduce((sum, r) => sum + r.partySize, 0);
     
@@ -247,9 +254,9 @@ export function ReservationsSection() {
         };
       case "past":
         return {
-          reservations: "Réservations Passées",
-          covers: "Couverts Passés",
-          occupancy: "Pages"
+          reservations: "Réservations ce mois",
+          covers: "Couverts ce mois",
+          occupancy: "Jour"
         };
       default:
         return {
