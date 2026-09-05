@@ -398,47 +398,6 @@ export function ReservationsSection() {
             ))}
           </div>
 
-          {/* Sélecteur de jour pour les réservations passées */}
-          {selectedFilter === "past" && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-[200px] justify-start text-left font-normal bg-card/50 border-border/50 hover:bg-card",
-                    !selectedPastDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                  {selectedPastDate
-                    ? format(selectedPastDate, "dd/MM/yyyy", { locale: fr })
-                    : "Choisir un jour"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 pointer-events-auto" align="end">
-                <CalendarComponent
-                  mode="single"
-                  selected={selectedPastDate}
-                  onSelect={setSelectedPastDate}
-                  defaultMonth={selectedPastDate || new Date()}
-                  toDate={new Date()}
-                  locale={fr}
-                  className="p-3"
-                />
-              </PopoverContent>
-            </Popover>
-          )}
-
-          {selectedFilter === "past" && selectedPastDate && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground"
-              onClick={() => setSelectedPastDate(undefined)}
-            >
-              Tout voir
-            </Button>
-          )}
         </div>
       </div>
 
@@ -485,32 +444,48 @@ export function ReservationsSection() {
           {selectedFilter === "past" ? (
             <Card className="premium-card p-3 sm:p-6 group hover:shadow-medium transition-all duration-300">
               <div className="flex flex-col items-center text-center space-y-3 sm:space-y-2 sm:flex-row sm:text-left sm:items-center sm:justify-between">
-                <div className="space-y-1 sm:space-y-2 order-2 sm:order-1 w-full sm:w-auto">
+                <div className="space-y-2 order-2 sm:order-1 w-full sm:w-auto">
                   <p className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
-                    {selectedPastDate ? "Jour sélectionné" : kpiTitles.occupancy}
+                    {selectedPastDate ? "Jour sélectionné" : "Choisir un jour"}
                   </p>
-                  <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap">
-                    {selectedPastDate ? (
-                      <span className="text-sm font-semibold text-foreground">
-                        {format(selectedPastDate, "dd/MM/yyyy", { locale: fr })}
-                      </span>
-                    ) : (
-                      <>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <Button
-                            key={page}
-                            variant={currentPage === page ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setCurrentPage(page)}
-                            className="h-8 w-8 p-0 text-xs"
-                          >
-                            {page}
-                          </Button>
-                        ))}
-                        {totalPages === 0 && (
-                          <span className="text-xs text-muted-foreground">Aucune page</span>
-                        )}
-                      </>
+                  <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(
+                            "justify-start text-left font-normal bg-card/50 border-border/50 hover:bg-card h-9 px-3",
+                            !selectedPastDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                          {selectedPastDate
+                            ? format(selectedPastDate, "dd/MM/yyyy", { locale: fr })
+                            : "Choisir un jour"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={selectedPastDate}
+                          onSelect={setSelectedPastDate}
+                          defaultMonth={selectedPastDate || new Date()}
+                          toDate={new Date()}
+                          locale={fr}
+                          className="p-3"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    {selectedPastDate && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-foreground h-9 px-2"
+                        onClick={() => setSelectedPastDate(undefined)}
+                      >
+                        Tout voir
+                      </Button>
                     )}
                   </div>
                 </div>
