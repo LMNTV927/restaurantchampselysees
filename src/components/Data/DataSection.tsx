@@ -484,7 +484,8 @@ export function DataSection() {
           <div className="p-6 border-b border-border/50">
             <h3 className="text-lg font-playfair font-semibold">Performance par Canal</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Analyse détaillée des conversions pour chaque canal de tracking
+              Réservations et couverts réels du mois (par jour de venue), doublons exclus.
+              Les clics et la conversion ne concernent que les liens de réservation suivis.
             </p>
           </div>
           
