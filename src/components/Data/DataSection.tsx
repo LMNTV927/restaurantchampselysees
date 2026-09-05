@@ -299,7 +299,7 @@ export function DataSection() {
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Conversion"
+            title="Conversion liens"
             value={kpis.conversion}
             suffix="%"
             icon={TrendingUp}
@@ -484,7 +484,8 @@ export function DataSection() {
           <div className="p-6 border-b border-border/50">
             <h3 className="text-lg font-playfair font-semibold">Performance par Canal</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Analyse détaillée des conversions pour chaque canal de tracking
+              Réservations et couverts réels du mois (par jour de venue), doublons exclus.
+              Les clics et la conversion ne concernent que les liens de réservation suivis.
             </p>
           </div>
           
@@ -511,7 +512,7 @@ export function DataSection() {
                   >
                     <TableCell className="font-medium">{channel.name}</TableCell>
                     <TableCell className="text-center font-semibold">
-                      {channel.clicks.toLocaleString()}
+                      {channel.slug ? channel.clicks.toLocaleString() : "—"}
                     </TableCell>
                     <TableCell className="text-center font-semibold">
                       {channel.reservations.toLocaleString()}
@@ -521,13 +522,17 @@ export function DataSection() {
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="font-semibold text-primary">
-                        {channel.conversion.toFixed(1)}%
+                        {channel.slug ? `${Math.round(channel.conversion)}%` : "—"}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <code className="px-2 py-1 bg-muted/50 rounded text-sm font-mono">
-                        {channel.shortUrl}
-                      </code>
+                      {channel.shortUrl ? (
+                        <code className="px-2 py-1 bg-muted/50 rounded text-sm font-mono">
+                          {channel.shortUrl}
+                        </code>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Hors lien de suivi</span>
+                      )}
                     </TableCell>
                   </motion.tr>
                 ))}
