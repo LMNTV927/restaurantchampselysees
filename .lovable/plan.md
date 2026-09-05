@@ -16,7 +16,7 @@ Deux causes :
   - sans jour sélectionné : tout l'historique (282 / 1 145 aujourd'hui) ;
   - avec un jour sélectionné : uniquement ce jour-là.
 - Le résumé au-dessus de la liste (« X réservations • Y couverts ») utilisera les mêmes totaux complets et restera cohérent avec les deux cartes.
-- La liste affichera les 20 réservations les plus récentes avec un bouton **« Afficher plus »** en bas, qui charge 20 de plus à chaque clic. Plus de grille de numéros de pages.
+- Sans jour sélectionné, aucune liste partielle ne sera affichée : l'écran invitera à choisir un jour afin d'éviter de donner l'impression que seules 5 réservations existent.
 - Quand un jour est choisi, toutes les réservations de ce jour s'affichent d'un coup.
 - Le sélecteur de jour et le bouton « Tout voir » restent tels quels dans la troisième carte.
 
@@ -26,6 +26,6 @@ Fichier concerné : `src/components/Reservations/ReservationsSection.tsx`
 
 - Extraire le calcul de la liste passée complète (filtrée par jour si défini, triée date/heure décroissantes) dans une valeur unique, réutilisée à la fois pour les KPI et pour l'affichage.
 - Les deux KPI et le résumé de la liste du filtre `past` utilisent la longueur et la somme des `guestsCount` de cette liste complète, au lieu de la tranche affichée.
-- Remplacer la pagination par tranches (`currentPage` / `ITEMS_PER_PAGE`) par un `visibleCount` (20 par défaut, +20 par clic), remis à 20 au changement d'onglet ou de jour.
-- Supprimer les états et le code de pagination devenus inutiles (`currentPage`, `totalPages`, `getTotalPastReservations`).
+- Supprimer la pagination par tranches et n'afficher la liste passée que lorsqu'une date précise est sélectionnée.
+- Supprimer les états et le code de pagination devenus inutiles (`currentPage`, `ITEMS_PER_PAGE`, `totalPages`, `getTotalPastReservations`).
 - Vérification après coup : ouvrir l'onglet dans le navigateur et confirmer que les compteurs correspondent au total en base, avec et sans jour sélectionné.
