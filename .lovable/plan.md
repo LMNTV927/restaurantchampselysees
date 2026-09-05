@@ -1,31 +1,32 @@
-# Réservations passées : chiffres et affichage complets
+# Pourquoi les chiffres diffèrent entre « Réservations passées » et « Données & Analytics »
 
-## Le problème constaté
+## Ce que j'ai vérifié dans vos données (septembre 2026)
 
-Dans l'onglet **Réservations passées**, l'écran affiche « 5 réservations • 18 couverts ».
-En réalité la base contient **282 réservations passées pour 1 145 couverts**.
+| Source du chiffre | Réservations | Couverts |
+|---|---|---|
+| Liste des réservations (par date de venue, doublons exclus) | 35 | 198 |
+| Compteurs utilisés par Données & Analytics | 18 | 51 |
 
-Deux causes :
+## Les trois raisons de l'écart
 
-1. Les deux compteurs (réservations et couverts) sont calculés sur la liste **affichée à l'écran**, qui est limitée à 5 éléments — pas sur l'ensemble des réservations passées.
-2. La grille de pages a été retirée au profit du sélecteur de jour, mais la liste reste découpée par tranches de 5 : sans boutons de navigation, il est impossible de voir au-delà des 5 premières.
+1. **Deux sources différentes.** La page Réservations lit la vraie liste des réservations. La page Données & Analytics ne lit pas cette liste : elle lit un compteur séparé, alimenté uniquement quand quelqu'un réserve via un lien de réservation suivi.
 
-## Ce qui va changer
+2. **Les réservations saisies à la main, celles venant de « IA » (agenda) et celles d'OpenTable ne sont jamais comptées** dans Données & Analytics. En septembre : 5 réservations « IA » (40 couverts) et 1 OpenTable (4 couverts) manquent, plus toutes celles ajoutées manuellement depuis le dashboard.
 
-- Les compteurs « Réservations Passées » et « Couverts Passés » afficheront le **total réel** :
-  - sans jour sélectionné : tout l'historique (282 / 1 145 aujourd'hui) ;
-  - avec un jour sélectionné : uniquement ce jour-là.
-- Le résumé au-dessus de la liste (« X réservations • Y couverts ») utilisera les mêmes totaux complets et restera cohérent avec les deux cartes.
-- Sans jour sélectionné, aucune liste partielle ne sera affichée : l'écran invitera à choisir un jour afin d'éviter de donner l'impression que seules 5 réservations existent.
-- Quand un jour est choisi, toutes les réservations de ce jour s'affichent d'un coup.
-- Le sélecteur de jour et le bouton « Tout voir » restent tels quels dans la troisième carte.
+3. **La date n'est pas la même.** La liste classe par jour de venue ; les compteurs d'Analytics classent par jour où la réservation a été prise. Une réservation prise le 28 août pour le 5 septembre apparaît en août côté Analytics, en septembre côté liste. De plus, si on modifie le nombre de convives d'une réservation, le compteur d'Analytics n'est pas mis à jour.
 
-## Détail technique
+## Correction proposée
 
-Fichier concerné : `src/components/Reservations/ReservationsSection.tsx`
+Faire calculer Données & Analytics à partir de la vraie liste des réservations, comme la page Réservations :
 
-- Extraire le calcul de la liste passée complète (filtrée par jour si défini, triée date/heure décroissantes) dans une valeur unique, réutilisée à la fois pour les KPI et pour l'affichage.
-- Les deux KPI et le résumé de la liste du filtre `past` utilisent la longueur et la somme des `guestsCount` de cette liste complète, au lieu de la tranche affichée.
-- Supprimer la pagination par tranches et n'afficher la liste passée que lorsqu'une date précise est sélectionnée.
-- Supprimer les états et le code de pagination devenus inutiles (`currentPage`, `ITEMS_PER_PAGE`, `totalPages`, `getTotalPastReservations`).
-- Vérification après coup : ouvrir l'onglet dans le navigateur et confirmer que les compteurs correspondent au total en base, avec et sans jour sélectionné.
+- Réservations, couverts et graphique journalier calculés sur la table des réservations du mois, **par date de venue**, en excluant les doublons.
+- Les clics restent issus des compteurs de liens (c'est leur seul rôle) ; le taux de conversion = réservations issues d'un lien suivi ÷ clics, avec une mention claire.
+- Répartition par canal basée sur le canal / la source réelle de chaque réservation, avec une ligne pour « IA », « OpenTable » et « Ajout manuel ».
+- Export CSV et rapport PDF alignés sur ces mêmes chiffres.
+- L'évolution mois précédent recalculée sur la même base.
+
+## Détails techniques
+
+- `src/hooks/useMonthlyData.ts` : agréger `reservations` filtrées sur `reservation_date` dans le mois et `is_duplicate = false`, au lieu de `channel_stats` ; garder `channel_stats` uniquement pour `clicks`. Même changement pour le mois courant (`useRealtimeChannelsData.ts`) afin que les deux chemins soient cohérents.
+- `src/components/Data/DataSection.tsx` : `getDailyData()` utilise déjà `reservation_date`, mais la requête filtre sur `created_at` — à aligner.
+- `src/hooks/usePDFReport.ts` : vérifier que le rapport utilise les nouveaux totaux.
