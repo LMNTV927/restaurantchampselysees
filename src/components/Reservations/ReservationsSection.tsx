@@ -86,9 +86,9 @@ export function ReservationsSection() {
     })
     .sort((a, b) => {
       if (a.reservationDate !== b.reservationDate) {
-        return b.reservationDate.localeCompare(a.reservationDate);
+        return a.reservationDate.localeCompare(b.reservationDate);
       }
-      return b.reservationTime.localeCompare(a.reservationTime);
+      return a.reservationTime.localeCompare(b.reservationTime);
     });
 
   // Filter reservations based on selected period
