@@ -76,14 +76,21 @@ export function ReservationsSection() {
     ? format(selectedPastDate, 'yyyy-MM-dd')
     : null;
 
-  const allPastReservations = realtimeReservations
+  const allPastReservationsBase = realtimeReservations
     .map(mapReservation)
     .filter(reservation => {
       const isPast = reservation.reservationDate < todayString ||
         (reservation.reservationDate === todayString && reservation.reservationTime < currentTime);
 
-      return isPast && (!selectedPastDateString || reservation.reservationDate === selectedPastDateString);
-    })
+      return isPast;
+    });
+
+  const currentMonth = getCurrentMonthInParis();
+  const currentMonthPastReservations = allPastReservationsBase
+    .filter(reservation => reservation.reservationDate.startsWith(currentMonth));
+
+  const allPastReservations = allPastReservationsBase
+    .filter(reservation => !selectedPastDateString || reservation.reservationDate === selectedPastDateString)
     .sort((a, b) => {
       if (a.reservationDate !== b.reservationDate) {
         return a.reservationDate.localeCompare(b.reservationDate);
