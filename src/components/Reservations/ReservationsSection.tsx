@@ -82,7 +82,7 @@ export function ReservationsSection() {
       const isPast = reservation.reservationDate < todayString ||
         (reservation.reservationDate === todayString && reservation.reservationTime < currentTime);
 
-      return !selectedPastDateString || reservation.reservationDate === selectedPastDateString;
+      return isPast && (!selectedPastDateString || reservation.reservationDate === selectedPastDateString);
     })
     .sort((a, b) => {
       if (a.reservationDate !== b.reservationDate) {
