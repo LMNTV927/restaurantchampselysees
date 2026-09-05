@@ -254,9 +254,9 @@ export function ReservationsSection() {
         };
       case "past":
         return {
-          reservations: "Réservations Passées",
-          covers: "Couverts Passés",
-          occupancy: "Pages"
+          reservations: "Réservations ce mois",
+          covers: "Couverts ce mois",
+          occupancy: "Jour"
         };
       default:
         return {
