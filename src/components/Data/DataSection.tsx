@@ -299,7 +299,7 @@ export function DataSection() {
         </motion.div>
         <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
           <KPICard
-            title="Conversion"
+            title="Conversion liens"
             value={kpis.conversion}
             suffix="%"
             icon={TrendingUp}
