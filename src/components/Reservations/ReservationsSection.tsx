@@ -38,9 +38,7 @@ interface Reservation {
 
 export function ReservationsSection() {
   const [selectedFilter, setSelectedFilter] = useState("today");
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedPastDate, setSelectedPastDate] = useState<Date | undefined>(undefined);
-  const ITEMS_PER_PAGE = 5;
   const { toast } = useToast();
   const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
@@ -49,8 +47,7 @@ export function ReservationsSection() {
 
 
 
-  // Transform real-time reservations to match local interface
-  const allReservations: Reservation[] = realtimeReservations.map(reservation => {
+  const mapReservation = (reservation: typeof realtimeReservations[number]) => {
     const nameParts = reservation.customerName.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
@@ -67,14 +64,35 @@ export function ReservationsSection() {
       occasion: '', // We don't have occasion in our data model yet
       notes: reservation.notes || '',
       status: reservation.status,
-      source: reservation.source || reservation.channelName
+      source: reservation.source || reservation.channelName,
+      reservationDate: reservation.reservationDate,
+      reservationTime: reservation.reservationTime
     };
-  });
+  };
+
+  const todayString = getTodayInParis();
+  const currentTime = getCurrentTimeInParis();
+  const selectedPastDateString = selectedPastDate
+    ? format(selectedPastDate, 'yyyy-MM-dd')
+    : null;
+
+  const allPastReservations = realtimeReservations
+    .map(mapReservation)
+    .filter(reservation => {
+      const isPast = reservation.reservationDate < todayString ||
+        (reservation.reservationDate === todayString && reservation.reservationTime < currentTime);
+
+      return !selectedPastDateString || reservation.reservationDate === selectedPastDateString;
+    })
+    .sort((a, b) => {
+      if (a.reservationDate !== b.reservationDate) {
+        return b.reservationDate.localeCompare(a.reservationDate);
+      }
+      return b.reservationTime.localeCompare(a.reservationTime);
+    });
 
   // Filter reservations based on selected period
   const getFilteredReservations = () => {
-    const todayString = getTodayInParis();
-    const currentTime = getCurrentTimeInParis();
     const currentMonth = getCurrentMonthInParis();
     
     // Calculate date strings for filtering (avoid timezone issues)
@@ -90,28 +108,7 @@ export function ReservationsSection() {
     
     // Use original reservation data for filtering (avoid timezone conversion issues)
     const sourceList = selectedFilter === 'duplicates' ? duplicates : realtimeReservations;
-    const reservationsWithOriginalData = sourceList.map(reservation => {
-      const nameParts = reservation.customerName.split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      
-      return {
-        id: reservation.id,
-        customer: { 
-          firstName, 
-          lastName, 
-          phone: reservation.customerPhone 
-        },
-        startAt: createDateTimeInParis(reservation.reservationDate, reservation.reservationTime),
-        partySize: reservation.guestsCount,
-        occasion: '',
-        notes: reservation.notes || '',
-        status: reservation.status,
-        source: reservation.source || reservation.channelName,
-        reservationDate: reservation.reservationDate, // Keep original date string
-        reservationTime: reservation.reservationTime  // Keep original time string
-      };
-    });
+    const reservationsWithOriginalData = sourceList.map(mapReservation);
 
     if (selectedFilter === 'duplicates') {
       return reservationsWithOriginalData.sort((a, b) =>
@@ -141,35 +138,7 @@ export function ReservationsSection() {
         );
       
       case "past": {
-        // Filtre par jour sélectionné si défini, sinon toutes les réservations passées paginées
-        const selectedPastDateString = selectedPastDate
-          ? selectedPastDate.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' })
-          : null;
-
-        const allPastReservations = reservationsWithOriginalData.filter(reservation => {
-          const isPast = reservation.reservationDate < todayString || 
-                        (reservation.reservationDate === todayString && 
-                         reservation.reservationTime < currentTime);
-          
-          if (selectedPastDateString) {
-            return isPast && reservation.reservationDate === selectedPastDateString;
-          }
-          return isPast;
-        }).sort((a, b) => {
-          if (a.reservationDate !== b.reservationDate) {
-            return b.reservationDate.localeCompare(a.reservationDate);
-          }
-          return b.reservationTime.localeCompare(a.reservationTime);
-        });
-        
-        if (selectedPastDateString) {
-          return allPastReservations;
-        }
-        
-        // Pagination - afficher seulement ITEMS_PER_PAGE réservations
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-        return allPastReservations.slice(startIndex, endIndex);
+        return selectedPastDateString ? allPastReservations : [];
       }
       
       default:
@@ -181,8 +150,9 @@ export function ReservationsSection() {
 
   // Calculate KPIs based on filtered reservations
   const getFilteredKPIs = () => {
-    const totalReservations = reservations.length;
-    const totalCovers = reservations.reduce((sum, r) => sum + r.partySize, 0);
+    const reservationsForTotals = selectedFilter === "past" ? allPastReservations : reservations;
+    const totalReservations = reservationsForTotals.length;
+    const totalCovers = reservationsForTotals.reduce((sum, r) => sum + r.partySize, 0);
     
     // Restaurant capacity: 500 seats
     const restaurantCapacity = 500;
@@ -197,54 +167,8 @@ export function ReservationsSection() {
 
   const filteredKPIs = getFilteredKPIs();
 
-  // Calculer les informations de pagination pour les réservations passées
-  const getTotalPastReservations = () => {
-    const todayString = getTodayInParis();
-    const currentTime = getCurrentTimeInParis();
-    const selectedPastDateString = selectedPastDate
-      ? selectedPastDate.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' })
-      : null;
-    
-    const reservationsWithOriginalData = realtimeReservations.map(reservation => {
-      const nameParts = reservation.customerName.split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      
-      return {
-        id: reservation.id,
-        customer: { 
-          firstName, 
-          lastName, 
-          phone: reservation.customerPhone 
-        },
-        startAt: createDateTimeInParis(reservation.reservationDate, reservation.reservationTime),
-        partySize: reservation.guestsCount,
-        occasion: '',
-        notes: reservation.notes || '',
-        status: reservation.status,
-        source: reservation.source || reservation.channelName,
-        reservationDate: reservation.reservationDate,
-        reservationTime: reservation.reservationTime
-      };
-    });
-
-    return reservationsWithOriginalData.filter(reservation => {
-      const isPast = reservation.reservationDate < todayString || 
-                    (reservation.reservationDate === todayString && 
-                     reservation.reservationTime < currentTime);
-      if (selectedPastDateString) {
-        return isPast && reservation.reservationDate === selectedPastDateString;
-      }
-      return isPast;
-    }).length;
-  };
-
-  const totalPastReservations = selectedFilter === "past" ? getTotalPastReservations() : 0;
-  const totalPages = selectedPastDate ? 1 : Math.ceil(totalPastReservations / ITEMS_PER_PAGE);
-
-  // Reset à la page 1 et au jour sélectionné si on change de filtre
+  // Réinitialiser le jour sélectionné lorsqu'on change de filtre
   useEffect(() => {
-    setCurrentPage(1);
     setSelectedPastDate(undefined);
   }, [selectedFilter]);
 
@@ -521,12 +445,16 @@ export function ReservationsSection() {
           <div className="p-6 border-b border-border/50">
             <h3 className="text-lg font-playfair font-semibold">{getFilterTitle()}</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {reservations.length} réservations • {reservations.reduce((sum, r) => sum + r.partySize, 0)} couverts
+              {filteredKPIs.totalReservations} réservations • {filteredKPIs.totalCovers} couverts
             </p>
           </div>
           
           <div className="p-6 space-y-4">
-            {reservations.length === 0 ? (
+            {selectedFilter === "past" && !selectedPastDate ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Choisissez un jour pour afficher ses réservations</p>
+              </div>
+            ) : reservations.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">Aucune réservation pour cette période</p>
               </div>
