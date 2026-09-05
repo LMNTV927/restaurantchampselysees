@@ -512,7 +512,7 @@ export function DataSection() {
                   >
                     <TableCell className="font-medium">{channel.name}</TableCell>
                     <TableCell className="text-center font-semibold">
-                      {channel.clicks.toLocaleString()}
+                      {channel.slug ? channel.clicks.toLocaleString() : "—"}
                     </TableCell>
                     <TableCell className="text-center font-semibold">
                       {channel.reservations.toLocaleString()}
@@ -522,13 +522,17 @@ export function DataSection() {
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="font-semibold text-primary">
-                        {channel.conversion.toFixed(1)}%
+                        {channel.slug ? `${Math.round(channel.conversion)}%` : "—"}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <code className="px-2 py-1 bg-muted/50 rounded text-sm font-mono">
-                        {channel.shortUrl}
-                      </code>
+                      {channel.shortUrl ? (
+                        <code className="px-2 py-1 bg-muted/50 rounded text-sm font-mono">
+                          {channel.shortUrl}
+                        </code>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Hors lien de suivi</span>
+                      )}
                     </TableCell>
                   </motion.tr>
                 ))}
