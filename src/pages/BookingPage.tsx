@@ -10,6 +10,26 @@ const princePalaceLogo = PRINCE_PALACE_LOGO;
 const dishImages = DISH_IMAGES;
 
 
+const GOOGLE_ADS_SLUG = "google-ads";
+
+/** Détecte une visite issue de Google Ads (gclid / utm cpc) */
+const detectGoogleAds = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const gclid = params.get("gclid") || params.get("gbraid") || params.get("wbraid");
+    const source = (params.get("utm_source") || "").toLowerCase();
+    const medium = (params.get("utm_medium") || "").toLowerCase();
+    const isAds =
+      !!gclid ||
+      (source.includes("google") && ["cpc", "ppc", "paid", "paidsearch", "paid_search"].includes(medium));
+    if (isAds) sessionStorage.setItem("pp_google_ads", "1");
+    return isAds || sessionStorage.getItem("pp_google_ads") === "1";
+  } catch {
+    return false;
+  }
+};
+
 export function BookingPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -27,8 +47,11 @@ export function BookingPage() {
         return;
       }
 
+      // Attribution Google Ads prioritaire sur le canal du lien
+      const effectiveSlug = detectGoogleAds() ? GOOGLE_ADS_SLUG : slug;
+
       // Le comptage du clic part en parallèle et ne bloque jamais l'affichage
-      supabase.rpc('increment_channel_clicks', { channel_slug: slug }).then(
+      supabase.rpc('increment_channel_clicks', { channel_slug: effectiveSlug }).then(
         () => {},
         () => {}
       );
@@ -37,14 +60,28 @@ export function BookingPage() {
         const { data, error } = await supabase
           .from('channels')
           .select('id, name, slug, is_active')
-          .eq('slug', slug)
+          .eq('slug', effectiveSlug)
           .eq('is_active', true)
           .maybeSingle();
 
         if (cancelled) return;
 
         if (error || !data) {
-          setError("Lien de réservation introuvable ou inactif");
+          // repli sur le canal du lien si le canal Google Ads est indisponible
+          const fallback = effectiveSlug === slug ? null : await supabase
+            .from('channels')
+            .select('id, name, slug, is_active')
+            .eq('slug', slug)
+            .eq('is_active', true)
+            .maybeSingle();
+
+          if (cancelled) return;
+
+          if (fallback?.data) {
+            setChannel(fallback.data);
+          } else {
+            setError("Lien de réservation introuvable ou inactif");
+          }
         } else {
           setChannel(data);
         }
@@ -60,6 +97,7 @@ export function BookingPage() {
     fetchChannel();
     return () => { cancelled = true; };
   }, [slug]);
+
 
   const handleBookingSuccess = async (reservationData: any) => {
     if (channel) {
