@@ -42,6 +42,34 @@ const types = [
   },
 ];
 
+const espaces = [
+  {
+    name: "Le Salon Prince",
+    image: eventSoiree,
+    alt: "Le Salon Prince, espace privatisable du Prince Palace aux Champs-Élysées",
+    text: "Le cœur du lieu : banquettes profondes, lumière tamisée et scène centrale pour les soirées qui se prolongent.",
+    cocktail: "jusqu'à 300 personnes",
+    diner: "jusqu'à 160 convives",
+  },
+  {
+    name: "La Mezzanine",
+    image: privatisation,
+    alt: "La Mezzanine du Prince Palace, espace en surplomb pour événements privés",
+    text: "En surplomb de la salle, un espace à part pour recevoir vos invités sans quitter l'ambiance générale.",
+    cocktail: "jusqu'à 120 personnes",
+    diner: "jusqu'à 70 convives",
+  },
+  {
+    name: "L'Écrin",
+    image: restaurantTable,
+    alt: "L'Écrin, salon intime du Prince Palace pour dîners privés à Paris 8",
+    text: "Un salon intime pour les dîners de famille, les anniversaires en comité restreint et les repas d'affaires.",
+    cocktail: "jusqu'à 60 personnes",
+    diner: "jusqu'à 40 convives",
+  },
+];
+
+
 const formules = [
   {
     name: "Espace réservé",
