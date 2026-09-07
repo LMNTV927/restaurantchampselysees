@@ -65,38 +65,20 @@ const handler = async (req: Request): Promise<Response> => {
         continue;
       }
 
-      // Clusters d'horaires proches (<= 120 min)
-      const sorted = [...group].sort((a, b) => minutesOf(a.reservation_time) - minutesOf(b.reservation_time));
-      const clusters: typeof sorted[] = [];
-      let current: typeof sorted = [sorted[0]];
-      for (let i = 1; i < sorted.length; i++) {
-        if (Math.abs(minutesOf(sorted[i].reservation_time) - minutesOf(current[current.length - 1].reservation_time)) <= 120) {
-          current.push(sorted[i]);
-        } else {
-          clusters.push(current);
-          current = [sorted[i]];
-        }
-      }
-      clusters.push(current);
-
-      for (const cluster of clusters) {
-        if (cluster.length === 1) {
-          if (cluster[0].is_duplicate) toRestore.push(cluster[0].id);
-          continue;
-        }
-        // On garde la réservation créée le plus récemment
-        const keep = cluster.reduce((a, b) =>
-          new Date(b.created_at).getTime() > new Date(a.created_at).getTime() ? b : a,
-        );
-        if (keep.is_duplicate) toRestore.push(keep.id);
-        for (const r of cluster) {
-          if (r.id === keep.id) continue;
-          if (!r.is_duplicate || r.duplicate_of !== keep.id) {
-            toMarkDuplicate.push({ id: r.id, duplicate_of: keep.id });
-          }
+      // Même téléphone + même date = doublon, quel que soit l'écart d'horaire.
+      // On garde la réservation créée le plus récemment.
+      const keep = group.reduce((a, b) =>
+        new Date(b.created_at).getTime() > new Date(a.created_at).getTime() ? b : a,
+      );
+      if (keep.is_duplicate) toRestore.push(keep.id);
+      for (const r of group) {
+        if (r.id === keep.id) continue;
+        if (!r.is_duplicate || r.duplicate_of !== keep.id) {
+          toMarkDuplicate.push({ id: r.id, duplicate_of: keep.id });
         }
       }
     }
+
 
     for (const item of toMarkDuplicate) {
       await supabase
