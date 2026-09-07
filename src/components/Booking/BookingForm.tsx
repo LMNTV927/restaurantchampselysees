@@ -10,6 +10,8 @@ import { SummaryStep } from './steps/SummaryStep';
 import { SuccessStep } from './steps/SuccessStep';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { isValidPhone, emailError } from '@/lib/contactValidation';
+
 
 export interface BookingData {
   date: Date | null;
