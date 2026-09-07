@@ -47,7 +47,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function LoginRoute() {
   const { user, loading } = useAuth();
   if (loading) return <RouteFallback />;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
   return <LoginPage />;
 }
 
@@ -61,7 +61,17 @@ const App = () => (
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/login" element={<LoginRoute />} />
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route element={<SiteLayout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/evenementiel" element={<Evenementiel />} />
+                <Route path="/restaurant" element={<Restaurant />} />
+                <Route path="/galerie" element={<Galerie />} />
+                <Route path="/avis" element={<Avis />} />
+                <Route path="/faq" element={<Faq />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/mentions-legales" element={<MentionsLegales />} />
+              </Route>
+              <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/book/:slug" element={<BookingPage />} />
               <Route path="/reservation/modify/:token" element={<ModifyReservationPage />} />
               <Route path="/reservation/cancel/:token" element={<CancelReservationPage />} />
