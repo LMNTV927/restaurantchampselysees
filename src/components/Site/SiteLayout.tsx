@@ -35,87 +35,85 @@ export function SiteLayout() {
     <div className="min-h-screen bg-background text-foreground">
       <header
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
-          scrolled ? "bg-background/90 backdrop-blur-md border-b border-primary/15" : "bg-transparent"
+          scrolled && !open
+            ? "bg-background/80 backdrop-blur-md border-b border-primary/10"
+            : "bg-transparent"
         }`}
       >
         <div className="container flex items-center justify-between h-16 sm:h-20">
-          <Link to="/" className="flex items-center gap-3">
-            <img
-              src={PRINCE_PALACE_LOGO}
-              alt="Logo Prince Palace, restaurant lounge événementiel aux Champs-Élysées"
-              width={40}
-              height={40}
-              className="h-10 w-10 rounded-xl object-cover"
-            />
-            <span className="font-playfair text-lg sm:text-xl tracking-wide">Prince Palace</span>
-          </Link>
-
-          <nav className="hidden lg:flex items-center gap-7">
-            {NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === "/"}
-                className={({ isActive }) =>
-                  `text-sm tracking-wide transition-colors hover:text-primary ${
-                    isActive ? "text-primary" : "text-foreground/80"
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-            <a
-              href={SITE.bookingPath}
-              className="premium-button border border-primary/60 text-primary px-5 py-2 text-sm hover:bg-primary hover:text-primary-foreground"
-            >
-              Réserver une table
-            </a>
-          </nav>
-
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-            className="lg:hidden p-2 text-foreground"
+            aria-expanded={open}
+            className="flex items-center gap-3 p-2 -ml-2 text-foreground/90 hover:text-primary transition-colors"
           >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <span className="hidden sm:inline text-[11px] uppercase tracking-[0.3em]">
+              {open ? "Fermer" : "Menu"}
+            </span>
           </button>
-        </div>
 
-        {open && (
-          <div className="lg:hidden bg-background/98 backdrop-blur-md border-t border-primary/15">
-            <nav className="container py-5 flex flex-col gap-4">
-              {NAV.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.to === "/"}
-                  className={({ isActive }) =>
-                    `text-base py-1 ${isActive ? "text-primary" : "text-foreground/85"}`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              ))}
-              <a
-                href={SITE.bookingPath}
-                className="premium-button bg-gradient-gold text-primary-foreground text-center py-3 mt-2 font-medium"
-              >
-                Réserver une table
-              </a>
-              <a
-                href={whatsappLink(DEVIS_MESSAGE)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="premium-button border border-primary/50 text-primary text-center py-3"
-              >
-                Demander un devis événementiel
-              </a>
-            </nav>
-          </div>
-        )}
+          <Link
+            to="/"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 text-foreground"
+            aria-label="Prince Palace, accueil"
+          >
+            <img
+              src={PRINCE_PALACE_LOGO}
+              alt="Logo Prince Palace, restaurant lounge événementiel aux Champs-Élysées"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-lg object-cover"
+            />
+            <span className="font-playfair text-base sm:text-lg tracking-[0.18em] uppercase">
+              Prince Palace
+            </span>
+          </Link>
+
+          <a
+            href={SITE.bookingPath}
+            className="border border-primary/60 text-primary px-4 sm:px-6 py-2 text-[11px] uppercase tracking-[0.22em] hover:bg-primary hover:text-primary-foreground transition-colors"
+          >
+            Réserver
+          </a>
+        </div>
       </header>
+
+      {/* Menu plein écran */}
+      <div
+        className={`fixed inset-0 z-40 bg-background/97 backdrop-blur-xl transition-opacity duration-500 ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <nav className="container h-full flex flex-col justify-center items-center gap-5 sm:gap-7">
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === "/"}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `font-playfair text-2xl sm:text-4xl tracking-wide transition-colors hover:text-primary ${
+                  isActive ? "text-primary" : "text-foreground/90"
+                }`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+          <span className="h-px w-16 bg-primary/40 my-2" />
+          <a
+            href={whatsappLink(DEVIS_MESSAGE)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] uppercase tracking-[0.28em] text-primary"
+          >
+            Demander un devis événementiel
+          </a>
+        </nav>
+      </div>
+
 
       <main>
         <Outlet />

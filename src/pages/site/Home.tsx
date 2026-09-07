@@ -66,22 +66,21 @@ export default function Home() {
       />
 
       <HeroSection image={heroLounge} alt="Salle du Prince Palace, lounge noir et or aux Champs-Élysées" priority>
-        <div className="max-w-2xl">
-          <p className="uppercase tracking-[0.35em] text-primary text-xs sm:text-sm mb-5">
-            Champs-Élysées · Paris 8
-          </p>
-          <h1 className="font-playfair text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
-            Votre événement privé
-            <span className="block text-primary">au cœur des Champs-Élysées</span>
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="font-playfair text-4xl sm:text-6xl lg:text-7xl font-light tracking-[0.06em] leading-tight">
+            Prince Palace
           </h1>
-          <p className="text-base sm:text-lg text-foreground/80 leading-relaxed mb-8 max-w-xl">
-            Le Prince Palace accueille vos soirées, anniversaires et privatisations dans un écrin
-            noir et or, et vous reçoit aussi à table pour un dîner d'exception.
+          <p className="uppercase tracking-[0.55em] text-primary text-[10px] sm:text-xs mt-4 sm:mt-5 pl-[0.55em]">
+            Champs-Élysées
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <span className="block h-px w-14 bg-primary/50 mx-auto my-8 sm:my-10" />
+          <p className="text-sm sm:text-base text-foreground/75 leading-relaxed max-w-md mx-auto">
+            Soirées privées, privatisations et dîners d'exception au cœur de Paris 8.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-9">
             <a
               href={SITE.bookingPath}
-              className="premium-button bg-gradient-gold text-primary-foreground px-8 py-4 text-center font-medium shadow-gold"
+              className="bg-gradient-gold text-primary-foreground px-8 py-4 text-center text-[11px] uppercase tracking-[0.25em] font-medium shadow-gold"
             >
               Réserver une table
             </a>
@@ -89,13 +88,14 @@ export default function Home() {
               href={whatsappLink(DEVIS_MESSAGE)}
               target="_blank"
               rel="noopener noreferrer"
-              className="premium-button border border-primary/60 text-primary px-8 py-4 text-center hover:bg-primary hover:text-primary-foreground transition-colors"
+              className="border border-primary/50 text-primary px-8 py-4 text-center text-[11px] uppercase tracking-[0.25em] hover:bg-primary hover:text-primary-foreground transition-colors"
             >
-              Demander un devis événementiel
+              Devis événementiel
             </a>
           </div>
         </div>
       </HeroSection>
+
 
       {/* Réassurance */}
       <section className="border-y border-primary/10 bg-card/40">
@@ -113,6 +113,49 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Agenda — temps forts */}
+      <section className="container py-20 sm:py-28">
+        <Reveal className="text-center max-w-xl mx-auto mb-14">
+          <p className="uppercase tracking-[0.3em] text-primary text-[11px] mb-4">Agenda</p>
+          <h2 className="font-playfair text-3xl sm:text-4xl font-light">Les temps forts de la semaine</h2>
+        </Reveal>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            {
+              title: "Dîner-spectacle",
+              when: "Vendredi & samedi · à partir de 20h",
+              text: "Dîner servi à table, ambiance musicale live et show au cœur de la salle.",
+            },
+            {
+              title: "Soirées privées",
+              when: "Toute la semaine · sur réservation",
+              text: "Un espace qui vous est réservé, une playlist choisie et un service dédié.",
+            },
+            {
+              title: "Afterwork Champs-Élysées",
+              when: "Jeudi · 19h — 23h",
+              text: "Planches à partager et cocktails signature pour prolonger la journée.",
+            },
+          ].map((item, i) => (
+            <Reveal key={item.title} delay={i * 80}>
+              <article className="h-full border border-primary/15 p-8 hover:border-primary/40 transition-colors duration-500">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-primary mb-4">{item.when}</p>
+                <h3 className="font-playfair text-2xl font-light mb-3">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{item.text}</p>
+                <Link
+                  to="/evenementiel"
+                  className="text-[11px] uppercase tracking-[0.25em] text-primary inline-flex items-center gap-2"
+                >
+                  En savoir plus <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+
 
       {/* Prestations */}
       <section className="container py-20 sm:py-28">
