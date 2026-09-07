@@ -77,7 +77,7 @@ export function HeroSection({ image, alt, children, height = "min-h-[92vh]", pri
         width={1920}
         height={1088}
         loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
+        {...{ fetchpriority: priority ? "high" : "auto" }}
         decoding="async"
         className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
         style={{ transformOrigin: "center 40%" }}
