@@ -17,6 +17,18 @@ const ThankYouEmailPreviewPage = lazy(() => import("./pages/ThankYouEmailPreview
 const ModifyReservationPage = lazy(() => import("./pages/ModifyReservationPage"));
 const CancelReservationPage = lazy(() => import("./pages/CancelReservationPage"));
 
+// Site vitrine public
+const SiteLayout = lazy(() => import("./components/Site/SiteLayout").then((m) => ({ default: m.SiteLayout })));
+const Home = lazy(() => import("./pages/site/Home"));
+const Evenementiel = lazy(() => import("./pages/site/Evenementiel"));
+const Restaurant = lazy(() => import("./pages/site/Restaurant"));
+const Galerie = lazy(() => import("./pages/site/Galerie"));
+const Avis = lazy(() => import("./pages/site/Avis"));
+const Faq = lazy(() => import("./pages/site/Faq"));
+const Contact = lazy(() => import("./pages/site/Contact"));
+const MentionsLegales = lazy(() => import("./pages/site/MentionsLegales"));
+
+
 const queryClient = new QueryClient();
 
 const RouteFallback = () => (
