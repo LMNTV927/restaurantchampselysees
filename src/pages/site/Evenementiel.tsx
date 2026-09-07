@@ -121,6 +121,61 @@ export default function Evenementiel() {
         </div>
       </HeroSection>
 
+      {/* Nos espaces */}
+      <section className="py-20 sm:py-28">
+        <Reveal className="container text-center max-w-xl mx-auto mb-14">
+          <p className="uppercase tracking-[0.3em] text-primary text-[11px] mb-4">Nos espaces</p>
+          <h2 className="font-playfair text-3xl sm:text-4xl font-light">
+            Trois lieux, trois atmosphères
+          </h2>
+        </Reveal>
+
+        <div className="space-y-16 sm:space-y-24">
+          {espaces.map((espace, i) => (
+            <Reveal key={espace.name}>
+              <div
+                className={`container grid lg:grid-cols-2 gap-8 lg:gap-14 items-center ${
+                  i % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""
+                }`}
+              >
+                <img
+                  src={espace.image}
+                  alt={espace.alt}
+                  width={1600}
+                  height={1072}
+                  loading="lazy"
+                  className="w-full object-cover aspect-[4/3]"
+                />
+                <div>
+                  <h3 className="font-playfair text-3xl font-light mb-4">{espace.name}</h3>
+                  <p className="text-muted-foreground leading-relaxed mb-6">{espace.text}</p>
+                  <ul className="text-sm text-muted-foreground space-y-1 mb-8">
+                    <li>
+                      <span className="text-primary uppercase tracking-[0.2em] text-[11px] mr-2">Cocktail</span>
+                      {espace.cocktail}
+                    </li>
+                    <li>
+                      <span className="text-primary uppercase tracking-[0.2em] text-[11px] mr-2">Dîner assis</span>
+                      {espace.diner}
+                    </li>
+                  </ul>
+                  <a
+                    href={whatsappLink(DEVIS_MESSAGE)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block border border-primary/50 text-primary px-7 py-3 text-[11px] uppercase tracking-[0.25em] hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    Demander un devis
+                  </a>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+
+
       <section className="container py-20 sm:py-28">
         <Reveal className="max-w-2xl mb-14">
           <p className="uppercase tracking-[0.3em] text-primary text-xs mb-4">Types d'événements</p>
