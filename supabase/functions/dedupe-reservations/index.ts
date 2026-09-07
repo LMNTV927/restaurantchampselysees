@@ -19,10 +19,8 @@ function normalizePhone(raw: string | null): string | null {
   return digits.length >= 9 ? digits.slice(-9) : digits;
 }
 
-function minutesOf(time: string): number {
-  const [h, m] = time.split(":").map(Number);
-  return (h || 0) * 60 + (m || 0);
-}
+
+
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
