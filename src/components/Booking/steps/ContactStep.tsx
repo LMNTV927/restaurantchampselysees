@@ -53,9 +53,13 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
             className="premium-input mt-1"
             required
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            Nous vous contacterons uniquement en cas de besoin concernant votre réservation
-          </p>
+          {phoneMsg ? (
+            <p className="text-xs text-destructive mt-1">{phoneMsg}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">
+              Nous vous contacterons uniquement en cas de besoin concernant votre réservation
+            </p>
+          )}
         </div>
         
         <div>
@@ -70,7 +74,9 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
             onChange={(e) => onUpdate({ customerEmail: e.target.value })}
             className="premium-input mt-1"
           />
+          {emailMsg && <p className="text-xs text-destructive mt-1">{emailMsg}</p>}
         </div>
+
         
         <div>
           <Label htmlFor="notes" className="text-sm font-medium text-foreground">
