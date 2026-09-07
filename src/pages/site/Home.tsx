@@ -84,8 +84,13 @@ export default function Home() {
         jsonLd={jsonLd}
       />
 
-      {/* 1 — HERO */}
-      <HeroSection image={heroLounge} alt="Salle du Prince Palace, lounge noir et or aux Champs-Élysées" priority>
+      {/* 1 — HERO (vidéo en boucle en fond) */}
+      <HeroSection
+        image={heroLounge}
+        video={heroLoop.url}
+        alt="Salle du Prince Palace, lounge noir et or aux Champs-Élysées"
+        priority
+      >
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="font-playfair text-5xl sm:text-7xl lg:text-8xl font-light tracking-[0.04em] leading-tight">
             Prince Palace
