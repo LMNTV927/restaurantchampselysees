@@ -2,6 +2,8 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 
 interface HeroSectionProps {
   image: string;
+  /** Vidéo de fond en boucle (remplace l'image si fournie) */
+  video?: string;
   alt: string;
   children: ReactNode;
   height?: string;
@@ -13,9 +15,9 @@ interface HeroSectionProps {
  * progressif de l'overlay au scroll. Uniquement transform/opacity (GPU),
  * déclenché par IntersectionObserver, désactivé si prefers-reduced-motion.
  */
-export function HeroSection({ image, alt, children, height = "min-h-[92vh]", priority }: HeroSectionProps) {
+export function HeroSection({ image, video, alt, children, height = "min-h-[92vh]", priority }: HeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const imageRef = useRef<HTMLImageElement | HTMLVideoElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
