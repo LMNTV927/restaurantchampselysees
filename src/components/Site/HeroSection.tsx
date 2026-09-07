@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
 
 interface HeroSectionProps {
   image: string;
