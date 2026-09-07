@@ -7,6 +7,7 @@ import { SITE, whatsappLink, DEVIS_MESSAGE } from "@/lib/siteConfig";
 import { DISH_IMAGES } from "@/lib/dishImages";
 import heroLounge from "@/assets/site/hero-lounge.jpg";
 import heroLoop from "@/assets/hero-loop.mp4.asset.json";
+import heroLoopWebm from "@/assets/hero-loop.webm.asset.json";
 import eventSoiree from "@/assets/site/event-soiree.jpg";
 import restaurantTable from "@/assets/site/restaurant-table.jpg";
 import privatisation from "@/assets/site/privatisation.jpg";

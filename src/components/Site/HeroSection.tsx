@@ -4,6 +4,7 @@ interface HeroSectionProps {
   image: string;
   /** Vidéo de fond en boucle (remplace l'image si fournie) */
   video?: string;
+  videoWebm?: string;
   alt: string;
   children: ReactNode;
   height?: string;
