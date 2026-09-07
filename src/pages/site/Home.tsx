@@ -1,34 +1,39 @@
 import { Link } from "react-router-dom";
-import { Sparkles, Users, Building2, Star, MapPin, Utensils, ArrowRight } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
 import { Seo } from "@/components/Site/Seo";
 import { HeroSection } from "@/components/Site/HeroSection";
 import { Reveal } from "@/components/Site/Reveal";
 import { SITE, whatsappLink, DEVIS_MESSAGE } from "@/lib/siteConfig";
+import { DISH_IMAGES } from "@/lib/dishImages";
 import heroLounge from "@/assets/site/hero-lounge.jpg";
 import eventSoiree from "@/assets/site/event-soiree.jpg";
 import restaurantTable from "@/assets/site/restaurant-table.jpg";
 import privatisation from "@/assets/site/privatisation.jpg";
+import detailTable from "@/assets/site/detail-table.jpg";
+import vibe1 from "@/assets/site/vibe-1.jpg";
+import vibe2 from "@/assets/site/vibe-2.jpg";
+import vibe3 from "@/assets/site/vibe-3.jpg";
 
-const prestations = [
+const VIBES = [
+  { src: vibe1, alt: "Table d'invités trinquant au champagne dans la salle du Prince Palace" },
+  { src: vibe2, alt: "Assiette gastronomique servie au Prince Palace, Paris 8" },
+  { src: vibe3, alt: "Anniversaire célébré au Prince Palace, bouteille et ambiance festive" },
+];
+
+const ESPACES = [
   {
-    icon: Sparkles,
-    title: "Soirées privées",
-    text: "Une salle qui vous appartient le temps d'une nuit : lumière tamisée, musique et service dédié.",
+    name: "Le Salon Prince",
+    image: eventSoiree,
+    alt: "Le Salon Prince, grande salle événementielle du Prince Palace aux Champs-Élysées",
+    p1: "Notre plus grand espace, au cœur du lieu : scène, piste centrale et service dédié pour vos plus grandes soirées.",
+    p2: "Jusqu'à 300 personnes en cocktail, 160 en dîner assis, avec disposition et sonorisation adaptées à votre événement.",
   },
   {
-    icon: Star,
-    title: "Anniversaires",
-    text: "Arrivée en fanfare, table dressée, gâteau et animation : le moment se retient longtemps.",
-  },
-  {
-    icon: Users,
-    title: "EVJF & EVG",
-    text: "Des formules pensées pour les groupes, entre dîner soigné et ambiance festive.",
-  },
-  {
-    icon: Building2,
-    title: "Entreprises & team building",
-    text: "Cocktails dînatoires, lancements de produit et dîners d'équipe au cœur du 8e.",
+    name: "La Mezzanine",
+    image: privatisation,
+    alt: "La Mezzanine privatisée du Prince Palace, espace intimiste noir et or",
+    p1: "Un espace surélevé, plus intime, qui domine la salle : parfait pour un anniversaire ou un dîner d'entreprise.",
+    p2: "Jusqu'à 120 personnes en cocktail, 70 en dîner assis, privatisable seul ou avec le salon principal.",
   },
 ];
 
@@ -54,6 +59,19 @@ export default function Home() {
       areaServed: "Paris",
       sameAs: [SITE.instagram, SITE.facebook, SITE.tiktok, SITE.restaurantSite],
     },
+    {
+      "@context": "https://schema.org",
+      "@type": "EventVenue",
+      name: "Prince Palace — lieu événementiel Champs-Élysées",
+      maximumAttendeeCapacity: 500,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "76 Avenue des Champs-Élysées",
+        addressLocality: "Paris",
+        postalCode: "75008",
+        addressCountry: "FR",
+      },
+    },
   ];
 
   return (
@@ -65,252 +83,211 @@ export default function Home() {
         jsonLd={jsonLd}
       />
 
+      {/* 1 — HERO */}
       <HeroSection image={heroLounge} alt="Salle du Prince Palace, lounge noir et or aux Champs-Élysées" priority>
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="font-playfair text-4xl sm:text-6xl lg:text-7xl font-light tracking-[0.06em] leading-tight">
+          <h1 className="font-playfair text-5xl sm:text-7xl lg:text-8xl font-light tracking-[0.04em] leading-tight">
             Prince Palace
           </h1>
-          <p className="uppercase tracking-[0.55em] text-primary text-[10px] sm:text-xs mt-4 sm:mt-5 pl-[0.55em]">
-            Champs-Élysées
+          <p className="uppercase tracking-[0.5em] text-primary text-[10px] sm:text-xs mt-5 pl-[0.5em]">
+            Restaurant &amp; Lounge
           </p>
-          <span className="block h-px w-14 bg-primary/50 mx-auto my-8 sm:my-10" />
-          <p className="text-sm sm:text-base text-foreground/75 leading-relaxed max-w-md mx-auto">
-            Soirées privées, privatisations et dîners d'exception au cœur de Paris 8.
+          <p className="uppercase tracking-[0.5em] text-foreground/70 text-[10px] sm:text-xs mt-2 pl-[0.5em]">
+            Paris
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-9">
-            <a
-              href={SITE.bookingPath}
-              className="bg-gradient-gold text-primary-foreground px-8 py-4 text-center text-[11px] uppercase tracking-[0.25em] font-medium shadow-gold"
-            >
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-10">
+            <a href={SITE.bookingPath} className="pill">
               Réserver une table
             </a>
-            <a
-              href={whatsappLink(DEVIS_MESSAGE)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border border-primary/50 text-primary px-8 py-4 text-center text-[11px] uppercase tracking-[0.25em] hover:bg-primary hover:text-primary-foreground transition-colors"
-            >
+            <a href={whatsappLink(DEVIS_MESSAGE)} target="_blank" rel="noopener noreferrer" className="pill-outline">
               Devis événementiel
             </a>
           </div>
         </div>
       </HeroSection>
 
-
-      {/* Réassurance */}
-      <section className="border-y border-primary/10 bg-card/40">
-        <div className="container py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { value: "500", label: "personnes accueillies" },
-            { value: "Paris 8", label: "Champs-Élysées" },
-            { value: "7j/7", label: "soirs d'ouverture" },
-            { value: "Sur mesure", label: "formules événementielles" },
-          ].map((item) => (
-            <Reveal key={item.label}>
-              <p className="font-playfair text-2xl sm:text-3xl text-primary">{item.value}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">{item.label}</p>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* Agenda — temps forts */}
-      <section className="container py-20 sm:py-28">
-        <Reveal className="text-center max-w-xl mx-auto mb-14">
-          <p className="uppercase tracking-[0.3em] text-primary text-[11px] mb-4">Agenda</p>
-          <h2 className="font-playfair text-3xl sm:text-4xl font-light">Les temps forts de la semaine</h2>
-        </Reveal>
-        <div className="grid gap-6 md:grid-cols-3">
-          {[
-            {
-              title: "Dîner-spectacle",
-              when: "Vendredi & samedi · à partir de 20h",
-              text: "Dîner servi à table, ambiance musicale live et show au cœur de la salle.",
-            },
-            {
-              title: "Soirées privées",
-              when: "Toute la semaine · sur réservation",
-              text: "Un espace qui vous est réservé, une playlist choisie et un service dédié.",
-            },
-            {
-              title: "Afterwork Champs-Élysées",
-              when: "Jeudi · 19h — 23h",
-              text: "Planches à partager et cocktails signature pour prolonger la journée.",
-            },
-          ].map((item, i) => (
-            <Reveal key={item.title} delay={i * 80}>
-              <article className="h-full border border-primary/15 p-8 hover:border-primary/40 transition-colors duration-500">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-primary mb-4">{item.when}</p>
-                <h3 className="font-playfair text-2xl font-light mb-3">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{item.text}</p>
-                <Link
-                  to="/evenementiel"
-                  className="text-[11px] uppercase tracking-[0.25em] text-primary inline-flex items-center gap-2"
-                >
-                  En savoir plus <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-
-
-      {/* Prestations */}
-      <section className="container py-20 sm:py-28">
-        <Reveal className="max-w-2xl mb-14">
-          <p className="uppercase tracking-[0.3em] text-primary text-xs mb-4">Nos prestations</p>
-          <h2 className="font-playfair text-3xl sm:text-4xl mb-5">
-            Un lieu pensé pour les grandes occasions
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            De la table de dix à la privatisation complète, nous composons chaque soirée avec vous :
-            accueil, formules, décoration, timing et service.
-          </p>
-        </Reveal>
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {prestations.map((p, i) => (
-            <Reveal key={p.title} delay={i * 80}>
-              <article className="premium-card h-full p-7 border-primary/15 hover:border-primary/40 hover:shadow-gold transition-all duration-500">
-                <p.icon className="h-7 w-7 text-primary mb-5" />
-                <h3 className="font-playfair text-xl mb-3">{p.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{p.text}</p>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal className="mt-12">
-          <Link
-            to="/evenementiel"
-            className="inline-flex items-center gap-2 text-primary hover:gap-3 transition-all"
-          >
-            Découvrir toutes nos formules événementielles <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Reveal>
-      </section>
-
-      {/* Événementiel visuel */}
-      <section className="container pb-20 sm:pb-28 grid lg:grid-cols-2 gap-10 items-center">
-        <Reveal>
-          <img
-            src={eventSoiree}
-            alt="Soirée privée célébrée au Prince Palace avec service de champagne"
-            width={1600}
-            height={1072}
-            loading="lazy"
-            className="rounded-2xl w-full object-cover aspect-[4/3] border border-primary/20"
-          />
-        </Reveal>
-        <Reveal delay={120}>
-          <p className="uppercase tracking-[0.3em] text-primary text-xs mb-4">Événementiel Paris</p>
-          <h2 className="font-playfair text-3xl sm:text-4xl mb-5">
-            Privatisez tout ou partie du Prince Palace
-          </h2>
-          <p className="text-muted-foreground leading-relaxed mb-4">
-            Espace lounge, mezzanine ou salle entière : jusqu'à 500 personnes selon la configuration.
-            Nous adaptons la disposition, la sonorisation et le service à votre événement.
-          </p>
-          <p className="text-muted-foreground leading-relaxed mb-8">
-            Chaque demande fait l'objet d'un devis sur mesure, avec un interlocuteur unique du premier
-            échange jusqu'à la fin de la soirée.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              to="/evenementiel"
-              className="premium-button bg-gradient-gold text-primary-foreground px-7 py-3 text-center font-medium"
-            >
-              Voir la page événementiel
-            </Link>
-            <a
-              href={whatsappLink(DEVIS_MESSAGE)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="premium-button border border-primary/50 text-primary px-7 py-3 text-center"
-            >
-              Demander un devis
-            </a>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* Restaurant */}
-      <section className="bg-card/40 border-y border-primary/10">
-        <div className="container py-20 sm:py-28 grid lg:grid-cols-2 gap-10 items-center">
-          <Reveal className="lg:order-2">
+      {/* 2 — INTRODUCTION (fond ivoire) */}
+      <section className="section-light">
+        <div className="container py-20 sm:py-28 grid lg:grid-cols-2 gap-12 items-center">
+          <Reveal>
+            <h2 className="display text-4xl sm:text-6xl">
+              <span className="text-primary block">Votre soirée d'exception</span>
+              <span className="block">au cœur des Champs-Élysées</span>
+            </h2>
+            <p className="muted-text mt-8 leading-relaxed">
+              À deux pas de l'avenue, le Prince Palace réunit un restaurant élégant et un lounge festif dans un
+              même lieu. Une salle feutrée, un service attentif et une cuisine généreuse servie tard le soir.
+            </p>
+            <p className="muted-text mt-4 leading-relaxed">
+              Dîner à deux, tablée d'amis ou soirée privée jusqu'à 500 personnes : chaque configuration est
+              pensée avec vous, de l'accueil à la dernière coupe.
+            </p>
+          </Reveal>
+          <Reveal delay={120}>
             <img
-              src={restaurantTable}
-              alt="Table dressée au Prince Palace, assiette gastronomique et lumière chaleureuse"
-              width={1600}
-              height={1072}
+              src={detailTable}
+              alt="Table dressée au Prince Palace : verres en cristal, bougie et lumière chaude"
+              width={1200}
+              height={1400}
               loading="lazy"
-              className="rounded-2xl w-full object-cover aspect-[4/3] border border-primary/20"
+              className="photo-rounded w-full aspect-[4/5]"
             />
           </Reveal>
-          <Reveal delay={120} className="lg:order-1">
-            <Utensils className="h-7 w-7 text-primary mb-5" />
-            <h2 className="font-playfair text-3xl sm:text-4xl mb-5">Le restaurant</h2>
-            <p className="text-muted-foreground leading-relaxed mb-4">
-              Une cuisine généreuse servie tard, dans une salle feutrée à deux pas de l'avenue.
-              Idéal pour un dîner à deux comme pour une tablée d'amis avant la soirée.
-            </p>
-            <p className="text-muted-foreground leading-relaxed mb-8">
-              La carte complète est présentée sur notre site dédié.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link
-                to="/restaurant"
-                className="premium-button border border-primary/50 text-primary px-7 py-3 text-center"
-              >
-                Découvrir le restaurant
-              </Link>
-              <a
-                href={SITE.bookingPath}
-                className="premium-button bg-gradient-gold text-primary-foreground px-7 py-3 text-center font-medium"
-              >
-                Réserver une table
-              </a>
-            </div>
+        </div>
+
+        <div className="container pb-20 sm:pb-24 text-center">
+          <p className="inline-flex items-center gap-2 text-sm muted-text">
+            <Clock className="h-4 w-4 text-primary" />
+            Ouvert 7j/7 — service du soir à partir de 17h
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+            <a href={SITE.bookingPath} className="pill">
+              Réserver une table
+            </a>
+            <a href={SITE.restaurantSite} target="_blank" rel="noopener noreferrer" className="pill-outline">
+              Découvrir la carte
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 3 — BANDE AMBIANCE */}
+      <section className="section-light border-t" style={{ borderColor: "hsl(var(--ink) / 0.08)" }}>
+        <div className="container py-16 sm:py-20">
+          <Reveal className="text-center mb-10">
+            <h2 className="display text-3xl sm:text-4xl">
+              L'ambiance <span className="text-primary">en images</span>
+            </h2>
+          </Reveal>
+          <div className="grid grid-cols-3 gap-3 sm:gap-6">
+            {VIBES.map((v, i) => (
+              <Reveal key={v.src} delay={i * 80}>
+                <img
+                  src={v.src}
+                  alt={v.alt}
+                  width={720}
+                  height={1280}
+                  loading="lazy"
+                  className="photo-rounded w-full aspect-[9/16]"
+                />
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4 — EXPÉRIENCES plein écran */}
+      {[
+        {
+          image: restaurantTable,
+          alt: "Dîner au restaurant du Prince Palace, table dressée et lumière chaleureuse",
+          kicker: "Le restaurant",
+          title: "Une cuisine généreuse, servie tard",
+          text: "Des assiettes à partager, des classiques revisités et un service qui accompagne la soirée jusqu'au bout de la nuit.",
+        },
+        {
+          image: heroLounge,
+          alt: "Ambiance lounge et bar du Prince Palace, lumières tamisées et musique",
+          kicker: "Le lounge",
+          title: "Cocktails, musique et nuits parisiennes",
+          text: "Un bar signature, une sélection de champagnes et une programmation musicale qui fait lever les tables.",
+        },
+      ].map((exp) => (
+        <section key={exp.kicker} className="relative min-h-[70vh] flex items-center">
+          <img
+            src={exp.image}
+            alt={exp.alt}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-background/75" />
+          <div className="container relative text-center max-w-2xl py-24">
+            <p className="uppercase tracking-[0.3em] text-primary text-[11px] mb-5">{exp.kicker}</p>
+            <h2 className="display text-3xl sm:text-5xl mb-6">{exp.title}</h2>
+            <p className="text-muted-foreground leading-relaxed mb-9">{exp.text}</p>
+            <a href={SITE.bookingPath} className="pill">
+              Réserver
+            </a>
+          </div>
+        </section>
+      ))}
+
+      {/* 5 — ÉVÉNEMENTIEL (fond noir) */}
+      <section className="bg-background">
+        <div className="container py-20 sm:py-28">
+          <Reveal className="max-w-2xl mb-14">
+            <p className="uppercase tracking-[0.3em] text-primary text-[11px] mb-4">Événementiel Paris 8</p>
+            <h2 className="display text-4xl sm:text-6xl">Nos espaces privatisables</h2>
+          </Reveal>
+
+          <div className="grid gap-10 md:grid-cols-2">
+            {ESPACES.map((e, i) => (
+              <Reveal key={e.name} delay={i * 100}>
+                <article>
+                  <img
+                    src={e.image}
+                    alt={e.alt}
+                    width={1600}
+                    height={1072}
+                    loading="lazy"
+                    className={`photo-rounded w-full ${i === 0 ? "aspect-[4/3]" : "aspect-[4/3.4]"}`}
+                  />
+                  <h3 className="display text-2xl sm:text-3xl text-primary mt-7 mb-4">{e.name}</h3>
+                  <p className="text-muted-foreground leading-relaxed mb-3">{e.p1}</p>
+                  <p className="text-muted-foreground leading-relaxed mb-7">{e.p2}</p>
+                  <a
+                    href={whatsappLink(DEVIS_MESSAGE)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pill"
+                  >
+                    Demander un devis
+                  </a>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal className="mt-14">
+            <Link to="/evenementiel" className="inline-flex items-center gap-2 text-primary hover:gap-3 transition-all">
+              Voir toutes nos formules événementielles <ArrowRight className="h-4 w-4" />
+            </Link>
           </Reveal>
         </div>
       </section>
 
-      {/* Adresse */}
-      <section className="container py-20 sm:py-28 grid lg:grid-cols-2 gap-10 items-center">
-        <Reveal>
-          <img
-            src={privatisation}
-            alt="Grande table dressée pour une privatisation au Prince Palace Paris"
-            width={1600}
-            height={1072}
-            loading="lazy"
-            className="rounded-2xl w-full object-cover aspect-[4/3] border border-primary/20"
-          />
-        </Reveal>
-        <Reveal delay={120}>
-          <MapPin className="h-7 w-7 text-primary mb-5" />
-          <h2 className="font-playfair text-3xl sm:text-4xl mb-5">Une adresse Champs-Élysées</h2>
-          <p className="text-muted-foreground leading-relaxed mb-6">
-            {SITE.addressPrimary} — entrée également au {SITE.addressSecondary}. Métro George V et
-            Franklin D. Roosevelt à quelques minutes à pied, parkings à proximité immédiate.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              to="/contact"
-              className="premium-button border border-primary/50 text-primary px-7 py-3 text-center"
-            >
-              Nous contacter
-            </Link>
-            <a
-              href={SITE.phoneHref}
-              className="premium-button bg-gradient-gold text-primary-foreground px-7 py-3 text-center font-medium"
-            >
-              {SITE.phone}
+      {/* 6 — INSTAGRAM */}
+      <section className="section-light">
+        <div className="container py-20 sm:py-24">
+          <Reveal className="text-center mb-10">
+            <h2 className="display text-3xl sm:text-5xl">
+              Suivez-nous sur <span className="text-primary">Instagram</span>
+            </h2>
+          </Reveal>
+          <div className="flex gap-4 overflow-x-auto pb-3 snap-x">
+            {[...DISH_IMAGES.map((d) => d.src), detailTable].slice(0, 5).map((src, i) => (
+              <a
+                key={i}
+                href={SITE.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 snap-start w-40 sm:w-56"
+              >
+                <img
+                  src={src}
+                  alt={`Publication Instagram du Prince Palace ${i + 1}`}
+                  loading="lazy"
+                  className="photo-rounded w-full aspect-square hover:opacity-90 transition-opacity"
+                />
+              </a>
+            ))}
+          </div>
+          <div className="text-center mt-10">
+            <a href={SITE.instagram} target="_blank" rel="noopener noreferrer" className="pill">
+              Voir le compte
             </a>
           </div>
-        </Reveal>
+        </div>
       </section>
     </>
   );
