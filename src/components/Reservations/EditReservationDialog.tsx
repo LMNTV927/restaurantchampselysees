@@ -31,6 +31,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { isValidPhone } from "@/lib/contactValidation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -39,7 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   customerName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  customerPhone: z.string().min(10, "Le numéro doit contenir au moins 10 caractères"),
+  customerPhone: z.string().refine(isValidPhone, "Numéro de téléphone incomplet ou invalide"),
   customerEmail: z.string().email("Email invalide").optional().or(z.literal("")),
   reservationDate: z.date({ required_error: "Veuillez sélectionner une date" }),
   reservationTime: z.string().min(1, "Veuillez sélectionner une heure"),
