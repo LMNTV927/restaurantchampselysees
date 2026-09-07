@@ -61,7 +61,12 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
       case 2:
         return bookingData.guestsCount > 0;
       case 3:
-        return bookingData.customerName.trim() !== '' && bookingData.customerPhone.trim() !== '';
+        return (
+          bookingData.customerName.trim().length >= 2 &&
+          isValidPhone(bookingData.customerPhone) &&
+          emailError(bookingData.customerEmail) === null
+        );
+
       case 4:
         return true;
       default:
