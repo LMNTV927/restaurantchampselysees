@@ -1,14 +1,10 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+Disallow: /book/
+Disallow: /dashboard
+Disallow: /login
+Disallow: /reservation/
+Disallow: /email-preview
+Disallow: /email-preview-thankyou
+
+Sitemap: https://xn--rservation-prince-palace-bfc.fr/sitemap.xml

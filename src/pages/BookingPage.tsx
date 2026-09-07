@@ -37,8 +37,20 @@ export function BookingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Les pages de réservation sont des pages de conversion : jamais indexées.
+  useEffect(() => {
+    let meta = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "robots");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", "noindex, nofollow");
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
+
 
     const fetchChannel = async () => {
       if (!slug) {
