@@ -72,18 +72,34 @@ export function HeroSection({ image, video, alt, children, height = "min-h-[92vh
 
   return (
     <section ref={sectionRef} className={`relative ${height} overflow-hidden flex items-center`}>
-      <img
-        ref={imageRef}
-        src={image}
-        alt={alt}
-        width={1920}
-        height={1088}
-        loading={priority ? "eager" : "lazy"}
-        {...{ fetchpriority: priority ? "high" : "auto" }}
-        decoding="async"
-        className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
-        style={{ transformOrigin: "center 40%" }}
-      />
+      {video ? (
+        <video
+          ref={imageRef as React.RefObject<HTMLVideoElement>}
+          className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
+          style={{ transformOrigin: "center 40%" }}
+          src={video}
+          poster={image}
+          aria-label={alt}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+        />
+      ) : (
+        <img
+          ref={imageRef as React.RefObject<HTMLImageElement>}
+          src={image}
+          alt={alt}
+          width={1920}
+          height={1088}
+          loading={priority ? "eager" : "lazy"}
+          {...{ fetchpriority: priority ? "high" : "auto" }}
+          decoding="async"
+          className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
+          style={{ transformOrigin: "center 40%" }}
+        />
+      )}
       <div ref={overlayRef} className="absolute inset-0 bg-background" style={{ opacity: 0.55 }} />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
       <div
