@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         'playfair': ['Playfair Display', 'serif'],
         'inter': ['Inter', 'sans-serif'],
+        'anton': ['Anton', 'Archivo Black', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -63,6 +64,8 @@ export default {
         charcoal: "hsl(var(--charcoal))",
         paper: "hsl(var(--paper))",
         gold: "hsl(var(--gold))",
+        ivory: "hsl(var(--ivory))",
+        ink: "hsl(var(--ink))",
       },
       backgroundImage: {
         'gradient-gold': 'var(--gradient-gold)',
