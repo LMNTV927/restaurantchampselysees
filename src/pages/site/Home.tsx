@@ -89,6 +89,7 @@ export default function Home() {
       <HeroSection
         image={heroLounge}
         video={heroLoop.url}
+        videoWebm={heroLoopWebm.url}
         alt="Salle du Prince Palace, lounge noir et or aux Champs-Élysées"
         priority
       >

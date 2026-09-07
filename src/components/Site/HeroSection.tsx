@@ -16,7 +16,7 @@ interface HeroSectionProps {
  * progressif de l'overlay au scroll. Uniquement transform/opacity (GPU),
  * déclenché par IntersectionObserver, désactivé si prefers-reduced-motion.
  */
-export function HeroSection({ image, video, alt, children, height = "min-h-[92vh]", priority }: HeroSectionProps) {
+export function HeroSection({ image, video, videoWebm, alt, children, height = "min-h-[92vh]", priority }: HeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const imageRef = useRef<HTMLImageElement | HTMLVideoElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
