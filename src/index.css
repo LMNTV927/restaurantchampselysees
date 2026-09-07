@@ -10,6 +10,11 @@
     --charcoal: 210 20% 7%;           /* #0F1115 */
     --paper: 210 14% 97%;             /* #F5F6F8 */
     --gold: 42 48% 58%;               /* #C8A45D */
+    --gold-deep: 42 42% 42%;          /* footer plein */
+    --ivory: 40 30% 95%;              /* beige/ivoire très pâle */
+    --ink: 210 20% 8%;                /* noir profond pour fonds clairs */
+    --ink-muted: 210 10% 35%;
+    --on-gold: 0 0% 100%;
     --slate-dark: 215 25% 27%;        /* #1E293B */
     --slate-light: 214 20% 65%;       /* #94A3B8 */
     
@@ -123,4 +128,39 @@
   .count-up {
     @apply tabular-nums font-semibold;
   }
+}
+
+
+@layer components {
+  /* --- Site vitrine : système éditorial noir / ivoire / doré --- */
+  .display {
+    @apply font-anton uppercase tracking-[0.02em] leading-[0.95];
+  }
+
+  .pill {
+    @apply inline-flex items-center justify-center rounded-full px-8 py-4 text-[12px]
+           font-bold uppercase tracking-[0.18em] transition-transform duration-300;
+    background: hsl(var(--gold));
+    color: hsl(var(--on-gold));
+  }
+  .pill:hover { transform: translateY(-2px); }
+
+  .pill-outline {
+    @apply inline-flex items-center justify-center rounded-full px-8 py-4 text-[12px]
+           font-bold uppercase tracking-[0.18em] transition-colors duration-300 border;
+    border-color: hsl(var(--gold));
+    color: hsl(var(--gold));
+  }
+  .pill-outline:hover {
+    background: hsl(var(--gold));
+    color: hsl(var(--on-gold));
+  }
+
+  .section-light {
+    background: hsl(var(--ivory));
+    color: hsl(var(--ink));
+  }
+  .section-light .muted-text { color: hsl(var(--ink-muted)); }
+
+  .photo-rounded { @apply rounded-[20px] object-cover; }
 }
