@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { BookingData } from '../BookingForm';
+import { phoneError, emailError } from '@/lib/contactValidation';
 
 interface ContactStepProps {
   data: BookingData;
@@ -9,6 +10,9 @@ interface ContactStepProps {
 }
 
 export function ContactStep({ data, onUpdate }: ContactStepProps) {
+  const phoneMsg = data.customerPhone.trim() ? phoneError(data.customerPhone) : null;
+  const emailMsg = emailError(data.customerEmail);
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
