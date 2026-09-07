@@ -75,7 +75,7 @@ export function HeroSection({ image, video, videoWebm, alt, children, height = "
     <section ref={sectionRef} className={`relative ${height} overflow-hidden flex items-center`}>
       {video ? (
         <video
-          ref={imageRef as React.RefObject<HTMLVideoElement>}
+          ref={imageRef as RefObject<HTMLVideoElement>}
           className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
           style={{ transformOrigin: "center 40%" }}
           poster={image}
@@ -91,7 +91,7 @@ export function HeroSection({ image, video, videoWebm, alt, children, height = "
         </video>
       ) : (
         <img
-          ref={imageRef as React.RefObject<HTMLImageElement>}
+          ref={imageRef as RefObject<HTMLImageElement>}
           src={image}
           alt={alt}
           width={1920}
