@@ -78,7 +78,6 @@ export function HeroSection({ image, video, videoWebm, alt, children, height = "
           ref={imageRef as React.RefObject<HTMLVideoElement>}
           className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
           style={{ transformOrigin: "center 40%" }}
-          src={video}
           poster={image}
           aria-label={alt}
           autoPlay
@@ -86,7 +85,10 @@ export function HeroSection({ image, video, videoWebm, alt, children, height = "
           loop
           playsInline
           preload="auto"
-        />
+        >
+          {videoWebm && <source src={videoWebm} type="video/webm" />}
+          <source src={video} type="video/mp4" />
+        </video>
       ) : (
         <img
           ref={imageRef as React.RefObject<HTMLImageElement>}
