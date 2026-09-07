@@ -114,6 +114,49 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Agenda — temps forts */}
+      <section className="container py-20 sm:py-28">
+        <Reveal className="text-center max-w-xl mx-auto mb-14">
+          <p className="uppercase tracking-[0.3em] text-primary text-[11px] mb-4">Agenda</p>
+          <h2 className="font-playfair text-3xl sm:text-4xl font-light">Les temps forts de la semaine</h2>
+        </Reveal>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            {
+              title: "Dîner-spectacle",
+              when: "Vendredi & samedi · à partir de 20h",
+              text: "Dîner servi à table, ambiance musicale live et show au cœur de la salle.",
+            },
+            {
+              title: "Soirées privées",
+              when: "Toute la semaine · sur réservation",
+              text: "Un espace qui vous est réservé, une playlist choisie et un service dédié.",
+            },
+            {
+              title: "Afterwork Champs-Élysées",
+              when: "Jeudi · 19h — 23h",
+              text: "Planches à partager et cocktails signature pour prolonger la journée.",
+            },
+          ].map((item, i) => (
+            <Reveal key={item.title} delay={i * 80}>
+              <article className="h-full border border-primary/15 p-8 hover:border-primary/40 transition-colors duration-500">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-primary mb-4">{item.when}</p>
+                <h3 className="font-playfair text-2xl font-light mb-3">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{item.text}</p>
+                <Link
+                  to="/evenementiel"
+                  className="text-[11px] uppercase tracking-[0.25em] text-primary inline-flex items-center gap-2"
+                >
+                  En savoir plus <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+
+
       {/* Prestations */}
       <section className="container py-20 sm:py-28">
         <Reveal className="max-w-2xl mb-14">
