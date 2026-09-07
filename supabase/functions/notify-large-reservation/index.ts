@@ -27,7 +27,8 @@ serve(async (req) => {
     const guests = Number(guestsCount) || 0;
     const haystack = `${notes ?? ''} ${source ?? ''}`.toLowerCase();
     const matchedKeyword = KEYWORDS.find((k) => haystack.includes(k));
-    const isLarge = guests >= 10;
+    const isLarge = guests >= 4;
+
 
     if (!isLarge && !matchedKeyword) {
       return new Response(JSON.stringify({ skipped: true }), {
