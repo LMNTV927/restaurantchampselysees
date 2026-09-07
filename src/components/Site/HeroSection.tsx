@@ -1,7 +1,10 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
 
 interface HeroSectionProps {
   image: string;
+  /** Vidéo de fond en boucle (remplace l'image si fournie) */
+  video?: string;
+  videoWebm?: string;
   alt: string;
   children: ReactNode;
   height?: string;
@@ -13,9 +16,9 @@ interface HeroSectionProps {
  * progressif de l'overlay au scroll. Uniquement transform/opacity (GPU),
  * déclenché par IntersectionObserver, désactivé si prefers-reduced-motion.
  */
-export function HeroSection({ image, alt, children, height = "min-h-[92vh]", priority }: HeroSectionProps) {
+export function HeroSection({ image, video, videoWebm, alt, children, height = "min-h-[92vh]", priority }: HeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const imageRef = useRef<HTMLImageElement | HTMLVideoElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -70,18 +73,36 @@ export function HeroSection({ image, alt, children, height = "min-h-[92vh]", pri
 
   return (
     <section ref={sectionRef} className={`relative ${height} overflow-hidden flex items-center`}>
-      <img
-        ref={imageRef}
-        src={image}
-        alt={alt}
-        width={1920}
-        height={1088}
-        loading={priority ? "eager" : "lazy"}
-        {...{ fetchpriority: priority ? "high" : "auto" }}
-        decoding="async"
-        className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
-        style={{ transformOrigin: "center 40%" }}
-      />
+      {video ? (
+        <video
+          ref={imageRef as RefObject<HTMLVideoElement>}
+          className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
+          style={{ transformOrigin: "center 40%" }}
+          poster={image}
+          aria-label={alt}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+        >
+          {videoWebm && <source src={videoWebm} type="video/webm" />}
+          <source src={video} type="video/mp4" />
+        </video>
+      ) : (
+        <img
+          ref={imageRef as RefObject<HTMLImageElement>}
+          src={image}
+          alt={alt}
+          width={1920}
+          height={1088}
+          loading={priority ? "eager" : "lazy"}
+          {...{ fetchpriority: priority ? "high" : "auto" }}
+          decoding="async"
+          className="absolute inset-0 h-[115%] w-full object-cover will-change-transform"
+          style={{ transformOrigin: "center 40%" }}
+        />
+      )}
       <div ref={overlayRef} className="absolute inset-0 bg-background" style={{ opacity: 0.55 }} />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
       <div

@@ -6,6 +6,8 @@ import { Reveal } from "@/components/Site/Reveal";
 import { SITE, whatsappLink, DEVIS_MESSAGE } from "@/lib/siteConfig";
 import { DISH_IMAGES } from "@/lib/dishImages";
 import heroLounge from "@/assets/site/hero-lounge.jpg";
+import heroLoop from "@/assets/hero-loop.mp4.asset.json";
+import heroLoopWebm from "@/assets/hero-loop.webm.asset.json";
 import eventSoiree from "@/assets/site/event-soiree.jpg";
 import restaurantTable from "@/assets/site/restaurant-table.jpg";
 import privatisation from "@/assets/site/privatisation.jpg";
@@ -83,8 +85,14 @@ export default function Home() {
         jsonLd={jsonLd}
       />
 
-      {/* 1 — HERO */}
-      <HeroSection image={heroLounge} alt="Salle du Prince Palace, lounge noir et or aux Champs-Élysées" priority>
+      {/* 1 — HERO (vidéo en boucle en fond) */}
+      <HeroSection
+        image={heroLounge}
+        video={heroLoop.url}
+        videoWebm={heroLoopWebm.url}
+        alt="Salle du Prince Palace, lounge noir et or aux Champs-Élysées"
+        priority
+      >
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="font-playfair text-5xl sm:text-7xl lg:text-8xl font-light tracking-[0.04em] leading-tight">
             Prince Palace
