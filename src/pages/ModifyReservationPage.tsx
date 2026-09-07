@@ -47,11 +47,12 @@ export default function ModifyReservationPage() {
     const fetchReservation = async () => {
       if (!token) { setError("Lien invalide"); setLoading(false); return; }
 
-      const { data, error: fetchError } = await supabase
-        .from('reservations')
-        .select('*')
-        .eq('modification_token', token)
-        .single();
+      const { data: res, error: fnError } = await supabase.functions.invoke('manage-reservation', {
+        body: { token, action: 'get' },
+      });
+      const data = res?.reservation ?? null;
+      const fetchError = fnError || res?.error || null;
+
 
       if (fetchError || !data) {
         setError("Réservation introuvable ou lien expiré");
@@ -81,17 +82,19 @@ export default function ModifyReservationPage() {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
       });
 
-      const { error: updateError } = await supabase
-        .from('reservations')
-        .update({
+      const { data: res, error: fnError } = await supabase.functions.invoke('manage-reservation', {
+        body: {
+          token,
+          action: 'update',
           reservation_date: newDate,
           reservation_time: time,
           guests_count: guestsCount,
           notes: notes || null,
-        })
-        .eq('modification_token', token);
+        },
+      });
 
-      if (updateError) throw updateError;
+      if (fnError || res?.error) throw new Error(res?.error || 'update failed');
+
 
       // Send updated confirmation email
       if (reservation.customer_email) {

@@ -10,6 +10,8 @@ import { SummaryStep } from './steps/SummaryStep';
 import { SuccessStep } from './steps/SuccessStep';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { isValidPhone, emailError } from '@/lib/contactValidation';
+
 
 export interface BookingData {
   date: Date | null;
@@ -61,7 +63,12 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
       case 2:
         return bookingData.guestsCount > 0;
       case 3:
-        return bookingData.customerName.trim() !== '' && bookingData.customerPhone.trim() !== '';
+        return (
+          bookingData.customerName.trim().length >= 2 &&
+          isValidPhone(bookingData.customerPhone) &&
+          emailError(bookingData.customerEmail) === null
+        );
+
       case 4:
         return true;
       default:
@@ -100,9 +107,8 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
       console.log('Date sélectionnée par l\'utilisateur:', bookingData.date);
       console.log('Date formatée pour la base de données:', reservationDate);
 
-      const { data: insertedData, error } = await supabase
-        .from('reservations')
-        .insert({
+      const { data: created, error } = await supabase.functions.invoke('create-reservation', {
+        body: {
           channel_id: channelId,
           reservation_date: reservationDate,
           reservation_time: bookingData.time,
@@ -111,21 +117,21 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
           customer_phone: bookingData.customerPhone,
           customer_email: bookingData.customerEmail || null,
           notes: bookingData.notes || null,
-        })
-        .select('modification_token')
-        .single();
+        },
+      });
 
-      if (error) {
-        console.error('Booking error:', error);
+      if (error || !created || created.error) {
+        console.error('Booking error:', error || created?.error);
         toast({
           title: "Erreur",
-          description: "Une erreur est survenue lors de la réservation. Veuillez réessayer.",
+          description: created?.error || "Une erreur est survenue lors de la réservation. Veuillez réessayer.",
           variant: "destructive",
         });
         return;
       }
 
-      const modificationToken = insertedData?.modification_token;
+      const modificationToken = created.modification_token;
+
 
       // Send confirmation email if email is provided
       if (bookingData.customerEmail && bookingData.customerEmail.trim()) {

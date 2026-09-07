@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { BookingData } from '../BookingForm';
+import { phoneError, emailError } from '@/lib/contactValidation';
 
 interface ContactStepProps {
   data: BookingData;
@@ -9,6 +10,9 @@ interface ContactStepProps {
 }
 
 export function ContactStep({ data, onUpdate }: ContactStepProps) {
+  const phoneMsg = data.customerPhone.trim() ? phoneError(data.customerPhone) : null;
+  const emailMsg = emailError(data.customerEmail);
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
@@ -49,9 +53,13 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
             className="premium-input mt-1"
             required
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            Nous vous contacterons uniquement en cas de besoin concernant votre réservation
-          </p>
+          {phoneMsg ? (
+            <p className="text-xs text-destructive mt-1">{phoneMsg}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">
+              Nous vous contacterons uniquement en cas de besoin concernant votre réservation
+            </p>
+          )}
         </div>
         
         <div>
@@ -66,7 +74,9 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
             onChange={(e) => onUpdate({ customerEmail: e.target.value })}
             className="premium-input mt-1"
           />
+          {emailMsg && <p className="text-xs text-destructive mt-1">{emailMsg}</p>}
         </div>
+
         
         <div>
           <Label htmlFor="notes" className="text-sm font-medium text-foreground">
