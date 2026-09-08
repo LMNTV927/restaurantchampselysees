@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Clock, Flame, Wine, ExternalLink } from "lucide-react";
+import { restaurantSchema, SITE_URL } from "@/lib/structuredData";
 import { Seo } from "@/components/Site/Seo";
 import { HeroSection } from "@/components/Site/HeroSection";
 import { Reveal } from "@/components/Site/Reveal";
@@ -9,24 +10,11 @@ import heroLounge from "@/assets/site/hero-lounge.jpg";
 import { DISH_IMAGES } from "@/lib/dishImages";
 
 export default function Restaurant() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Restaurant",
-    name: "Prince Palace",
+  const jsonLd = restaurantSchema({
+    url: `${SITE_URL}/restaurant`,
     description:
       "Restaurant lounge aux Champs-Élysées : cuisine généreuse servie tard, ambiance feutrée, service jusqu'à la nuit.",
-    servesCuisine: "Cuisine méditerranéenne et internationale",
-    priceRange: "€€€",
-    telephone: "+33159133268",
-    hasMenu: SITE.restaurantSite,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "76 Avenue des Champs-Élysées",
-      addressLocality: "Paris",
-      postalCode: "75008",
-      addressCountry: "FR",
-    },
-  };
+  });
 
   return (
     <>

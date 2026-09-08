@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Cake, Glasses, Users, Building2, Crown, PartyPopper, Check } from "lucide-react";
+import { eventVenueSchema } from "@/lib/structuredData";
 import { Seo } from "@/components/Site/Seo";
 import { HeroSection } from "@/components/Site/HeroSection";
 import { Reveal } from "@/components/Site/Reveal";
@@ -100,22 +101,10 @@ const formules = [
 ];
 
 export default function Evenementiel() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "EventVenue",
-    name: "Prince Palace — Espace événementiel Champs-Élysées",
+  const jsonLd = eventVenueSchema({
     description:
       "Lieu événementiel à Paris 8 : soirées privées, anniversaires, EVJF, cocktails d'entreprise et privatisation jusqu'à 500 personnes.",
-    maximumAttendeeCapacity: 500,
-    telephone: "+33159133268",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "76 Avenue des Champs-Élysées",
-      addressLocality: "Paris",
-      postalCode: "75008",
-      addressCountry: "FR",
-    },
-  };
+  });
 
   return (
     <>

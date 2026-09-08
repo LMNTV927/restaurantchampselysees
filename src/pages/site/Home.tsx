@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Clock, ArrowRight } from "lucide-react";
+import { restaurantSchema, eventVenueSchema } from "@/lib/structuredData";
 import { Seo } from "@/components/Site/Seo";
 import { HeroSection } from "@/components/Site/HeroSection";
 import { Reveal } from "@/components/Site/Reveal";
@@ -41,39 +42,13 @@ const ESPACES = [
 
 export default function Home() {
   const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "Restaurant",
-      name: "Prince Palace",
+    restaurantSchema({
       description:
         "Restaurant lounge et lieu événementiel aux Champs-Élysées : soirées privées, anniversaires, cocktails et privatisation à Paris 8.",
-      servesCuisine: "Cuisine méditerranéenne et internationale",
-      priceRange: "€€€",
-      telephone: "+33159133268",
-      email: SITE.email,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "76 Avenue des Champs-Élysées",
-        addressLocality: "Paris",
-        postalCode: "75008",
-        addressCountry: "FR",
-      },
-      areaServed: "Paris",
-      sameAs: [SITE.instagram, SITE.facebook, SITE.tiktok, SITE.restaurantSite],
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "EventVenue",
+    }),
+    eventVenueSchema({
       name: "Prince Palace — lieu événementiel Champs-Élysées",
-      maximumAttendeeCapacity: 500,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "76 Avenue des Champs-Élysées",
-        addressLocality: "Paris",
-        postalCode: "75008",
-        addressCountry: "FR",
-      },
-    },
+    }),
   ];
 
   return (
