@@ -146,7 +146,7 @@ export const buildAnalytics = (
       reservations: totalReservations,
       covers,
       trackedReservations,
-      conversion: clicks > 0 ? Math.round((trackedReservations / clicks) * 100) : 0,
+      conversion: clicks > 0 ? Math.min(100, Math.round((trackedReservations / clicks) * 100)) : 0,
     },
   };
 };
