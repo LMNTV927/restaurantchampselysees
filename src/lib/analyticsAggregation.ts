@@ -111,16 +111,16 @@ export const buildAnalytics = (
       clicks,
       reservations: bucket.reservations,
       covers: bucket.covers,
-      conversion: clicks > 0 ? Math.round((bucket.reservations / clicks) * 100) : 0,
+      conversion: clicks > 0 ? Math.min(100, Math.round((bucket.reservations / clicks) * 100)) : 0,
       shortUrl: getBookingUrl(channel.slug),
     };
   });
 
   const otherChannels: ChannelData[] = Array.from(buckets.entries())
-    .filter(([name]) => !used.has(name))
-    .map(([name, bucket]) => ({
-      id: `source:${name}`,
-      name,
+    .filter(([key]) => !used.has(key))
+    .map(([key, bucket]) => ({
+      id: `source:${key}`,
+      name: bucket.label,
       slug: '',
       description: null,
       isActive: true,
