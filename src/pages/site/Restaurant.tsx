@@ -9,24 +9,11 @@ import heroLounge from "@/assets/site/hero-lounge.jpg";
 import { DISH_IMAGES } from "@/lib/dishImages";
 
 export default function Restaurant() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Restaurant",
-    name: "Prince Palace",
+  const jsonLd = restaurantSchema({
+    url: `${SITE_URL}/restaurant`,
     description:
       "Restaurant lounge aux Champs-Élysées : cuisine généreuse servie tard, ambiance feutrée, service jusqu'à la nuit.",
-    servesCuisine: "Cuisine méditerranéenne et internationale",
-    priceRange: "€€€",
-    telephone: "+33159133268",
-    hasMenu: SITE.restaurantSite,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "76 Avenue des Champs-Élysées",
-      addressLocality: "Paris",
-      postalCode: "75008",
-      addressCountry: "FR",
-    },
-  };
+  });
 
   return (
     <>
