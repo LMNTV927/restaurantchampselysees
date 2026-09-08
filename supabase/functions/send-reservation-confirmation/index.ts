@@ -80,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send to customer
     const emailResponse = await resend.emails.send({
-      from: `${brandName} <confirmation@xn--rservation-prince-palace-bfc.fr>`,
+      from: `${brandName} <confirmation@restaurantchampselysees-princepalace.fr>`,
       to: [customerEmail],
       subject,
       html,
@@ -90,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send copy to restaurant
     const restaurantCopy = await resend.emails.send({
-      from: `${brandName} <confirmation@xn--rservation-prince-palace-bfc.fr>`,
+      from: `${brandName} <confirmation@restaurantchampselysees-princepalace.fr>`,
       to: [RESTAURANT_EMAIL],
       subject: `[Copie] ${subject} - ${customerName}`,
       html,

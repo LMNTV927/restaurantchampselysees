@@ -12,7 +12,7 @@ const corsHeaders = {
 const GOOGLE_REVIEW_LINK = "https://g.page/r/CWh1Fw303_ybEAE/review";
 const RESTAURANT_EMAIL = "princepalace.champselysees@gmail.com";
 const BRAND_NAME = "Prince Palace";
-const FROM_EMAIL = `${BRAND_NAME} <confirmation@xn--rservation-prince-palace-bfc.fr>`;
+const FROM_EMAIL = `${BRAND_NAME} <confirmation@restaurantchampselysees-princepalace.fr>`;
 const LOGO_URL = "https://vedistbhwfdtkjaojycs.supabase.co/storage/v1/object/public/email-assets/prince-palace-logo-thankyou.png";
 
 function buildThankYouEmailHtml(customerName: string): string {
