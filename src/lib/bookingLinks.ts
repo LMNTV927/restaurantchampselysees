@@ -1,4 +1,4 @@
-export const BOOKING_BASE_URL = "https://xn--rservation-prince-palace-bfc.fr";
+export const BOOKING_BASE_URL = "https://restaurantchampselysees-princepalace.fr";
 
 export const getBookingPath = (slug: string) => `/book/${slug}`;
 

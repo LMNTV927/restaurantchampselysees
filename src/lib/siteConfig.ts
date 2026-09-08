@@ -11,7 +11,7 @@ export const SITE = {
   instagram: "https://www.instagram.com/princepalace_paris/",
   facebook: "https://www.facebook.com/princepalaceparis/",
   tiktok: "https://www.tiktok.com/@princepalaceparis",
-  bookingPath: "https://xn--rservation-prince-palace-bfc.fr/book/site-lovable",
+  bookingPath: "https://restaurantchampselysees-princepalace.fr/book/site-lovable",
   capacity: 500,
 };
 

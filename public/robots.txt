@@ -7,4 +7,4 @@ Disallow: /reservation/
 Disallow: /email-preview
 Disallow: /email-preview-thankyou
 
-Sitemap: https://xn--rservation-prince-palace-bfc.fr/sitemap.xml
+Sitemap: https://restaurantchampselysees-princepalace.fr/sitemap.xml
