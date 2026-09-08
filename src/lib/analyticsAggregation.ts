@@ -49,12 +49,24 @@ interface Bucket {
   covers: number;
 }
 
-const aggregateReservations = (reservations: AnalyticsReservationRow[]): Map<string, Bucket> => {
-  const map = new Map<string, Bucket>();
+/** Clé de regroupement insensible à la casse/accents ("OpenTable" == "OPENTABLE") */
+export const normalizeBucketKey = (name: string): string =>
+  name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
+const aggregateReservations = (
+  reservations: AnalyticsReservationRow[]
+): Map<string, Bucket & { label: string }> => {
+  const map = new Map<string, Bucket & { label: string }>();
   reservations.forEach((reservation) => {
-    const key = getReservationBucket(reservation);
-    const existing = map.get(key) || { reservations: 0, covers: 0 };
+    const label = getReservationBucket(reservation);
+    const key = normalizeBucketKey(label);
+    const existing = map.get(key) || { reservations: 0, covers: 0, label };
     map.set(key, {
+      label: existing.label,
       reservations: existing.reservations + 1,
       covers: existing.covers + (reservation.guests_count || 0),
     });
