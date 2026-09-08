@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Clock, Flame, Wine, ExternalLink } from "lucide-react";
+import { restaurantSchema, SITE_URL } from "@/lib/structuredData";
 import { Seo } from "@/components/Site/Seo";
 import { HeroSection } from "@/components/Site/HeroSection";
 import { Reveal } from "@/components/Site/Reveal";

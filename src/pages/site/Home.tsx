@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Clock, ArrowRight } from "lucide-react";
+import { restaurantSchema, eventVenueSchema } from "@/lib/structuredData";
 import { Seo } from "@/components/Site/Seo";
 import { HeroSection } from "@/components/Site/HeroSection";
 import { Reveal } from "@/components/Site/Reveal";

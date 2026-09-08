@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Cake, Glasses, Users, Building2, Crown, PartyPopper, Check } from "lucide-react";
+import { eventVenueSchema } from "@/lib/structuredData";
 import { Seo } from "@/components/Site/Seo";
 import { HeroSection } from "@/components/Site/HeroSection";
 import { Reveal } from "@/components/Site/Reveal";
