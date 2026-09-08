@@ -49,12 +49,24 @@ interface Bucket {
   covers: number;
 }
 
-const aggregateReservations = (reservations: AnalyticsReservationRow[]): Map<string, Bucket> => {
-  const map = new Map<string, Bucket>();
+/** Clé de regroupement insensible à la casse/accents ("OpenTable" == "OPENTABLE") */
+export const normalizeBucketKey = (name: string): string =>
+  name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
+const aggregateReservations = (
+  reservations: AnalyticsReservationRow[]
+): Map<string, Bucket & { label: string }> => {
+  const map = new Map<string, Bucket & { label: string }>();
   reservations.forEach((reservation) => {
-    const key = getReservationBucket(reservation);
-    const existing = map.get(key) || { reservations: 0, covers: 0 };
+    const label = getReservationBucket(reservation);
+    const key = normalizeBucketKey(label);
+    const existing = map.get(key) || { reservations: 0, covers: 0, label };
     map.set(key, {
+      label: existing.label,
       reservations: existing.reservations + 1,
       covers: existing.covers + (reservation.guests_count || 0),
     });
@@ -86,8 +98,9 @@ export const buildAnalytics = (
   const used = new Set<string>();
 
   const trackedChannels: ChannelData[] = channelRows.map((channel) => {
-    const bucket = buckets.get(channel.name) || { reservations: 0, covers: 0 };
-    used.add(channel.name);
+    const key = normalizeBucketKey(channel.name);
+    const bucket = buckets.get(key) || { reservations: 0, covers: 0 };
+    used.add(key);
     const clicks = clicksMap.get(channel.id) || 0;
     return {
       id: channel.id,
@@ -98,16 +111,16 @@ export const buildAnalytics = (
       clicks,
       reservations: bucket.reservations,
       covers: bucket.covers,
-      conversion: clicks > 0 ? Math.round((bucket.reservations / clicks) * 100) : 0,
+      conversion: clicks > 0 ? Math.min(100, Math.round((bucket.reservations / clicks) * 100)) : 0,
       shortUrl: getBookingUrl(channel.slug),
     };
   });
 
   const otherChannels: ChannelData[] = Array.from(buckets.entries())
-    .filter(([name]) => !used.has(name))
-    .map(([name, bucket]) => ({
-      id: `source:${name}`,
-      name,
+    .filter(([key]) => !used.has(key))
+    .map(([key, bucket]) => ({
+      id: `source:${key}`,
+      name: bucket.label,
       slug: '',
       description: null,
       isActive: true,
@@ -133,7 +146,7 @@ export const buildAnalytics = (
       reservations: totalReservations,
       covers,
       trackedReservations,
-      conversion: clicks > 0 ? Math.round((trackedReservations / clicks) * 100) : 0,
+      conversion: clicks > 0 ? Math.min(100, Math.round((trackedReservations / clicks) * 100)) : 0,
     },
   };
 };
