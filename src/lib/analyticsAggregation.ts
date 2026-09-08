@@ -98,8 +98,9 @@ export const buildAnalytics = (
   const used = new Set<string>();
 
   const trackedChannels: ChannelData[] = channelRows.map((channel) => {
-    const bucket = buckets.get(channel.name) || { reservations: 0, covers: 0 };
-    used.add(channel.name);
+    const key = normalizeBucketKey(channel.name);
+    const bucket = buckets.get(key) || { reservations: 0, covers: 0 };
+    used.add(key);
     const clicks = clicksMap.get(channel.id) || 0;
     return {
       id: channel.id,
