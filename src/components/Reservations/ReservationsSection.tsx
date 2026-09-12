@@ -157,10 +157,15 @@ export function ReservationsSection() {
 
   // Calculate KPIs based on filtered reservations
   const getFilteredKPIs = () => {
-    const reservationsForTotals = selectedFilter === "past" ? currentMonthPastReservations : reservations;
+    const reservationsForTotals =
+      selectedFilter === "past" && !selectedPastDateString
+        ? currentMonthPastReservations
+        : selectedFilter === "past" && selectedPastDateString
+          ? allPastReservations
+          : reservations;
     const totalReservations = reservationsForTotals.length;
     const totalCovers = reservationsForTotals.reduce((sum, r) => sum + r.partySize, 0);
-    
+
     // Restaurant capacity: 500 seats
     const restaurantCapacity = 500;
     const occupancyRate = Math.min(Math.round((totalCovers / restaurantCapacity) * 100), 100);
