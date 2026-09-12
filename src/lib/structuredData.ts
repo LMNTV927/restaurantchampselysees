@@ -1,6 +1,6 @@
 import { SITE } from "@/lib/siteConfig";
 
-export const SITE_URL = "https://restaurantchampselysees-princepalace.fr";
+export const SITE_URL = "https://restaurantchampselysees.fr";
 export const SITE_IMAGE = `${SITE_URL}/prince-palace-og.png`;
 
 export const POSTAL_ADDRESS = {

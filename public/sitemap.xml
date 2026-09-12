@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://restaurantchampselysees-princepalace.fr/</loc>
+    <loc>https://restaurantchampselysees.fr/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://restaurantchampselysees-princepalace.fr/evenementiel</loc>
+    <loc>https://restaurantchampselysees.fr/evenementiel</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://restaurantchampselysees-princepalace.fr/restaurant</loc>
+    <loc>https://restaurantchampselysees.fr/restaurant</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://restaurantchampselysees-princepalace.fr/galerie</loc>
+    <loc>https://restaurantchampselysees.fr/galerie</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://restaurantchampselysees-princepalace.fr/avis</loc>
+    <loc>https://restaurantchampselysees.fr/avis</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://restaurantchampselysees-princepalace.fr/faq</loc>
+    <loc>https://restaurantchampselysees.fr/faq</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://restaurantchampselysees-princepalace.fr/contact</loc>
+    <loc>https://restaurantchampselysees.fr/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://restaurantchampselysees-princepalace.fr/mentions-legales</loc>
+    <loc>https://restaurantchampselysees.fr/mentions-legales</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
