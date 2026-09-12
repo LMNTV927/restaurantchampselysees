@@ -257,12 +257,21 @@ export function ReservationsSection() {
           covers: "Couverts futures",
           occupancy: "Taux d'Occupation"
         };
-      case "past":
+      case "past": {
+        if (selectedPastDate) {
+          const dateLabel = format(selectedPastDate, 'dd/MM/yyyy', { locale: fr });
+          return {
+            reservations: `Réservations du ${dateLabel}`,
+            covers: `Couverts du ${dateLabel}`,
+            occupancy: "Jour"
+          };
+        }
         return {
           reservations: "Réservations ce mois",
           covers: "Couverts ce mois",
           occupancy: "Jour"
         };
+      }
       default:
         return {
           reservations: "Réservations",
