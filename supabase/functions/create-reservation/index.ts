@@ -45,15 +45,16 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!channel) return json({ error: "Canal introuvable" }, 400);
 
-    // Duplicate guard: same phone + same date already booked
+    // Duplicate guard: same phone + same date already booked.
+    // La réservation la plus récente est toujours celle qui compte : on insère
+    // la nouvelle comme valide et on marque les précédentes comme doublons.
     const { data: existing } = await supabase
       .from("reservations")
       .select("id")
       .eq("customer_phone", phone)
       .eq("reservation_date", date)
       .eq("is_duplicate", false)
-      .neq("status", "cancelled")
-      .limit(1);
+      .neq("status", "cancelled");
 
     const { data: inserted, error } = await supabase
       .from("reservations")
@@ -66,8 +67,8 @@ Deno.serve(async (req) => {
         customer_phone: phone,
         customer_email: email.value,
         notes,
-        is_duplicate: (existing?.length ?? 0) > 0,
-        duplicate_of: existing?.[0]?.id ?? null,
+        is_duplicate: false,
+        duplicate_of: null,
       })
       .select("id, modification_token")
       .single();
@@ -76,6 +77,14 @@ Deno.serve(async (req) => {
       console.error("insert error", error);
       return json({ error: "Enregistrement impossible" }, 500);
     }
+
+    if (existing && existing.length > 0) {
+      await supabase
+        .from("reservations")
+        .update({ is_duplicate: true, duplicate_of: inserted.id, reminder_sent: true })
+        .in("id", existing.map((r) => r.id));
+    }
+
 
     return json({
       id: inserted.id,
