@@ -11,8 +11,8 @@ const corsHeaders = {
 
 const RESTAURANT_EMAIL = "princepalace.champselysees@gmail.com";
 const BRAND_NAME = "Prince Palace";
-const FROM_EMAIL = `${BRAND_NAME} <confirmation@restaurantchampselysees-princepalace.fr>`;
-const BASE_URL = "https://restaurantchampselysees-princepalace.fr";
+const FROM_EMAIL = `${BRAND_NAME} <confirmation@restaurantchampselysees.fr>`;
+const BASE_URL = "https://restaurantchampselysees.fr";
 const LOGO_URL = "https://vedistbhwfdtkjaojycs.supabase.co/storage/v1/object/public/email-assets/prince-palace-logo-thankyou.png";
 
 function formatFrenchDate(dateStr: string): string {
