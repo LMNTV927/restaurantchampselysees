@@ -63,7 +63,7 @@ function buildThankYouEmailHtml(customerName: string): string {
 <tr><td align="center" style="padding-bottom:16px;">
 <a href="https://www.instagram.com/princepalace_off/" target="_blank" style="display:inline-block;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="20" height="20" alt="Instagram" style="opacity:0.5;" /></a>
 &nbsp;&nbsp;&nbsp;
-<a href="https://www.facebook.com/leprincepalace75?locale=fr_FR" target="_blank" style="display:inline-block;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width="20" height="20" alt="Facebook" style="opacity:0.5;" /></a>
+<a href="https://www.facebook.com/leprincepalace75" target="_blank" style="display:inline-block;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width="20" height="20" alt="Facebook" style="opacity:0.5;" /></a>
 &nbsp;&nbsp;&nbsp;
 <a href="https://www.tiktok.com/@59princepalace" target="_blank" style="display:inline-block;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" width="20" height="20" alt="TikTok" style="opacity:0.5;" /></a>
 </td></tr>

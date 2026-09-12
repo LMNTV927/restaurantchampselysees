@@ -99,7 +99,7 @@ const EmailPreviewPage = () => {
                 <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width={20} height={20} alt="Instagram" style={{ opacity: 0.5 }} />
               </a>
               &nbsp;&nbsp;&nbsp;
-              <a href="https://www.facebook.com/leprincepalace75?locale=fr_FR" style={{ display: 'inline-block', textDecoration: 'none' }}>
+              <a href="https://www.facebook.com/leprincepalace75" style={{ display: 'inline-block', textDecoration: 'none' }}>
                 <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width={20} height={20} alt="Facebook" style={{ opacity: 0.5 }} />
               </a>
               &nbsp;&nbsp;&nbsp;
