@@ -6,7 +6,14 @@ Quand un visiteur arrive sur `princepalace.fr` depuis une campagne Google Ads (`
 
 ## Code à intégrer
 
-Copier-coller ce script dans le **pied de page** de `princepalace.fr` (Hostinger : *Paramètres → Code personnalisé → Footer / Pied de page*, ou directement avant la balise `</body>`) :
+Copier-coller ce script dans le **pied de page** de `princepalace.fr` (avant la balise `</body>`). Sur WordPress, les méthodes les plus simples sont :
+
+- **Méthode 1 (recommandée, sans toucher au thème)** : installer l'extension gratuite *Insert Headers and Footers* (ou *WPCode*), aller dans *Settings → Insert Headers and Footers*, coller le script dans le champ **Scripts in Footer**, puis enregistrer.
+- **Méthode 2 (thème enfant)** : ajouter le script à la fin du fichier `footer.php` du thème enfant, juste avant `</body>`.
+- **Méthode 3 (functions.php du thème enfant)** : utiliser `wp_enqueue_script` pour charger un fichier `.js` externe contenant le script.
+
+Quel que soit le choix, le script doit se trouver dans le **footer** et s'exécuter sur toutes les pages où se trouve le bouton « Réserver ».
+
 
 ```html
 <script>
