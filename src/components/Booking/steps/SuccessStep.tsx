@@ -33,10 +33,7 @@ export function SuccessStep({ bookingData }: SuccessStepProps) {
       // sessionStorage indisponible : on envoie quand même
     }
 
-    // En iframe, la conversion est déclenchée par le site parent (son propre tag).
-    const isEmbedded = window.top !== window.self;
-
-    if (!isEmbedded && window.gtag) {
+    if (window.gtag) {
       window.gtag('event', 'conversion', {
         send_to: 'AW-17923951263/vSa2CKCC4NkcEJ-V5-JC',
       });

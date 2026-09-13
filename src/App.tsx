@@ -16,7 +16,6 @@ const EmailPreviewPage = lazy(() => import("./pages/EmailPreviewPage"));
 const ThankYouEmailPreviewPage = lazy(() => import("./pages/ThankYouEmailPreviewPage"));
 const ModifyReservationPage = lazy(() => import("./pages/ModifyReservationPage"));
 const CancelReservationPage = lazy(() => import("./pages/CancelReservationPage"));
-const EmbedBookingPage = lazy(() => import("./pages/EmbedBookingPage"));
 
 // Site vitrine public
 const SiteLayout = lazy(() => import("./components/Site/SiteLayout").then((m) => ({ default: m.SiteLayout })));
@@ -74,7 +73,6 @@ const App = () => (
               </Route>
               <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/book/:slug" element={<BookingPage />} />
-              <Route path="/embed/:slug" element={<EmbedBookingPage />} />
               <Route path="/reservation/modify/:token" element={<ModifyReservationPage />} />
               <Route path="/reservation/cancel/:token" element={<CancelReservationPage />} />
               <Route path="/email-preview" element={<EmailPreviewPage />} />
