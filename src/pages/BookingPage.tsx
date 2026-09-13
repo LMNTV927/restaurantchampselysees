@@ -12,21 +12,49 @@ const dishImages = DISH_IMAGES;
 
 const GOOGLE_ADS_SLUG = "google-ads";
 
-/** Détecte une visite issue de Google Ads (gclid / utm cpc) */
+const ADS_STORAGE_KEY = "pp_google_ads_at";
+const ADS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
+
+/** Détecte une visite issue de Google Ads (gclid / utm cpc / ads=1), mémorisée 30 jours */
 const detectGoogleAds = (): boolean => {
   if (typeof window === "undefined") return false;
+
+  let isAds = false;
   try {
     const params = new URLSearchParams(window.location.search);
     const gclid = params.get("gclid") || params.get("gbraid") || params.get("wbraid");
     const source = (params.get("utm_source") || "").toLowerCase();
     const medium = (params.get("utm_medium") || "").toLowerCase();
-    const isAds =
+    const flag = (params.get("ads") || "").toLowerCase();
+    isAds =
       !!gclid ||
+      flag === "1" ||
+      flag === "true" ||
       (source.includes("google") && ["cpc", "ppc", "paid", "paidsearch", "paid_search"].includes(medium));
-    if (isAds) sessionStorage.setItem("pp_google_ads", "1");
-    return isAds || sessionStorage.getItem("pp_google_ads") === "1";
   } catch {
     return false;
+  }
+
+  // Mémorisation (30 jours) avec repli sur la session si localStorage indisponible
+  try {
+    if (isAds) {
+      localStorage.setItem(ADS_STORAGE_KEY, String(Date.now()));
+      return true;
+    }
+    const stored = Number(localStorage.getItem(ADS_STORAGE_KEY) || 0);
+    if (stored && Date.now() - stored < ADS_WINDOW_MS) return true;
+  } catch {
+    /* localStorage indisponible */
+  }
+
+  try {
+    if (isAds) {
+      sessionStorage.setItem("pp_google_ads", "1");
+      return true;
+    }
+    return sessionStorage.getItem("pp_google_ads") === "1";
+  } catch {
+    return isAds;
   }
 };
 
