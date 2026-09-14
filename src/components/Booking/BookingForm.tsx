@@ -107,6 +107,8 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
       console.log('Date sélectionnée par l\'utilisateur:', bookingData.date);
       console.log('Date formatée pour la base de données:', reservationDate);
 
+      const attribution = getCampaignAttribution();
+
       const { data: created, error } = await supabase.functions.invoke('create-reservation', {
         body: {
           channel_id: channelId,
@@ -117,6 +119,9 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
           customer_phone: bookingData.customerPhone,
           customer_email: bookingData.customerEmail || null,
           notes: bookingData.notes || null,
+          utm_campaign: attribution.utm_campaign,
+          utm_source: attribution.utm_source,
+          gclid: attribution.gclid,
         },
       });
 
