@@ -132,93 +132,8 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
 
       const modificationToken = created.modification_token;
 
-
-      // Send confirmation email if email is provided
-      if (bookingData.customerEmail && bookingData.customerEmail.trim()) {
-        try {
-          const emailData = {
-            customerName: bookingData.customerName,
-            customerEmail: bookingData.customerEmail,
-            restaurantName: 'Prince Palace',
-            reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }),
-            reservationTime: bookingData.time,
-            guestsCount: bookingData.guestsCount,
-            customerPhone: bookingData.customerPhone,
-            notes: bookingData.notes,
-            modificationToken,
-          };
-
-          const { error: emailError } = await supabase.functions.invoke('send-reservation-confirmation', {
-            body: emailData
-          });
-
-          if (emailError) {
-            console.error('Email sending error:', emailError);
-          }
-        } catch (emailError) {
-          console.error('Email sending error:', emailError);
-        }
-      }
-
-      // Send confirmation SMS
-      try {
-        const smsData = {
-          customerName: bookingData.customerName,
-          customerPhone: bookingData.customerPhone,
-          restaurantName: channelData?.name || 'Restaurant',
-          reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }),
-          reservationTime: bookingData.time,
-          guestsCount: bookingData.guestsCount,
-        };
-
-        const { error: smsError } = await supabase.functions.invoke('send-reservation-sms', {
-          body: smsData
-        });
-
-        if (smsError) {
-          console.error('SMS sending error:', smsError);
-        }
-      } catch (smsError) {
-        console.error('SMS sending error:', smsError);
-      }
-
-      // Alerte interne pour grandes réservations / événements
-      try {
-        await supabase.functions.invoke('notify-large-reservation', {
-          body: {
-            customerName: bookingData.customerName,
-            customerPhone: bookingData.customerPhone,
-            reservationDate: bookingData.date!.toLocaleDateString('fr-FR', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }),
-            reservationTime: bookingData.time,
-            guestsCount: bookingData.guestsCount,
-            notes: bookingData.notes,
-            source: channelData?.name,
-          }
-        });
-      } catch (alertError) {
-        console.error('Large reservation alert error:', alertError);
-      }
-
-      // Détection de doublons (marquage uniquement, aucune suppression)
-      supabase.functions.invoke('dedupe-reservations').catch(() => {});
-
-
-      // Success!
+      // Succès affiché immédiatement — les envois (email, SMS, alertes)
+      // continuent en arrière-plan sans bloquer l'utilisateur.
       setIsSuccess(true);
       onSuccess(bookingData);
       toast({
@@ -227,6 +142,62 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
           ? "Votre table a été réservée avec succès. Un email de confirmation vous a été envoyé."
           : "Votre table a été réservée avec succès.",
       });
+
+      const dateLong = bookingData.date!.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      // Email de confirmation (arrière-plan)
+      if (bookingData.customerEmail && bookingData.customerEmail.trim()) {
+        supabase.functions.invoke('send-reservation-confirmation', {
+          body: {
+            customerName: bookingData.customerName,
+            customerEmail: bookingData.customerEmail,
+            restaurantName: 'Prince Palace',
+            reservationDate: dateLong,
+            reservationTime: bookingData.time,
+            guestsCount: bookingData.guestsCount,
+            customerPhone: bookingData.customerPhone,
+            notes: bookingData.notes,
+            modificationToken,
+          }
+        }).then(({ error }) => {
+          if (error) console.error('Email sending error:', error);
+        }).catch(err => console.error('Email sending error:', err));
+      }
+
+      // SMS de confirmation (arrière-plan)
+      supabase.functions.invoke('send-reservation-sms', {
+        body: {
+          customerName: bookingData.customerName,
+          customerPhone: bookingData.customerPhone,
+          restaurantName: channelData?.name || 'Restaurant',
+          reservationDate: dateLong,
+          reservationTime: bookingData.time,
+          guestsCount: bookingData.guestsCount,
+        }
+      }).then(({ error }) => {
+        if (error) console.error('SMS sending error:', error);
+      }).catch(err => console.error('SMS sending error:', err));
+
+      // Alerte interne grandes réservations / événements (arrière-plan)
+      supabase.functions.invoke('notify-large-reservation', {
+        body: {
+          customerName: bookingData.customerName,
+          customerPhone: bookingData.customerPhone,
+          reservationDate: dateLong,
+          reservationTime: bookingData.time,
+          guestsCount: bookingData.guestsCount,
+          notes: bookingData.notes,
+          source: channelData?.name,
+        }
+      }).catch(err => console.error('Large reservation alert error:', err));
+
+      // Détection de doublons (marquage uniquement, aucune suppression)
+      supabase.functions.invoke('dedupe-reservations').catch(() => {});
       
     } catch (error) {
       console.error('Unexpected error:', error);
