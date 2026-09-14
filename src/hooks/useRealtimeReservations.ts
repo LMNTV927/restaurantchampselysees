@@ -60,6 +60,8 @@ const mapRow = (r: any): ReservationData => ({
   createdAt: r.created_at,
   source: r.source || null,
   externalId: r.external_id || null,
+  utmCampaign: r.utm_campaign || null,
+  utmSource: r.utm_source || null,
   isDuplicate: !!r.is_duplicate,
 });
 
@@ -70,7 +72,7 @@ const fetchReservations = async (): Promise<ReservationsResult> => {
   const [allRes, yesterdayRes] = await Promise.all([
     supabase
       .from('reservations')
-      .select('id, customer_name, customer_phone, customer_email, reservation_date, reservation_time, guests_count, notes, status, created_at, source, external_id, is_duplicate, channels(name)')
+      .select('id, customer_name, customer_phone, customer_email, reservation_date, reservation_time, guests_count, notes, status, created_at, source, external_id, utm_campaign, utm_source, is_duplicate, channels(name)')
       .order('reservation_date', { ascending: true })
       .order('reservation_time', { ascending: true }),
     supabase
