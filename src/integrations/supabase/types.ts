@@ -107,6 +107,7 @@ export type Database = {
           duplicate_of: string | null
           external_id: string | null
           followup_sent: boolean
+          gclid: string | null
           guests_count: number
           id: string
           is_duplicate: boolean
@@ -117,6 +118,8 @@ export type Database = {
           reservation_time: string
           source: string | null
           status: string | null
+          utm_campaign: string | null
+          utm_source: string | null
         }
         Insert: {
           channel_id: string
@@ -127,6 +130,7 @@ export type Database = {
           duplicate_of?: string | null
           external_id?: string | null
           followup_sent?: boolean
+          gclid?: string | null
           guests_count?: number
           id?: string
           is_duplicate?: boolean
@@ -137,6 +141,8 @@ export type Database = {
           reservation_time: string
           source?: string | null
           status?: string | null
+          utm_campaign?: string | null
+          utm_source?: string | null
         }
         Update: {
           channel_id?: string
@@ -147,6 +153,7 @@ export type Database = {
           duplicate_of?: string | null
           external_id?: string | null
           followup_sent?: boolean
+          gclid?: string | null
           guests_count?: number
           id?: string
           is_duplicate?: boolean
@@ -157,6 +164,8 @@ export type Database = {
           reservation_time?: string
           source?: string | null
           status?: string | null
+          utm_campaign?: string | null
+          utm_source?: string | null
         }
         Relationships: [
           {
