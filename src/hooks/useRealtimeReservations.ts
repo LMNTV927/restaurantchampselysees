@@ -17,6 +17,8 @@ export interface ReservationData {
   createdAt: string;
   source: string | null;
   externalId: string | null;
+  utmCampaign: string | null;
+  utmSource: string | null;
   isDuplicate?: boolean;
 }
 

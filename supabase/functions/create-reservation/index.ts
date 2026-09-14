@@ -77,6 +77,9 @@ Deno.serve(async (req) => {
         customer_phone: phone,
         customer_email: email.value,
         notes,
+        utm_campaign: utmCampaign,
+        utm_source: utmSource,
+        gclid,
         is_duplicate: false,
         duplicate_of: null,
       })
