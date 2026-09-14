@@ -65,6 +65,7 @@ export function ReservationsSection() {
       notes: reservation.notes || '',
       status: reservation.status,
       source: reservation.source || reservation.channelName,
+      utmCampaign: reservation.utmCampaign,
       reservationDate: reservation.reservationDate,
       reservationTime: reservation.reservationTime
     };
@@ -532,6 +533,11 @@ export function ReservationsSection() {
                         <p className="text-xs text-primary">
                           via {reservation.source}
                         </p>
+                      )}
+                      {reservation.utmCampaign && (
+                        <Badge variant="outline" className="text-xs border-primary/40 text-primary">
+                          Campagne : {reservation.utmCampaign}
+                        </Badge>
                       )}
                     </div>
                   </div>

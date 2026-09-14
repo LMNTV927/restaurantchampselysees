@@ -24,6 +24,16 @@ Deno.serve(async (req) => {
     const guests = Number(body.guests_count ?? 0);
     const notes = body.notes ? cleanText(String(body.notes)).slice(0, 1000) : null;
 
+    // Attribution marketing (optionnelle) — ajout, ne remplace rien
+    const tag = (v: unknown): string | null => {
+      if (typeof v !== "string") return null;
+      const s = v.trim().slice(0, 120);
+      return s.length > 0 ? s : null;
+    };
+    const utmCampaign = tag(body.utm_campaign);
+    const utmSource = tag(body.utm_source);
+    const gclid = tag(body.gclid);
+
     if (!/^[0-9a-f-]{36}$/i.test(channelId)) return json({ error: "Canal invalide" }, 400);
     if (name.length < 2 || name.length > 120) return json({ error: "Nom invalide" }, 400);
     if (!phone) return json({ error: "Numéro de téléphone invalide" }, 400);
@@ -67,6 +77,9 @@ Deno.serve(async (req) => {
         customer_phone: phone,
         customer_email: email.value,
         notes,
+        utm_campaign: utmCampaign,
+        utm_source: utmSource,
+        gclid,
         is_duplicate: false,
         duplicate_of: null,
       })

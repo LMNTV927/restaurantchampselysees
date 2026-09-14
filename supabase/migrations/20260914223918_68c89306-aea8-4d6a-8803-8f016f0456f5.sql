@@ -1,0 +1,4 @@
+ALTER TABLE public.reservations
+  ADD COLUMN IF NOT EXISTS utm_campaign TEXT,
+  ADD COLUMN IF NOT EXISTS utm_source TEXT,
+  ADD COLUMN IF NOT EXISTS gclid TEXT;
