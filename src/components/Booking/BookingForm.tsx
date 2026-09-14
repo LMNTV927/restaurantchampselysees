@@ -11,6 +11,7 @@ import { SuccessStep } from './steps/SuccessStep';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { isValidPhone, emailError } from '@/lib/contactValidation';
+import { getCampaignAttribution } from '@/lib/campaignTracking';
 
 
 export interface BookingData {
