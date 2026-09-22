@@ -564,15 +564,7 @@ export function ReservationsSection() {
                         Restaurer
                       </Button>
                     ) : (
-                      <>
-                        <Button 
-                          variant={reservation.status === "show" ? "default" : "outline"}
-                          size="sm" 
-                          className="premium-button"
-                          onClick={() => handleUpdateReservationStatus(reservation.id, reservation.status === "show" ? "confirmed" : "show")}
-                        >
-                          Présent
-                        </Button>
+                    <>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
@@ -594,6 +586,14 @@ export function ReservationsSection() {
                             )}
                           </PopoverContent>
                         </Popover>
+                        <Button 
+                          variant={reservation.status === "show" ? "default" : "outline"}
+                          size="sm" 
+                          className="premium-button"
+                          onClick={() => handleUpdateReservationStatus(reservation.id, reservation.status === "show" ? "confirmed" : "show")}
+                        >
+                          Présent
+                        </Button>
                         <Button 
                           variant={reservation.status === "no_show" ? "destructive" : "outline"}
                           size="sm" 
