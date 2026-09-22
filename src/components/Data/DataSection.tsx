@@ -446,8 +446,8 @@ export function DataSection() {
                   dataKey="reservations"
                   nameKey="name"
                 >
-                  {channels.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  {channels.map((entry) => (
+                    <Cell key={`cell-${entry.id}`} fill={getChannelColor(entry.name)} />
                   ))}
                 </Pie>
                 <ChartTooltip 
