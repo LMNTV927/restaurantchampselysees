@@ -511,7 +511,16 @@ export function DataSection() {
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                     className="hover:bg-muted/30 transition-colors"
                   >
-                    <TableCell className="font-medium">{channel.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-block w-3 h-3 rounded-full"
+                          style={{ backgroundColor: getChannelColor(channel.name) }}
+                          aria-hidden="true"
+                        />
+                        {channel.name}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-center font-semibold">
                       {channel.slug ? channel.clicks.toLocaleString() : "—"}
                     </TableCell>
