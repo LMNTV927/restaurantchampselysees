@@ -75,8 +75,8 @@ export function DataSection() {
     },
   };
 
-  // Couleurs pour le graphique en secteurs
-  const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
+  // Couleurs uniques par canal pour le graphique en secteurs
+  const getChannelColor = (name: string) => getChannelHsl(name);
 
   // Préparer les données pour les graphiques mensuels
   const getDailyData = () => {
