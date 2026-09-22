@@ -76,11 +76,12 @@ const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => 
   }));
 
   const prevReservations: AnalyticsReservationRow[] = (prevReservationsRes.data || []).map((r) => {
-    const row = r as unknown as { channel_id: string | null; source: string | null; guests_count: number | null; channels: { name: string } | null };
+    const row = r as unknown as { channel_id: string | null; source: string | null; utm_campaign: string | null; guests_count: number | null; channels: { name: string } | null };
     return {
       channel_id: row.channel_id,
       channel_name: row.channels?.name ?? null,
       source: row.source,
+      utm_campaign: row.utm_campaign,
       guests_count: row.guests_count,
     };
   });
