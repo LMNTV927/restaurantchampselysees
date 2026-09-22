@@ -43,6 +43,7 @@ import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
 import { useMonthlyData } from "@/hooks/useMonthlyData";
 import { usePDFReport } from "@/hooks/usePDFReport";
 import { getCurrentMonthInParis, getCurrentYearInParis } from "@/lib/dateUtils";
+import { getChannelHsl } from "@/lib/channelColors";
 import { toast } from "sonner";
 
 export function DataSection() {
