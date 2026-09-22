@@ -17,6 +17,7 @@ import { AddReservationDialog } from "./AddReservationDialog";
 import { ImportOpenTableDialog } from "./ImportOpenTableDialog";
 import { EditCommentDialog } from "./EditCommentDialog";
 import { EditReservationDialog } from "./EditReservationDialog";
+import { CustomerHistoryDialog } from "./CustomerHistoryDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -40,6 +41,7 @@ interface Reservation {
 export function ReservationsSection() {
   const [selectedFilter, setSelectedFilter] = useState("today");
   const [selectedPastDate, setSelectedPastDate] = useState<Date | undefined>(undefined);
+  const [customerPhone, setCustomerPhone] = useState<string | null>(null);
   const { toast } = useToast();
   const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
@@ -511,9 +513,20 @@ export function ReservationsSection() {
                         </p>
                         <StatusBadge status={reservation.status} />
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {reservation.customer.phone}
-                      </p>
+                      {reservation.customer.phone ? (
+                        <button
+                          type="button"
+                          onClick={() => setCustomerPhone(reservation.customer.phone)}
+                          aria-label={`Voir la fiche client de ${reservation.customer.firstName} ${reservation.customer.lastName}`}
+                          className="text-sm text-muted-foreground underline decoration-dotted underline-offset-4 cursor-pointer hover:text-primary transition-colors text-left"
+                        >
+                          {reservation.customer.phone}
+                        </button>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          {reservation.customer.phone}
+                        </p>
+                      )}
                       {reservation.occasion && (
                         <Badge variant="outline" className="text-xs">
                           {reservation.occasion}
@@ -693,6 +706,13 @@ export function ReservationsSection() {
           </div>
         </Card>
       </motion.div>
+
+      <CustomerHistoryDialog
+        open={!!customerPhone}
+        onOpenChange={(open) => { if (!open) setCustomerPhone(null); }}
+        phone={customerPhone || ""}
+        reservations={realtimeReservations}
+      />
     </motion.div>
   );
 }
