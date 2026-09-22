@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, Calendar, Clock, Users, MapPin, History, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Calendar, Clock, Users, MapPin, History, Trash2, Info } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -67,7 +67,8 @@ export function ReservationsSection() {
       source: reservation.source || reservation.channelName,
       utmCampaign: reservation.utmCampaign,
       reservationDate: reservation.reservationDate,
-      reservationTime: reservation.reservationTime
+      reservationTime: reservation.reservationTime,
+      createdAt: reservation.createdAt
     };
   };
 
@@ -572,6 +573,27 @@ export function ReservationsSection() {
                         >
                           Présent
                         </Button>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="premium-button px-2"
+                              aria-label="Voir quand la réservation a été faite"
+                            >
+                              <Info className="h-4 w-4" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-3" align="center">
+                            {reservation.createdAt ? (
+                              <p className="text-sm text-foreground">
+                                Réservé le <span className="font-medium">{format(new Date(reservation.createdAt), "EEEE d MMMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                              </p>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">Date de réservation inconnue</p>
+                            )}
+                          </PopoverContent>
+                        </Popover>
                         <Button 
                           variant={reservation.status === "no_show" ? "destructive" : "outline"}
                           size="sm" 
