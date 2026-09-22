@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { getBookingUrl } from "@/lib/bookingLinks";
+import { getChannelColor } from "@/lib/channelColors";
 
 interface Link {
   id: string;
