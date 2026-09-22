@@ -148,11 +148,18 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
                 className="group hover:bg-muted/30 transition-colors"
               >
                 <TableCell>
-                  <div>
-                    <p className="font-medium text-foreground">{link.channel}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Créé le {link.createdAt.toLocaleDateString()}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-block w-3 h-3 rounded-full"
+                      style={{ backgroundColor: getChannelColor(link.channel).hsl }}
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <p className="font-medium text-foreground">{link.channel}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Créé le {link.createdAt.toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>
