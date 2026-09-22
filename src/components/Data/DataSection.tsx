@@ -446,7 +446,7 @@ export function DataSection() {
                   dataKey="reservations"
                   nameKey="name"
                 >
-                  {channels.map((entry) => (
+                  {channels.filter(c => c.reservations > 0).map((entry) => (
                     <Cell key={`cell-${entry.id}`} fill={getChannelColor(entry.name)} />
                   ))}
                 </Pie>

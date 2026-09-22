@@ -13,6 +13,7 @@ export interface AnalyticsReservationRow {
   channel_id: string | null;
   channel_name: string | null;
   source: string | null;
+  utm_campaign: string | null;
   guests_count: number | null;
 }
 
@@ -40,7 +41,15 @@ export const getReservationBucket = (reservation: AnalyticsReservationRow): stri
   const source = reservation.source?.trim();
   if (source) return source;
   const channelName = reservation.channel_name?.trim();
-  if (channelName) return channelName;
+  if (channelName) {
+    const normalizedChannel = normalizeBucketKey(channelName);
+    if (normalizedChannel === 'google ads') {
+      const campaign = (reservation.utm_campaign || '').toLowerCase();
+      if (campaign.includes('pmax')) return 'Google Ads - P-max';
+      if (campaign.includes('search')) return 'Google Ads - Search';
+    }
+    return channelName;
+  }
   return MANUAL_BUCKET;
 };
 
