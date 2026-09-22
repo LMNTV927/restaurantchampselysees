@@ -67,7 +67,8 @@ export function ReservationsSection() {
       source: reservation.source || reservation.channelName,
       utmCampaign: reservation.utmCampaign,
       reservationDate: reservation.reservationDate,
-      reservationTime: reservation.reservationTime
+      reservationTime: reservation.reservationTime,
+      createdAt: reservation.createdAt
     };
   };
 
