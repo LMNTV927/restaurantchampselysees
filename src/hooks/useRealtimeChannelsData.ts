@@ -44,6 +44,7 @@ interface ChannelsResult {
 type ReservationQueryRow = {
   channel_id: string | null;
   source: string | null;
+  utm_campaign: string | null;
   guests_count: number | null;
   channels: { name: string } | null;
 };
@@ -53,6 +54,7 @@ const mapReservationRows = (rows: ReservationQueryRow[] | null): AnalyticsReserv
     channel_id: r.channel_id,
     channel_name: r.channels?.name ?? null,
     source: r.source,
+    utm_campaign: r.utm_campaign,
     guests_count: r.guests_count,
   }));
 
@@ -64,7 +66,7 @@ const fetchChannelsAndStats = async (): Promise<ChannelsResult> => {
     supabase.from('channels').select('id, name, slug, description, is_active').eq('is_active', true),
     supabase.from('channel_stats').select('channel_id, clicks').gte('date', start).lt('date', end),
     supabase.from('channel_stats').select('channel_id, clicks').gte('date', prevStart).lt('date', start),
-    supabase.from('reservations').select('channel_id, source, guests_count, channels(name)')
+    supabase.from('reservations').select('channel_id, source, utm_campaign, guests_count, channels(name)')
       .gte('reservation_date', start).lt('reservation_date', end).eq('is_duplicate', false),
     supabase.from('reservations').select('channel_id, source, guests_count, channels(name)')
       .gte('reservation_date', prevStart).lt('reservation_date', start).eq('is_duplicate', false),

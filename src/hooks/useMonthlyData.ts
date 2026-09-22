@@ -24,6 +24,7 @@ interface ReservationData {
   channel_id: string;
   channel_name: string;
   source: string | null;
+  utm_campaign: string | null;
 }
 
 interface MonthlyData {
@@ -37,6 +38,7 @@ const toAnalyticsRows = (reservations: ReservationData[]): AnalyticsReservationR
     channel_id: r.channel_id,
     channel_name: r.channel_name,
     source: r.source,
+    utm_campaign: r.utm_campaign,
     guests_count: r.guests_count,
   }));
 
@@ -70,6 +72,7 @@ const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => 
     channel_id: r.channel_id,
     channel_name: (r.channels as { name: string } | null)?.name || 'Canal inconnu',
     source: r.source,
+    utm_campaign: r.utm_campaign,
   }));
 
   const prevReservations: AnalyticsReservationRow[] = (prevReservationsRes.data || []).map((r) => {
