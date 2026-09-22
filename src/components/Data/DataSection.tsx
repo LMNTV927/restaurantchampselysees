@@ -43,6 +43,7 @@ import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
 import { useMonthlyData } from "@/hooks/useMonthlyData";
 import { usePDFReport } from "@/hooks/usePDFReport";
 import { getCurrentMonthInParis, getCurrentYearInParis } from "@/lib/dateUtils";
+import { getChannelHsl } from "@/lib/channelColors";
 import { toast } from "sonner";
 
 export function DataSection() {
@@ -74,8 +75,8 @@ export function DataSection() {
     },
   };
 
-  // Couleurs pour le graphique en secteurs
-  const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
+  // Couleurs uniques par canal pour le graphique en secteurs
+  const getChannelColor = (name: string) => getChannelHsl(name);
 
   // Préparer les données pour les graphiques mensuels
   const getDailyData = () => {
@@ -445,8 +446,8 @@ export function DataSection() {
                   dataKey="reservations"
                   nameKey="name"
                 >
-                  {channels.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  {channels.map((entry) => (
+                    <Cell key={`cell-${entry.id}`} fill={getChannelColor(entry.name)} />
                   ))}
                 </Pie>
                 <ChartTooltip 
@@ -510,7 +511,16 @@ export function DataSection() {
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                     className="hover:bg-muted/30 transition-colors"
                   >
-                    <TableCell className="font-medium">{channel.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-block w-3 h-3 rounded-full"
+                          style={{ backgroundColor: getChannelColor(channel.name) }}
+                          aria-hidden="true"
+                        />
+                        {channel.name}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-center font-semibold">
                       {channel.slug ? channel.clicks.toLocaleString() : "—"}
                     </TableCell>

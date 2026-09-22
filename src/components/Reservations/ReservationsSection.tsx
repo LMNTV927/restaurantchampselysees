@@ -21,6 +21,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis, createDateTimeInParis } from "@/lib/dateUtils";
+import { getChannelColor } from "@/lib/channelColors";
 import { cn } from "@/lib/utils";
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
@@ -531,9 +532,16 @@ export function ReservationsSection() {
                         />
                       </div>
                       {reservation.source && (
-                        <p className="text-xs text-primary">
-                          via {reservation.source}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="inline-block w-2 h-2 rounded-full"
+                            style={{ backgroundColor: getChannelColor(reservation.source).hsl }}
+                            aria-hidden="true"
+                          />
+                          <p className="text-xs" style={{ color: getChannelColor(reservation.source).hsl }}>
+                            via {reservation.source}
+                          </p>
+                        </div>
                       )}
                       {reservation.utmCampaign && (
                         <Badge variant="outline" className="text-xs border-primary/40 text-primary">
