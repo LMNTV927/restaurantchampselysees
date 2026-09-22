@@ -706,6 +706,13 @@ export function ReservationsSection() {
           </div>
         </Card>
       </motion.div>
+
+      <CustomerHistoryDialog
+        open={!!customerPhone}
+        onOpenChange={(open) => { if (!open) setCustomerPhone(null); }}
+        phone={customerPhone || ""}
+        reservations={realtimeReservations}
+      />
     </motion.div>
   );
 }
