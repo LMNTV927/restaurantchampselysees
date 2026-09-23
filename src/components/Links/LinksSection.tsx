@@ -11,6 +11,12 @@ import { TrendingUp, MousePointer, Calendar, Users } from "lucide-react";
 import { useRealtimeChannelsData, type ChannelData } from "@/hooks/useRealtimeChannelsData";
 import { getBookingPath, getBookingUrl } from "@/lib/bookingLinks";
 
+interface CampaignBreakdown {
+  label: string;
+  reservations: number;
+  covers: number;
+}
+
 interface Link {
   id: string;
   channel: string;
@@ -22,6 +28,7 @@ interface Link {
   conversion: number;
   isActive: boolean;
   createdAt: Date;
+  campaignBreakdown: CampaignBreakdown[];
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -29,6 +36,35 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 /** Canal réel (vrai lien de tracking), pas un canal dérivé d'une source/campagne */
 const isRealChannel = (channel: ChannelData): boolean =>
   !!channel.slug && !channel.id.startsWith('source:') && UUID_REGEX.test(channel.id);
+
+/** Libellé court Search / PMax pour un canal dérivé de campagne */
+const getCampaignLabel = (name: string): string => {
+  const n = name.toLowerCase();
+  if (n.includes('search')) return 'Search';
+  if (n.includes('pmax') || n.includes('p-max') || n.includes('p_max') || n.includes('performance max')) return 'PMax';
+  return name;
+};
+
+/** Détail par campagne pour un canal réel (réservations/couverts uniquement, jamais les clics) */
+const buildCampaignBreakdown = (
+  realChannel: ChannelData,
+  allChannels: ChannelData[]
+): CampaignBreakdown[] => {
+  if (!realChannel.slug) return [];
+  return allChannels
+    .filter(
+      (ch) =>
+        !isRealChannel(ch) &&
+        ch.id.startsWith('source:') &&
+        ch.slug === realChannel.slug &&
+        (ch.reservations > 0 || ch.covers > 0)
+    )
+    .map((ch) => ({
+      label: getCampaignLabel(ch.name),
+      reservations: ch.reservations,
+      covers: ch.covers,
+    }));
+};
 
 
 export function LinksSection() {
