@@ -167,20 +167,29 @@ export const buildAnalytics = (
     };
   });
 
+  const channelById = new Map(channelRows.map((c) => [c.id, c]));
+
   const otherChannels: ChannelData[] = Array.from(buckets.entries())
     .filter(([key]) => !used.has(key))
-    .map(([key, bucket]) => ({
-      id: `source:${key}`,
-      name: bucket.label,
-      slug: '',
-      description: null,
-      isActive: true,
-      clicks: 0,
-      reservations: bucket.reservations,
-      covers: bucket.covers,
-      conversion: 0,
-      shortUrl: '',
-    }))
+    .map(([key, bucket]) => {
+      // Un bucket dérivé (campagne Google Ads, source manuelle) conserve le
+      // canal de tracking réel d'où viennent ses réservations : slug + clics.
+      const originId = dominantChannelId(bucket.channelCounts);
+      const origin = originId ? channelById.get(originId) : undefined;
+      const clicks = originId ? clicksMap.get(originId) || 0 : 0;
+      return {
+        id: `source:${key}`,
+        name: bucket.label,
+        slug: origin?.slug ?? '',
+        description: null,
+        isActive: true,
+        clicks,
+        reservations: bucket.reservations,
+        covers: bucket.covers,
+        conversion: clicks > 0 ? Math.min(100, Math.round((bucket.reservations / clicks) * 100)) : 0,
+        shortUrl: origin ? getBookingUrl(origin.slug) : '',
+      };
+    })
     .sort((a, b) => b.reservations - a.reservations);
 
   const channels = [...trackedChannels, ...otherChannels];
