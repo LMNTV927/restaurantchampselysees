@@ -104,6 +104,7 @@ export type Database = {
           customer_email: string | null
           customer_name: string
           customer_phone: string
+          dedupe_ignored: boolean
           duplicate_of: string | null
           external_id: string | null
           followup_sent: boolean
@@ -127,6 +128,7 @@ export type Database = {
           customer_email?: string | null
           customer_name: string
           customer_phone: string
+          dedupe_ignored?: boolean
           duplicate_of?: string | null
           external_id?: string | null
           followup_sent?: boolean
@@ -150,6 +152,7 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string
           customer_phone?: string
+          dedupe_ignored?: boolean
           duplicate_of?: string | null
           external_id?: string | null
           followup_sent?: boolean
