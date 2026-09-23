@@ -35,6 +35,7 @@ interface Link {
   conversion: number;
   isActive: boolean;
   createdAt: Date;
+  campaign?: string | null;
 }
 
 interface LinksTableProps {
@@ -42,11 +43,20 @@ interface LinksTableProps {
   onLinksChange: (links: Link[]) => void;
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Un lien n'est manipulable (copie / suppression) que s'il a un slug et un id réel */
+const isActionableLink = (link: Link): boolean => {
+  const slug = link.shortUrl.replace(/^\/book\//, "").trim();
+  return !!slug && !link.id.startsWith("source:") && UUID_REGEX.test(link.id);
+};
+
 export function LinksTable({ links, onLinksChange }: LinksTableProps) {
   const { toast } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopyLink = async (link: Link) => {
+    if (!isActionableLink(link)) return;
     const fullUrl = link.redirectUrl || getBookingUrl(link.shortUrl.replace(/^\/book\//, ""));
     await navigator.clipboard.writeText(fullUrl);
     setCopiedId(link.id);
