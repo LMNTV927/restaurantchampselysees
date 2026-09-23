@@ -87,8 +87,16 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         if (!r.is_duplicate || r.duplicate_of !== keep.id) {
+          // Filet de sécurité : aucun commentaire ne peut être perdu lors d'un masquage.
+          if (hasNotes(r)) {
+            const existing = (noteMerges.get(keep.id) ?? keep.notes ?? "").trim();
+            const incoming = String(r.notes).trim();
+            if (!existing) noteMerges.set(keep.id, incoming);
+            else if (!existing.includes(incoming)) noteMerges.set(keep.id, `${existing}\n${incoming}`);
+          }
           toMarkDuplicate.push({ id: r.id, duplicate_of: keep.id });
         }
+
       }
     };
 
