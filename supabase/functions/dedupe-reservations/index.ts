@@ -144,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
 
 
     return new Response(
-      JSON.stringify({ success: true, marked: toMarkDuplicate.length, restored: toRestore.length }),
+      JSON.stringify({ success: true, marked: toMarkDuplicate.length, restored: Array.from(new Set(toRestore)).length, notesMerged: noteMerges.size }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
     );
   } catch (error: any) {
