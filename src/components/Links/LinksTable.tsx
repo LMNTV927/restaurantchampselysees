@@ -35,7 +35,6 @@ interface Link {
   conversion: number;
   isActive: boolean;
   createdAt: Date;
-  campaign?: string | null;
 }
 
 interface LinksTableProps {
@@ -141,7 +140,6 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
             <TableRow className="border-border/50">
               <TableHead className="font-semibold">Canal</TableHead>
               <TableHead className="font-semibold">URL courte</TableHead>
-              <TableHead className="font-semibold">Campagne</TableHead>
               <TableHead className="font-semibold text-center">Clics</TableHead>
               <TableHead className="font-semibold text-center">Réservations</TableHead>
               <TableHead className="font-semibold text-center">Couverts</TableHead>
@@ -178,15 +176,6 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
                   <code className="px-2 py-1 bg-muted/50 rounded text-sm font-mono">
                     {link.shortUrl}
                   </code>
-                </TableCell>
-                <TableCell>
-                  {link.campaign ? (
-                    <code className="px-2 py-1 rounded text-xs font-mono text-primary bg-primary/10 border border-primary/20">
-                      {link.campaign}
-                    </code>
-                  ) : (
-                    <span className="text-muted-foreground text-sm">—</span>
-                  )}
                 </TableCell>
                 <TableCell className="text-center font-semibold">
                   {link.clicks.toLocaleString()}
