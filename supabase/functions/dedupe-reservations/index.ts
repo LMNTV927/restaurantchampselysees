@@ -120,7 +120,12 @@ const handler = async (req: Request): Promise<Response> => {
       if (cluster.length > 0) handleCluster(cluster);
     }
 
+    for (const [keepId, mergedNotes] of noteMerges.entries()) {
+      await supabase.from("reservations").update({ notes: mergedNotes }).eq("id", keepId);
+    }
+
     for (const item of toMarkDuplicate) {
+
       await supabase
         .from("reservations")
         .update({ is_duplicate: true, duplicate_of: item.duplicate_of })
