@@ -168,7 +168,7 @@ export function useRealtimeReservations() {
   const restoreReservation = async (reservationId: string) => {
     const { error } = await supabase
       .from('reservations')
-      .update({ is_duplicate: false, duplicate_of: null })
+      .update({ is_duplicate: false, duplicate_of: null, dedupe_ignored: true })
       .eq('id', reservationId);
     if (error) throw error;
     queryClient.invalidateQueries({ queryKey: ['reservations'] });
