@@ -33,23 +33,42 @@ export const aggregateClicks = (rows: ClickStatRow[]): Map<string, number> => {
   return map;
 };
 
+export const GOOGLE_ADS_PMAX_LABEL = 'Google Ads - P-max';
+export const GOOGLE_ADS_SEARCH_LABEL = 'Google Ads - Search';
+
+/**
+ * Détecte la campagne Google Ads (PMax / Search) depuis `utm_campaign`,
+ * quel que soit le canal de tracking d'origine.
+ */
+export const detectCampaignBucket = (utmCampaign: string | null): string | null => {
+  const campaign = (utmCampaign || '').toLowerCase();
+  if (!campaign) return null;
+  if (
+    campaign.includes('pmax') ||
+    campaign.includes('p-max') ||
+    campaign.includes('p_max') ||
+    campaign.includes('performance max') ||
+    campaign.includes('performance-max') ||
+    campaign.includes('performance_max')
+  ) {
+    return GOOGLE_ADS_PMAX_LABEL;
+  }
+  if (campaign.includes('search')) return GOOGLE_ADS_SEARCH_LABEL;
+  return null;
+};
+
 /**
  * Nom du "canal" réel d'une réservation :
- * la source saisie manuellement (IA, OpenTable, James...) prime sur le canal de tracking.
+ * une campagne Google Ads identifiée prime, puis la source saisie
+ * manuellement (IA, OpenTable, James...), puis le canal de tracking.
  */
 export const getReservationBucket = (reservation: AnalyticsReservationRow): string => {
+  const campaign = detectCampaignBucket(reservation.utm_campaign);
+  if (campaign) return campaign;
   const source = reservation.source?.trim();
   if (source) return source;
   const channelName = reservation.channel_name?.trim();
-  if (channelName) {
-    const normalizedChannel = normalizeBucketKey(channelName);
-    if (normalizedChannel === 'google ads') {
-      const campaign = (reservation.utm_campaign || '').toLowerCase();
-      if (campaign.includes('pmax')) return 'Google Ads - P-max';
-      if (campaign.includes('search')) return 'Google Ads - Search';
-    }
-    return channelName;
-  }
+  if (channelName) return channelName;
   return MANUAL_BUCKET;
 };
 
@@ -66,21 +85,44 @@ export const normalizeBucketKey = (name: string): string =>
     .trim()
     .toLowerCase();
 
+type AggregatedBucket = Bucket & { label: string; channelCounts: Map<string, number> };
+
 const aggregateReservations = (
   reservations: AnalyticsReservationRow[]
-): Map<string, Bucket & { label: string }> => {
-  const map = new Map<string, Bucket & { label: string }>();
+): Map<string, AggregatedBucket> => {
+  const map = new Map<string, AggregatedBucket>();
   reservations.forEach((reservation) => {
     const label = getReservationBucket(reservation);
     const key = normalizeBucketKey(label);
-    const existing = map.get(key) || { reservations: 0, covers: 0, label };
+    const existing =
+      map.get(key) || { reservations: 0, covers: 0, label, channelCounts: new Map<string, number>() };
+    if (reservation.channel_id) {
+      existing.channelCounts.set(
+        reservation.channel_id,
+        (existing.channelCounts.get(reservation.channel_id) || 0) + 1
+      );
+    }
     map.set(key, {
       label: existing.label,
       reservations: existing.reservations + 1,
       covers: existing.covers + (reservation.guests_count || 0),
+      channelCounts: existing.channelCounts,
     });
   });
   return map;
+};
+
+/** Canal de tracking majoritaire d'un bucket dérivé */
+const dominantChannelId = (channelCounts: Map<string, number>): string | null => {
+  let best: string | null = null;
+  let bestCount = 0;
+  channelCounts.forEach((count, id) => {
+    if (count > bestCount) {
+      best = id;
+      bestCount = count;
+    }
+  });
+  return best;
 };
 
 export interface AnalyticsResult {
@@ -125,20 +167,29 @@ export const buildAnalytics = (
     };
   });
 
+  const channelById = new Map(channelRows.map((c) => [c.id, c]));
+
   const otherChannels: ChannelData[] = Array.from(buckets.entries())
     .filter(([key]) => !used.has(key))
-    .map(([key, bucket]) => ({
-      id: `source:${key}`,
-      name: bucket.label,
-      slug: '',
-      description: null,
-      isActive: true,
-      clicks: 0,
-      reservations: bucket.reservations,
-      covers: bucket.covers,
-      conversion: 0,
-      shortUrl: '',
-    }))
+    .map(([key, bucket]) => {
+      // Un bucket dérivé (campagne Google Ads, source manuelle) conserve le
+      // canal de tracking réel d'où viennent ses réservations : slug + clics.
+      const originId = dominantChannelId(bucket.channelCounts);
+      const origin = originId ? channelById.get(originId) : undefined;
+      const clicks = originId ? clicksMap.get(originId) || 0 : 0;
+      return {
+        id: `source:${key}`,
+        name: bucket.label,
+        slug: origin?.slug ?? '',
+        description: null,
+        isActive: true,
+        clicks,
+        reservations: bucket.reservations,
+        covers: bucket.covers,
+        conversion: clicks > 0 ? Math.min(100, Math.round((bucket.reservations / clicks) * 100)) : 0,
+        shortUrl: origin ? getBookingUrl(origin.slug) : '',
+      };
+    })
     .sort((a, b) => b.reservations - a.reservations);
 
   const channels = [...trackedChannels, ...otherChannels];

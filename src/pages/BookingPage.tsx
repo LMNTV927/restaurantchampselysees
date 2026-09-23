@@ -11,6 +11,9 @@ const dishImages = DISH_IMAGES;
 
 
 const GOOGLE_ADS_SLUG = "google-ads";
+const GOOGLE_ADS_PMAX_SLUG = "google-ads-pmax";
+const GOOGLE_ADS_SEARCH_SLUG = "google-ads-search";
+const CAMPAIGN_STORAGE_KEY = "pp_ads_campaign_kind";
 
 /** Détecte une visite issue de Google Ads (gclid / utm cpc) */
 const detectGoogleAds = (): boolean => {
@@ -28,6 +31,35 @@ const detectGoogleAds = (): boolean => {
   } catch {
     return false;
   }
+};
+
+/** "pmax" | "search" | null — mémorisé pour survivre au tunnel de réservation */
+const detectCampaignKind = (): "pmax" | "search" | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const campaign = (params.get("utm_campaign") || "").toLowerCase();
+    let kind: "pmax" | "search" | null = null;
+    if (/(pmax|p-max|p_max|performance[ -_]?max)/.test(campaign)) kind = "pmax";
+    else if (campaign.includes("search")) kind = "search";
+
+    if (kind) {
+      sessionStorage.setItem(CAMPAIGN_STORAGE_KEY, kind);
+      return kind;
+    }
+    const stored = sessionStorage.getItem(CAMPAIGN_STORAGE_KEY);
+    return stored === "pmax" || stored === "search" ? stored : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Slug de canal publicitaire à utiliser, par ordre de préférence */
+const getAdsSlugCandidates = (): string[] => {
+  const kind = detectCampaignKind();
+  if (kind === "pmax") return [GOOGLE_ADS_PMAX_SLUG, GOOGLE_ADS_SLUG];
+  if (kind === "search") return [GOOGLE_ADS_SEARCH_SLUG, GOOGLE_ADS_SLUG];
+  return [GOOGLE_ADS_SLUG];
 };
 
 export function BookingPage() {
@@ -59,43 +91,39 @@ export function BookingPage() {
         return;
       }
 
-      // Attribution Google Ads prioritaire sur le canal du lien
-      const effectiveSlug = detectGoogleAds() ? GOOGLE_ADS_SLUG : slug;
-
-      // Le comptage du clic part en parallèle et ne bloque jamais l'affichage
-      supabase.rpc('increment_channel_clicks', { channel_slug: effectiveSlug }).then(
-        () => {},
-        () => {}
-      );
+      // Attribution publicitaire prioritaire : canal de campagne (pmax / search),
+      // puis repli sur "google-ads", puis sur le canal du lien.
+      const candidates = detectGoogleAds()
+        ? Array.from(new Set([...getAdsSlugCandidates(), slug]))
+        : [slug];
 
       try {
-        const { data, error } = await supabase
-          .from('channels')
-          .select('id, name, slug, is_active')
-          .eq('slug', effectiveSlug)
-          .eq('is_active', true)
-          .maybeSingle();
+        let resolved: any = null;
 
-        if (cancelled) return;
-
-        if (error || !data) {
-          // repli sur le canal du lien si le canal Google Ads est indisponible
-          const fallback = effectiveSlug === slug ? null : await supabase
+        for (const candidate of candidates) {
+          const { data } = await supabase
             .from('channels')
             .select('id, name, slug, is_active')
-            .eq('slug', slug)
+            .eq('slug', candidate)
             .eq('is_active', true)
             .maybeSingle();
 
           if (cancelled) return;
-
-          if (fallback?.data) {
-            setChannel(fallback.data);
-          } else {
-            setError("Lien de réservation introuvable ou inactif");
+          if (data) {
+            resolved = data;
+            break;
           }
+        }
+
+        if (resolved) {
+          setChannel(resolved);
+          // Le comptage du clic ne bloque jamais l'affichage
+          supabase.rpc('increment_channel_clicks', { channel_slug: resolved.slug }).then(
+            () => {},
+            () => {}
+          );
         } else {
-          setChannel(data);
+          setError("Lien de réservation introuvable ou inactif");
         }
       } catch (err) {
         if (cancelled) return;
