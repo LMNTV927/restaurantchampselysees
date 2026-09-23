@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
+import type { ChannelData } from "@/hooks/useRealtimeChannelsData";
 import { Button } from "@/components/ui/button";
 import { KPICard } from "@/components/UI/KPICard";
 import { LinksTable } from "./LinksTable";
