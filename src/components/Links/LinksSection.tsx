@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
-import type { ChannelData } from "@/hooks/useRealtimeChannelsData";
 import { Button } from "@/components/ui/button";
 import { KPICard } from "@/components/UI/KPICard";
 import { LinksTable } from "./LinksTable";
@@ -9,7 +8,7 @@ import { CreateLinkDialog } from "./CreateLinkDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, MousePointer, Calendar, Users } from "lucide-react";
-import { useRealtimeChannelsData, ChannelData } from "@/hooks/useRealtimeChannelsData";
+import { useRealtimeChannelsData, type ChannelData } from "@/hooks/useRealtimeChannelsData";
 import { getBookingPath, getBookingUrl } from "@/lib/bookingLinks";
 
 interface Link {
