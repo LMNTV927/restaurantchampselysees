@@ -37,51 +37,85 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: reservations, error } = await supabase
       .from("reservations")
-      .select("id, customer_phone, customer_name, reservation_date, reservation_time, created_at, is_duplicate, duplicate_of, status")
+      .select("id, customer_phone, customer_name, reservation_date, reservation_time, created_at, is_duplicate, duplicate_of, status, notes, dedupe_ignored")
       .neq("status", "cancelled")
       .gte("reservation_date", today);
 
     if (error) throw error;
 
-    // Regroupement par téléphone normalisé + date
-    const groups = new Map<string, typeof reservations>();
+    const hasNotes = (r: any) => !!(r.notes && String(r.notes).trim().length > 0);
+    const toMinutes = (time: string | null): number => {
+      if (!time) return 0;
+      const [h, m] = String(time).split(":");
+      return (parseInt(h, 10) || 0) * 60 + (parseInt(m, 10) || 0);
+    };
+
+    // Regroupement par téléphone normalisé + date (les lignes ignorées volontairement sont écartées)
+    const groups = new Map<string, any[]>();
     for (const r of reservations || []) {
+      if (r.dedupe_ignored) continue;
       const phone = normalizePhone(r.customer_phone);
       if (!phone) continue;
       const key = `${phone}|${r.reservation_date}`;
-      if (!groups.has(key)) groups.set(key, [] as any);
+      if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(r);
     }
 
-    const toMarkDuplicate: { id: string; duplicate_of: string }[] = [];
+    const toMarkDuplicate: { id: string; duplicate_of: string; notes?: string }[] = [];
     const toRestore: string[] = [];
+    const noteMerges = new Map<string, string>();
 
-    for (const group of groups.values()) {
-      if (group.length === 1) {
-        // Plus de doublon : restaurer si marquée à tort
-        if (group[0].is_duplicate) toRestore.push(group[0].id);
-        continue;
+    const handleCluster = (cluster: any[]) => {
+      if (cluster.length === 1) {
+        if (cluster[0].is_duplicate) toRestore.push(cluster[0].id);
+        return;
       }
 
-      // Même téléphone + même date = doublon, quel que soit l'écart d'horaire.
       // On garde la réservation créée le plus récemment.
-      const keep = group.reduce((a, b) =>
+      const keep = cluster.reduce((a, b) =>
         new Date(b.created_at).getTime() > new Date(a.created_at).getTime() ? b : a,
       );
       if (keep.is_duplicate) toRestore.push(keep.id);
-      for (const r of group) {
+
+      for (const r of cluster) {
         if (r.id === keep.id) continue;
+
+        // Un commentaire est un travail humain : on ne masque jamais une ligne commentée.
+        if (hasNotes(r)) {
+          if (r.is_duplicate) toRestore.push(r.id);
+          continue;
+        }
+
         if (!r.is_duplicate || r.duplicate_of !== keep.id) {
           toMarkDuplicate.push({ id: r.id, duplicate_of: keep.id });
         }
       }
-    }
+    };
 
+    for (const group of groups.values()) {
+      // Fenêtre horaire : seules les réservations à moins de 3h d'écart sont candidates.
+      const sorted = [...group].sort((a, b) => toMinutes(a.reservation_time) - toMinutes(b.reservation_time));
+      let cluster: any[] = [];
+      for (const r of sorted) {
+        if (cluster.length === 0) {
+          cluster.push(r);
+          continue;
+        }
+        const last = cluster[cluster.length - 1];
+        if (Math.abs(toMinutes(r.reservation_time) - toMinutes(last.reservation_time)) < 180) {
+          cluster.push(r);
+        } else {
+          handleCluster(cluster);
+          cluster = [r];
+        }
+      }
+      if (cluster.length > 0) handleCluster(cluster);
+    }
 
     for (const item of toMarkDuplicate) {
       await supabase
         .from("reservations")
-        .update({ is_duplicate: true, duplicate_of: item.duplicate_of, reminder_sent: true })
+        .update({ is_duplicate: true, duplicate_of: item.duplicate_of })
         .eq("id", item.id);
     }
 
@@ -89,10 +123,12 @@ const handler = async (req: Request): Promise<Response> => {
       await supabase
         .from("reservations")
         .update({ is_duplicate: false, duplicate_of: null })
-        .in("id", toRestore);
+        .in("id", Array.from(new Set(toRestore)));
     }
 
-    console.log(`Dedupe: ${toMarkDuplicate.length} marquées, ${toRestore.length} restaurées`);
+    console.log(`Dedupe: ${toMarkDuplicate.length} marquées, ${toRestore.length} restaurées, ${noteMerges.size} commentaires fusionnés`);
+
+
 
     return new Response(
       JSON.stringify({ success: true, marked: toMarkDuplicate.length, restored: toRestore.length }),
