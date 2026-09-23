@@ -60,13 +60,22 @@ export function LinksSection() {
     campaign: getExpectedCampaign(channel)
   }));
 
-  const handleCreateLink = async (data: { channel: string }) => {
+  const handleCreateLink = async (data: { channel: string; adsCampaign?: 'pmax' | 'search' | null }) => {
     try {
-      // Generate a URL-friendly slug from the channel name
-      const slug = data.channel
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+      // Slug imposé pour les canaux de campagne Google Ads
+      const campaignSlug =
+        data.adsCampaign === 'pmax'
+          ? 'google-ads-pmax'
+          : data.adsCampaign === 'search'
+            ? 'google-ads-search'
+            : null;
+
+      const slug =
+        campaignSlug ||
+        data.channel
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
 
       const { error } = await supabase
         .from('channels')
