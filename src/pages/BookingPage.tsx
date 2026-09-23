@@ -91,43 +91,39 @@ export function BookingPage() {
         return;
       }
 
-      // Attribution Google Ads prioritaire sur le canal du lien
-      const effectiveSlug = detectGoogleAds() ? GOOGLE_ADS_SLUG : slug;
-
-      // Le comptage du clic part en parallèle et ne bloque jamais l'affichage
-      supabase.rpc('increment_channel_clicks', { channel_slug: effectiveSlug }).then(
-        () => {},
-        () => {}
-      );
+      // Attribution publicitaire prioritaire : canal de campagne (pmax / search),
+      // puis repli sur "google-ads", puis sur le canal du lien.
+      const candidates = detectGoogleAds()
+        ? Array.from(new Set([...getAdsSlugCandidates(), slug]))
+        : [slug];
 
       try {
-        const { data, error } = await supabase
-          .from('channels')
-          .select('id, name, slug, is_active')
-          .eq('slug', effectiveSlug)
-          .eq('is_active', true)
-          .maybeSingle();
+        let resolved: any = null;
 
-        if (cancelled) return;
-
-        if (error || !data) {
-          // repli sur le canal du lien si le canal Google Ads est indisponible
-          const fallback = effectiveSlug === slug ? null : await supabase
+        for (const candidate of candidates) {
+          const { data } = await supabase
             .from('channels')
             .select('id, name, slug, is_active')
-            .eq('slug', slug)
+            .eq('slug', candidate)
             .eq('is_active', true)
             .maybeSingle();
 
           if (cancelled) return;
-
-          if (fallback?.data) {
-            setChannel(fallback.data);
-          } else {
-            setError("Lien de réservation introuvable ou inactif");
+          if (data) {
+            resolved = data;
+            break;
           }
+        }
+
+        if (resolved) {
+          setChannel(resolved);
+          // Le comptage du clic ne bloque jamais l'affichage
+          supabase.rpc('increment_channel_clicks', { channel_slug: resolved.slug }).then(
+            () => {},
+            () => {}
+          );
         } else {
-          setChannel(data);
+          setError("Lien de réservation introuvable ou inactif");
         }
       } catch (err) {
         if (cancelled) return;
