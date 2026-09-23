@@ -11,6 +11,9 @@ const dishImages = DISH_IMAGES;
 
 
 const GOOGLE_ADS_SLUG = "google-ads";
+const GOOGLE_ADS_PMAX_SLUG = "google-ads-pmax";
+const GOOGLE_ADS_SEARCH_SLUG = "google-ads-search";
+const CAMPAIGN_STORAGE_KEY = "pp_ads_campaign_kind";
 
 /** Détecte une visite issue de Google Ads (gclid / utm cpc) */
 const detectGoogleAds = (): boolean => {
@@ -28,6 +31,35 @@ const detectGoogleAds = (): boolean => {
   } catch {
     return false;
   }
+};
+
+/** "pmax" | "search" | null — mémorisé pour survivre au tunnel de réservation */
+const detectCampaignKind = (): "pmax" | "search" | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const campaign = (params.get("utm_campaign") || "").toLowerCase();
+    let kind: "pmax" | "search" | null = null;
+    if (/(pmax|p-max|p_max|performance[ -_]?max)/.test(campaign)) kind = "pmax";
+    else if (campaign.includes("search")) kind = "search";
+
+    if (kind) {
+      sessionStorage.setItem(CAMPAIGN_STORAGE_KEY, kind);
+      return kind;
+    }
+    const stored = sessionStorage.getItem(CAMPAIGN_STORAGE_KEY);
+    return stored === "pmax" || stored === "search" ? stored : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Slug de canal publicitaire à utiliser, par ordre de préférence */
+const getAdsSlugCandidates = (): string[] => {
+  const kind = detectCampaignKind();
+  if (kind === "pmax") return [GOOGLE_ADS_PMAX_SLUG, GOOGLE_ADS_SLUG];
+  if (kind === "search") return [GOOGLE_ADS_SEARCH_SLUG, GOOGLE_ADS_SLUG];
+  return [GOOGLE_ADS_SLUG];
 };
 
 export function BookingPage() {
