@@ -141,6 +141,7 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
             <TableRow className="border-border/50">
               <TableHead className="font-semibold">Canal</TableHead>
               <TableHead className="font-semibold">URL courte</TableHead>
+              <TableHead className="font-semibold">Campagne</TableHead>
               <TableHead className="font-semibold text-center">Clics</TableHead>
               <TableHead className="font-semibold text-center">Réservations</TableHead>
               <TableHead className="font-semibold text-center">Couverts</TableHead>
