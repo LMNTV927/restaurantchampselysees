@@ -77,6 +77,7 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
   };
 
   const handleDeleteLink = async (linkId: string) => {
+    if (!UUID_REGEX.test(linkId)) return;
     try {
       // First delete associated channel_stats
       const { error: statsError } = await supabase
