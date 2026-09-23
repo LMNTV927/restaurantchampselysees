@@ -127,6 +127,33 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
             </p>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="ads-campaign" className="text-sm font-medium">
+              Campagne Google Ads <span className="text-muted-foreground">(optionnel)</span>
+            </Label>
+            <Select
+              value={adsCampaign}
+              onValueChange={(value) => handleCampaignChange(value as AdsCampaign)}
+              disabled={isGenerating}
+            >
+              <SelectTrigger id="ads-campaign" className="premium-input">
+                <SelectValue placeholder="Aucune" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Aucune</SelectItem>
+                <SelectItem value="search">Search</SelectItem>
+                <SelectItem value="pmax">PMax</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {adsCampaign === "search"
+                ? "Lien créé : /book/google-ads-search"
+                : adsCampaign === "pmax"
+                  ? "Lien créé : /book/google-ads-pmax"
+                  : "Choisissez Search ou PMax pour créer un lien dédié à une campagne"}
+            </p>
+          </div>
+
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
