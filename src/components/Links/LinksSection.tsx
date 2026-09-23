@@ -84,6 +84,7 @@ export function LinksSection() {
     conversion: channel.conversion,
     isActive: channel.isActive,
     createdAt: new Date(), // We don't have creation date in the hook yet
+    campaignBreakdown: buildCampaignBreakdown(channel, channels),
   }));
 
   const handleCreateLink = async (data: { channel: string; adsCampaign?: 'pmax' | 'search' | null }) => {
