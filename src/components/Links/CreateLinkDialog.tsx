@@ -13,21 +13,41 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
+type AdsCampaign = "none" | "search" | "pmax";
+
+const CAMPAIGN_NAMES: Record<Exclude<AdsCampaign, "none">, string> = {
+  search: "Google Ads — Search",
+  pmax: "Google Ads — PMax",
+};
+
 interface CreateLinkDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: { channel: string }) => void;
+  onSubmit: (data: { channel: string; adsCampaign?: "pmax" | "search" | null }) => void;
 }
 
 export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDialogProps) {
   const [channel, setChannel] = useState("");
+  const [adsCampaign, setAdsCampaign] = useState<AdsCampaign>("none");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
+  const handleCampaignChange = (value: AdsCampaign) => {
+    setAdsCampaign(value);
+    if (value !== "none") {
+      setChannel(CAMPAIGN_NAMES[value]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!channel.trim()) {
+
+    const isCampaign = adsCampaign !== "none";
+    const channelName = isCampaign
+      ? channel.trim() || CAMPAIGN_NAMES[adsCampaign]
+      : channel.trim();
+
+    if (!channelName) {
       toast({
         title: "Erreur",
         description: "Veuillez saisir le nom du canal",
@@ -37,17 +57,18 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
     }
 
     setIsGenerating(true);
-    
+
     try {
-      // Store channel name before resetting
-      const channelName = channel.trim();
-      
       // Call the parent function
-      await onSubmit({ channel: channelName });
-      
+      await onSubmit({
+        channel: channelName,
+        adsCampaign: isCampaign ? adsCampaign : null,
+      });
+
       // Reset form only after successful submission
       setChannel("");
-      
+      setAdsCampaign("none");
+
     } catch (error) {
       console.error('Error creating channel:', error);
       toast({
@@ -65,6 +86,7 @@ export function CreateLinkDialog({ open, onOpenChange, onSubmit }: CreateLinkDia
       onOpenChange(newOpen);
       if (!newOpen) {
         setChannel("");
+        setAdsCampaign("none");
       }
     }
   };
