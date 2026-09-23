@@ -132,12 +132,23 @@ const handler = async (req: Request): Promise<Response> => {
         .eq("id", item.id);
     }
 
+    // Auto-réparation : toute réservation commentée masquée (même passée) est restaurée.
+    const { data: hiddenWithNotes } = await supabase
+      .from("reservations")
+      .select("id, notes")
+      .eq("is_duplicate", true)
+      .not("notes", "is", null);
+    for (const r of hiddenWithNotes || []) {
+      if (hasNotes(r)) toRestore.push(r.id);
+    }
+
     if (toRestore.length > 0) {
       await supabase
         .from("reservations")
         .update({ is_duplicate: false, duplicate_of: null })
         .in("id", Array.from(new Set(toRestore)));
     }
+
 
     console.log(`Dedupe: ${toMarkDuplicate.length} marquées, ${toRestore.length} restaurées, ${noteMerges.size} commentaires fusionnés`);
 
