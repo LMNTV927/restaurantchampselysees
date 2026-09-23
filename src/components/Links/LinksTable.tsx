@@ -179,6 +179,15 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
                     {link.shortUrl}
                   </code>
                 </TableCell>
+                <TableCell>
+                  {link.campaign ? (
+                    <code className="px-2 py-1 rounded text-xs font-mono text-primary bg-primary/10 border border-primary/20">
+                      {link.campaign}
+                    </code>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">—</span>
+                  )}
+                </TableCell>
                 <TableCell className="text-center font-semibold">
                   {link.clicks.toLocaleString()}
                 </TableCell>
