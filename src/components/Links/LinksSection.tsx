@@ -22,7 +22,6 @@ interface Link {
   conversion: number;
   isActive: boolean;
   createdAt: Date;
-  campaign: string | null;
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -31,14 +30,6 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 const isRealChannel = (channel: ChannelData): boolean =>
   !!channel.slug && !channel.id.startsWith('source:') && UUID_REGEX.test(channel.id);
 
-/** Campagne attendue dans les URLs pour les canaux Google Ads */
-const getExpectedCampaign = (channel: ChannelData): string | null => {
-  const key = `${channel.slug} ${channel.name}`.toLowerCase();
-  if (!key.includes('google ads') && !key.includes('google-ads')) return null;
-  if (key.includes('search')) return 'utm_campaign=search_lovable';
-  if (key.includes('pmax') || key.includes('p-max')) return 'utm_campaign=pmax_princepalace';
-  return 'utm_campaign=pmax_princepalace';
-};
 
 export function LinksSection() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -57,7 +48,6 @@ export function LinksSection() {
     conversion: channel.conversion,
     isActive: channel.isActive,
     createdAt: new Date(), // We don't have creation date in the hook yet
-    campaign: getExpectedCampaign(channel)
   }));
 
   const handleCreateLink = async (data: { channel: string; adsCampaign?: 'pmax' | 'search' | null }) => {
