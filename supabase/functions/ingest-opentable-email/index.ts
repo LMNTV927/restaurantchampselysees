@@ -127,7 +127,7 @@ serve(async (req) => {
 
     const { data: existing } = await supabase
       .from("reservations")
-      .select("id")
+      .select("id, notes")
       .eq("source", OPENTABLE_SOURCE)
       .eq("external_id", externalId)
       .maybeSingle();
@@ -147,14 +147,22 @@ serve(async (req) => {
     };
 
     if (existing) {
-      const { error } = await supabase.from("reservations").update(record).eq("id", existing.id);
+      const storedNotes = typeof existing.notes === "string" ? existing.notes.trim() : "";
+      const incomingNotes = typeof parsed.notes === "string" ? parsed.notes.trim() : "";
+      const { notes: _incomingRecordNotes, ...recordWithoutNotes } = record;
+      const updateRecord = {
+        ...recordWithoutNotes,
+        ...(!storedNotes && incomingNotes ? { notes: parsed.notes } : {}),
+      };
+
+      const { error } = await supabase.from("reservations").update(updateRecord).eq("id", existing.id);
       if (error) return json({ error: error.message }, 500);
-      return json({ ok: true, action: "updated", externalId });
+      return json({ ok: true, action: "updated", externalId, notesKept: storedNotes ? 1 : 0 });
     }
 
     const { error } = await supabase.from("reservations").insert(record);
     if (error) return json({ error: error.message }, 500);
-    return json({ ok: true, action: "created", externalId });
+    return json({ ok: true, action: "created", externalId, notesKept: 0 });
   } catch (err) {
     console.error("ingest-opentable-email error:", err);
     return json({ error: String((err as Error).message ?? err) }, 500);

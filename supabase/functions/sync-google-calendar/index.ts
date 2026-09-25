@@ -344,6 +344,7 @@ serve(async (req) => {
     let imported = 0;
     let updated = 0;
     let skipped = 0;
+    let notesKept = 0;
 
     for (const ev of events) {
       const startIso: string | undefined = ev.start?.dateTime;
@@ -391,21 +392,27 @@ serve(async (req) => {
 
       const { data: existing } = await supabase
         .from("reservations")
-        .select("id")
+        .select("id, notes")
         .eq("source", GOOGLE_SOURCE)
         .eq("external_id", ev.id)
         .maybeSingle();
 
       if (existing) {
+        const storedNotes = typeof existing.notes === "string" ? existing.notes.trim() : "";
+        const incomingNotes = typeof payload.notes === "string" ? payload.notes.trim() : "";
+        const updatePatch = {
+          customer_name: payload.customer_name,
+          reservation_date: payload.reservation_date,
+          reservation_time: payload.reservation_time,
+          guests_count: payload.guests_count,
+          ...(!storedNotes && incomingNotes ? { notes: payload.notes } : {}),
+        };
+
+        if (storedNotes) notesKept++;
+
         const { error } = await supabase
           .from("reservations")
-          .update({
-            customer_name: payload.customer_name,
-            reservation_date: payload.reservation_date,
-            reservation_time: payload.reservation_time,
-            guests_count: payload.guests_count,
-            notes: payload.notes,
-          })
+          .update(updatePatch)
           .eq("id", existing.id);
         if (error) console.error("Update failed:", error.message);
         else updated++;
@@ -416,7 +423,7 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, total: events.length, imported, updated, skipped }), {
+    return new Response(JSON.stringify({ ok: true, total: events.length, imported, updated, skipped, notesKept }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
