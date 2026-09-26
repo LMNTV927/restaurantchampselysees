@@ -1,16 +1,38 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Users, TrendingUp, Phone, Clock, MapPin, Activity, AlertTriangle } from "lucide-react";
+import { Calendar, Users, Clock, MapPin, Activity, AlertTriangle } from "lucide-react";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/UI/StatusBadge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useRealtimeDashboard } from "@/hooks/useRealtimeDashboard";
-import { getCurrentMonthNameInParis } from "@/lib/dateUtils";
+import { useReservationsTaken } from "@/hooks/useReservationsTaken";
+import { getTodayInParis, getCurrentMonthNameInParis } from "@/lib/dateUtils";
+
+const formatTakenTime = (createdAt: string): string =>
+  new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(createdAt));
+
+const formatForDay = (date: string, time: string): string => {
+  const dayLabel = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${date}T${time}`));
+  return `${dayLabel} à ${time}`;
+};
 
 export function DashboardSection() {
   const { dashboardData, loading } = useRealtimeDashboard();
   const currentMonthName = getCurrentMonthNameInParis();
+  const today = getTodayInParis();
+  const [takenDay, setTakenDay] = useState(today);
+  const { reservations: takenReservations, count: takenCount, loading: takenLoading } = useReservationsTaken(takenDay);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
