@@ -16,7 +16,7 @@ const allTabs = [
   { id: "links", label: "Liens" },
   { id: "reservations", label: "Réservations" },
   { id: "data", label: "Données" },
-  
+  { id: "clients", label: "Clients" },
   { id: "assistant", label: "Assistant IA" },
 ];
 
