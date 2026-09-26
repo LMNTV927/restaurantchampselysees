@@ -1,16 +1,38 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Users, TrendingUp, Phone, Clock, MapPin, Activity, AlertTriangle } from "lucide-react";
+import { Calendar, Users, Clock, MapPin, Activity, AlertTriangle } from "lucide-react";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/UI/StatusBadge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useRealtimeDashboard } from "@/hooks/useRealtimeDashboard";
-import { getCurrentMonthNameInParis } from "@/lib/dateUtils";
+import { useReservationsTaken } from "@/hooks/useReservationsTaken";
+import { getTodayInParis, getCurrentMonthNameInParis } from "@/lib/dateUtils";
+
+const formatTakenTime = (createdAt: string): string =>
+  new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(createdAt));
+
+const formatForDay = (date: string, time: string): string => {
+  const dayLabel = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${date}T${time}`));
+  return `${dayLabel} à ${time}`;
+};
 
 export function DashboardSection() {
   const { dashboardData, loading } = useRealtimeDashboard();
   const currentMonthName = getCurrentMonthNameInParis();
+  const today = getTodayInParis();
+  const [takenDay, setTakenDay] = useState(today);
+  const { reservations: takenReservations, count: takenCount, loading: takenLoading } = useReservationsTaken(takenDay);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -195,7 +217,7 @@ export function DashboardSection() {
         </motion.div>
       </div>
 
-      {/* Activité récente */}
+      {/* Réservations prises */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -203,57 +225,70 @@ export function DashboardSection() {
       >
         <Card className="premium-card">
           <div className="p-3 sm:p-4 lg:p-6 border-b border-border/50">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold">
-                Activité Récente
+                Réservations prises
               </h3>
+              <div className="flex items-center gap-2 ml-auto">
+                <input
+                  type="date"
+                  value={takenDay}
+                  onChange={(e) => setTakenDay(e.target.value || getTodayInParis())}
+                  className="h-9 rounded-md border border-border bg-background px-2 text-xs sm:text-sm text-foreground"
+                  aria-label="Choisir le jour"
+                />
+                {takenDay !== today && (
+                  <button
+                    type="button"
+                    onClick={() => setTakenDay(today)}
+                    className="h-9 rounded-md border border-border px-2.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+                  >
+                    Aujourd'hui
+                  </button>
+                )}
+              </div>
             </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              {takenLoading
+                ? "Chargement…"
+                : takenCount === 0
+                  ? "Aucune réservation prise"
+                  : takenCount === 1
+                    ? "1 réservation prise"
+                    : `${takenCount} réservations prises`}
+            </p>
           </div>
-          
-          <div className="p-3 sm:p-4 lg:p-6 space-y-2 sm:space-y-3 lg:space-y-4">
-            {dashboardData.recentActivity.map((activity, index) => (
-              <motion.div
-                key={activity.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl hover:bg-muted/30 transition-all duration-300"
+
+          <div className="p-3 sm:p-4 lg:p-6 space-y-2 sm:space-y-3">
+            {takenReservations.map((r) => (
+              <div
+                key={r.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 p-4 bg-muted/20 rounded-2xl hover:bg-muted/30 transition-all duration-300"
               >
-                <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-xl ${
-                    activity.type === 'reservation' ? 'bg-primary/20' :
-                    activity.type === 'click' ? 'bg-blue-500/20' :
-                    'bg-success/20'
-                  }`}>
-                    {activity.type === 'reservation' && <Calendar className="h-4 w-4 text-primary" />}
-                    {activity.type === 'click' && <Phone className="h-4 w-4 text-blue-500" />}
-                    {activity.type === 'show' && <Users className="h-4 w-4 text-success" />}
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">
-                      {activity.message}
-                    </p>
-                    {activity.customer && (
-                      <p className="text-sm text-muted-foreground">
-                        {activity.customer}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  {activity.status && (
-                    <StatusBadge status={activity.status} />
-                  )}
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex items-start sm:items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
                     <Clock className="h-3 w-3" />
-                    {activity.time}
+                    {formatTakenTime(r.createdAt)}
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="font-medium text-foreground truncate">
+                      {r.customerName} · {r.guestsCount} couvert{r.guestsCount > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      pour le {formatForDay(r.reservationDate, r.reservationTime)}
+                      {r.channelName ? ` · via ${r.channelName}` : " · via Web"}
+                    </p>
                   </div>
                 </div>
-              </motion.div>
+                <div className="shrink-0">
+                  <StatusBadge status={r.status} />
+                </div>
+              </div>
             ))}
+            {!takenLoading && takenReservations.length === 0 && (
+              <p className="text-sm text-muted-foreground py-2">Aucune réservation prise ce jour-là</p>
+            )}
           </div>
         </Card>
       </motion.div>
