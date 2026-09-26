@@ -49,7 +49,7 @@ const buildClients = (reservations: ReservationData[]): ClientRow[] => {
       existing.latest = r;
       existing.phone = r.customerPhone;
       existing.name = r.customerName;
-et     }
+    }
     if (!existing.email && r.customerEmail?.trim()) {
       existing.email = r.customerEmail.trim();
     }

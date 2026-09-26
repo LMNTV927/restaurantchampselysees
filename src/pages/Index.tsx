@@ -37,6 +37,8 @@ function IndexContent() {
         return <ReservationsSection />;
       case "data":
         return <DataSection />;
+      case "clients":
+        return <ClientsSection />;
       case "assistant":
         return <AssistantSection />;
       default:
