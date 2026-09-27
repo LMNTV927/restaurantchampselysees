@@ -12,9 +12,10 @@ import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
 import { useGoogleCalendarAutoSync } from "@/hooks/useGoogleCalendarAutoSync";
+import { useYahooOpenTableAutoSync } from "@/hooks/useYahooOpenTableAutoSync";
 import { useAuth } from "@/hooks/useAuth";
 import { AddReservationDialog } from "./AddReservationDialog";
-import { ImportOpenTableDialog } from "./ImportOpenTableDialog";
+
 import { EditCommentDialog } from "./EditCommentDialog";
 import { EditReservationDialog } from "./EditReservationDialog";
 import { CustomerHistoryDialog } from "./CustomerHistoryDialog";
@@ -46,6 +47,8 @@ export function ReservationsSection() {
   const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
   useGoogleCalendarAutoSync();
+  useYahooOpenTableAutoSync();
+
 
 
 
@@ -319,7 +322,7 @@ export function ReservationsSection() {
         
         <div className="flex items-center gap-4">
           <AddReservationDialog onReservationAdded={refetch} />
-          {role === 'admin' && <ImportOpenTableDialog onImported={refetch} />}
+
 
 
           {/* Filters */}
