@@ -12,9 +12,10 @@ import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
 import { useGoogleCalendarAutoSync } from "@/hooks/useGoogleCalendarAutoSync";
+import { useYahooOpenTableAutoSync } from "@/hooks/useYahooOpenTableAutoSync";
 import { useAuth } from "@/hooks/useAuth";
 import { AddReservationDialog } from "./AddReservationDialog";
-import { ImportOpenTableDialog } from "./ImportOpenTableDialog";
+
 import { EditCommentDialog } from "./EditCommentDialog";
 import { EditReservationDialog } from "./EditReservationDialog";
 import { CustomerHistoryDialog } from "./CustomerHistoryDialog";
