@@ -47,6 +47,8 @@ export function ReservationsSection() {
   const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
   useGoogleCalendarAutoSync();
+  useYahooOpenTableAutoSync();
+
 
 
 
