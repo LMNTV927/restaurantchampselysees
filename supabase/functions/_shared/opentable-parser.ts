@@ -108,20 +108,21 @@ export function parseOpenTableEmail(subject: string, body: string): ParsedReserv
 
   const name =
     firstMatch(text, [
-      /(?:Nom(?:\s+du\s+client)?|Client|Invit[ée]|Guest(?:\s+name)?|Name)\s*[:\-]\s*([A-Za-zÀ-ÿ'’\-\. ]{2,60})/i,
+      /(?:Nom(?:\s+du\s+client)?|Client|Invit[ée]|Guest(?:\s+name)?|Name)\s*[:\-]?\s*\n?\s*([A-Za-zÀ-ÿ'’\-\. ]{2,60})/i,
       /(?:R[ée]servation (?:de|pour)|Reservation for)\s+([A-Za-zÀ-ÿ'’\-\. ]{2,60})/i,
+      /r[ée]servation faites pour le [^\n,]+ par ([A-Za-zÀ-ÿ'’\-\. ]{2,60})/i,
     ]) ?? null;
 
   const guestsRaw = firstMatch(text, [
-    /(?:Nombre de (?:personnes|couverts|convives)|Couverts|Convives|Party size|Guests|People)\s*[:\-]?\s*(\d{1,3})/i,
+    /(?:Nombre de (?:personnes|couverts|convives)|Couverts|Convives|Party size|Guests|People)\s*[:\-]?\s*\n?\s*(\d{1,3})/i,
     /\b(\d{1,3})\s*(?:personnes?|couverts?|convives?|guests?|people)\b/i,
   ]);
 
   const dateLine = firstMatch(text, [
-    /(?:Date(?:\s+de\s+la\s+r[ée]servation)?|Date)\s*[:\-]\s*([^\n]{4,60})/i,
+    /(?:Date(?:\s+de\s+la\s+r[ée]servation)?|Date)\s*[:\-]?\s*\n?\s*([^\n]{4,60})/i,
   ]);
   const timeLine = firstMatch(text, [
-    /(?:Heure|Time|Horaire)\s*[:\-]\s*([^\n]{2,30})/i,
+    /(?:Heure|Time|Horaire)\s*[:\-]?\s*\n?\s*([^\n]{2,30})/i,
   ]);
 
   const date = (dateLine && parseDate(dateLine)) ?? parseDate(text);
@@ -131,7 +132,7 @@ export function parseOpenTableEmail(subject: string, body: string): ParsedReserv
 
   const phone =
     firstMatch(text, [
-      /(?:T[ée]l[ée]phone|Tel|Phone|Mobile)\s*[:\-]?\s*(\+[\d\s().\-]{8,20})/i,
+      /(?:Num[ée]ro de t[ée]l[ée]phone|T[ée]l[ée]phone|Tel|Phone|Mobile)\s*[:\-]?\s*\n?\s*(\+?[\d\s().\-]{8,20})/i,
     ])?.replace(/[^\d+]/g, "") ?? "";
 
   const email = firstMatch(text, [
