@@ -108,7 +108,7 @@ export function parseOpenTableEmail(subject: string, body: string): ParsedReserv
 
   const name =
     firstMatch(text, [
-      /(?:Nom(?:\s+du\s+client)?|Client|Invit[ée]|Guest(?:\s+name)?|Name)\s*[:\-]?\s*\n?\s*([A-Za-zÀ-ÿ'’\-\. ]{2,60})/i,
+      /(?:Nom(?!bre)(?:\s+du\s+client)?|Client|Invit[ée]|Guest(?:\s+name)?|Name)\s*[:\-]?\s*\n?\s*([A-Za-zÀ-ÿ'’\-\. ]{2,60})/i,
       /(?:R[ée]servation (?:de|pour)|Reservation for)\s+([A-Za-zÀ-ÿ'’\-\. ]{2,60})/i,
       /r[ée]servation faites pour le [^\n,]+ par ([A-Za-zÀ-ÿ'’\-\. ]{2,60})/i,
     ]) ?? null;
