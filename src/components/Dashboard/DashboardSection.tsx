@@ -19,12 +19,15 @@ const formatTakenTime = (createdAt: string): string =>
   }).format(new Date(createdAt));
 
 const formatForDay = (date: string, time: string): string => {
+  const hasTime = /^\d{2}:\d{2}/.test(time ?? "");
+  const d = new Date(`${date}T${hasTime ? time.slice(0, 5) : "12:00"}`);
+  if (isNaN(d.getTime())) return `${date}${time ? ` à ${time}` : ""}`;
   const dayLabel = new Intl.DateTimeFormat("fr-FR", {
     weekday: "short",
     day: "numeric",
     month: "short",
-  }).format(new Date(`${date}T${time}`));
-  return `${dayLabel} à ${time}`;
+  }).format(d);
+  return hasTime ? `${dayLabel} à ${time.slice(0, 5)}` : `${dayLabel} · heure ${time || "à confirmer"}`;
 };
 
 export function DashboardSection() {
