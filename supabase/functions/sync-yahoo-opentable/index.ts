@@ -78,8 +78,8 @@ serve(async (req) => {
       const out = [];
       for (const seq of [...new Set(seqs)].slice(-8)) {
         const e = parseRawEmail(await client.fetchRaw(seq));
-        const b = e.text && e.text.trim().length > 20 ? e.text : htmlToText(e.html);
-        out.push({ seq, from: e.from, subject: e.subject, body: b.slice(0, 2500) });
+        const b = htmlToText(e.html) + "\n---TEXT---\n" + e.text + "\n---RAWLEN " + e.html.length;
+        out.push({ seq, from: e.from, subject: e.subject, body: b.slice(0, 4000) });
       }
       return json({ count: seqs.length, out });
     }
