@@ -2,6 +2,10 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { htmlToText, parseOpenTableEmail } from "../_shared/opentable-parser.ts";
 import { ImapClient, imapDate, parseRawEmail } from "../_shared/imap-client.ts";
+import { parseTheForkEmail, THEFORK_UNKNOWN_TIME } from "../_shared/thefork-parser.ts";
+
+const THEFORK_SOURCE = "TheFork";
+const THEFORK_SLUG = "thefork";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -69,20 +73,67 @@ serve(async (req) => {
     await client.connect();
     await client.selectMailbox("INBOX");
 
-    if (new URL(req.url).searchParams.get("inspect") === "thefork") {
-      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const seqs = [
-        ...(await client.search(`SINCE ${imapDate(since)} FROM "thefork"`)),
-        ...(await client.search(`SINCE ${imapDate(since)} FROM "lafourchette"`)),
-      ];
-      const out = [];
-      for (const seq of [...new Set(seqs)].slice(-8)) {
-        const e = parseRawEmail(await client.fetchRaw(seq));
-        const b = htmlToText(e.html) + "\n---TEXT---\n" + e.text + "\n---RAWLEN " + e.html.length;
-        out.push({ seq, from: e.from, subject: e.subject, body: b.slice(0, 4000), html: e.html });
+    /* ---------- TheFork ---------- */
+    const { data: forkChannel } = await supabaseAdmin
+      .from("channels")
+      .select("id")
+      .eq("slug", THEFORK_SLUG)
+      .maybeSingle();
+    if (forkChannel) {
+      const forkSince = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+      const forkSeqs = [...new Set([
+        ...(await client.search(`SINCE ${imapDate(forkSince)} FROM "info-reservation@thefork.com"`)),
+        ...(await client.search(`SINCE ${imapDate(forkSince)} FROM "lafourchette"`)),
+      ])].sort((a, b) => a - b).slice(-MAX_MESSAGES);
+      total += forkSeqs.length;
+
+      for (const seq of forkSeqs) {
+        try {
+          const email = parseRawEmail(await client.fetchRaw(seq));
+          const parsed = parseTheForkEmail(email.subject, email.html, email.text);
+          if (!parsed) { skipped += 1; continue; }
+
+          const { data: existing } = await supabaseAdmin
+            .from("reservations")
+            .select("id, reservation_time")
+            .eq("source", THEFORK_SOURCE)
+            .eq("external_id", parsed.externalId)
+            .maybeSingle();
+
+          const base = {
+            channel_id: forkChannel.id,
+            customer_name: parsed.customerName,
+            customer_phone: parsed.customerPhone,
+            customer_email: parsed.customerEmail,
+            reservation_date: parsed.date,
+            guests_count: parsed.guests,
+            status: parsed.cancelled ? "cancelled" : "confirmed",
+            source: THEFORK_SOURCE,
+            external_id: parsed.externalId,
+          };
+
+          if (existing) {
+            // Never touch notes; only set the time when the e-mail provides one.
+            const patch = parsed.time ? { ...base, reservation_time: parsed.time } : base;
+            const { error } = await supabaseAdmin.from("reservations").update(patch).eq("id", existing.id);
+            if (error) { console.error("thefork update", error.message); skipped += 1; continue; }
+            updated += 1;
+          } else {
+            const { error } = await supabaseAdmin.from("reservations").insert({
+              ...base,
+              reservation_time: parsed.time ?? THEFORK_UNKNOWN_TIME,
+            });
+            if (error) { console.error("thefork insert", error.message); skipped += 1; continue; }
+            imported += 1;
+          }
+        } catch (err) {
+          console.error("TheFork message error", seq, err);
+          skipped += 1;
+        }
       }
-      return json({ count: seqs.length, out });
     }
+
+
 
 
 
