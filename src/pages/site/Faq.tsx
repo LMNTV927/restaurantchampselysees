@@ -19,6 +19,14 @@ const faq = [
     a: "Le service du soir démarre à 17h et se poursuit tard dans la nuit. Les réservations en ligne se font par créneaux de 30 minutes entre 17h et 5h.",
   },
   {
+    q: "À quelle heure ouvre le club ?",
+    a: "Tous les soirs, à partir de minuit, la salle passe en ambiance club avec DJ, jusqu'à 5h du matin.",
+  },
+  {
+    q: "Peut-on réserver une table pour la soirée club ?",
+    a: "Oui. Choisissez un créneau à partir de minuit lors de votre réservation en ligne, ou appelez-nous au 01 59 13 32 68 pour un groupe.",
+  },
+  {
     q: "Peut-on privatiser l'établissement ?",
     a: "Oui, en partie ou en totalité. La privatisation partielle convient de 50 à 150 invités, la privatisation totale jusqu'à 500 personnes. Chaque demande fait l'objet d'un devis sur mesure.",
   },
