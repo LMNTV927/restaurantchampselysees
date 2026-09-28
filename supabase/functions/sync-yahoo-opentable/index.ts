@@ -69,6 +69,23 @@ serve(async (req) => {
     await client.connect();
     await client.selectMailbox("INBOX");
 
+    if (new URL(req.url).searchParams.get("inspect") === "thefork") {
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const seqs = [
+        ...(await client.search(`SINCE ${imapDate(since)} FROM "thefork"`)),
+        ...(await client.search(`SINCE ${imapDate(since)} FROM "lafourchette"`)),
+      ];
+      const out = [];
+      for (const seq of [...new Set(seqs)].slice(-8)) {
+        const e = parseRawEmail(await client.fetchRaw(seq));
+        const b = e.text && e.text.trim().length > 20 ? e.text : htmlToText(e.html);
+        out.push({ seq, from: e.from, subject: e.subject, body: b.slice(0, 2500) });
+      }
+      return json({ count: seqs.length, out });
+    }
+
+
+
     const since = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
     let sequences = await client.search(`SINCE ${imapDate(since)} FROM "opentable"`);
     if (sequences.length === 0) {
