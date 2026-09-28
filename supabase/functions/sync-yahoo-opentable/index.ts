@@ -144,7 +144,7 @@ serve(async (req) => {
     }
 
     const recent = sequences.slice(-MAX_MESSAGES);
-    total = recent.length;
+    total += recent.length;
 
     for (const seq of recent) {
       let raw = "";
