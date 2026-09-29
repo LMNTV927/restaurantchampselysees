@@ -22,7 +22,7 @@ export interface ClickStatRow {
   clicks: number | null;
 }
 
-export const MANUAL_BUCKET = 'Ajout manuel';
+export const MANUAL_BUCKET = 'Manuel';
 
 /** Clics agrégés par canal */
 export const aggregateClicks = (rows: ClickStatRow[]): Map<string, number> => {
@@ -66,6 +66,9 @@ export const getReservationBucket = (reservation: AnalyticsReservationRow): stri
   const campaign = detectCampaignBucket(reservation.utm_campaign);
   if (campaign) return campaign;
   const source = reservation.source?.trim();
+  if (source && ['telephone', 'manuel', 'ajout manuel'].includes(normalizeBucketKey(source))) {
+    return MANUAL_BUCKET;
+  }
   if (source) return source;
   const channelName = reservation.channel_name?.trim();
   if (channelName) return channelName;
@@ -176,18 +179,18 @@ export const buildAnalytics = (
       // canal de tracking réel d'où viennent ses réservations : slug + clics.
       const originId = dominantChannelId(bucket.channelCounts);
       const origin = originId ? channelById.get(originId) : undefined;
-      const clicks = originId ? clicksMap.get(originId) || 0 : 0;
+       const clicks = bucket.label === MANUAL_BUCKET ? 0 : originId ? clicksMap.get(originId) || 0 : 0;
       return {
         id: `source:${key}`,
         name: bucket.label,
-        slug: origin?.slug ?? '',
+         slug: bucket.label === MANUAL_BUCKET ? '' : origin?.slug ?? '',
         description: null,
         isActive: true,
         clicks,
         reservations: bucket.reservations,
         covers: bucket.covers,
         conversion: clicks > 0 ? Math.min(100, Math.round((bucket.reservations / clicks) * 100)) : 0,
-        shortUrl: origin ? getBookingUrl(origin.slug) : '',
+         shortUrl: bucket.label !== MANUAL_BUCKET && origin ? getBookingUrl(origin.slug) : '',
       };
     })
     .sort((a, b) => b.reservations - a.reservations);

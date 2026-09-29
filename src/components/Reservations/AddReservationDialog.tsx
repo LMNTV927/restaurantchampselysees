@@ -74,7 +74,7 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
       customerPhone: "",
       customerEmail: "",
       guestsCount: 2,
-      source: "",
+      source: "Manuel",
       notes: "",
     },
   });
@@ -379,7 +379,7 @@ export function AddReservationDialog({ onReservationAdded }: AddReservationDialo
                 <FormItem>
                   <FormLabel>Via (source de la réservation)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Téléphone, Instagram, Sur place..." {...field} />
+                    <Input placeholder="Manuel" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
