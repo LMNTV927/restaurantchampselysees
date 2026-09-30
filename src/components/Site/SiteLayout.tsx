@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { Menu, X, Instagram, Facebook, Cookie } from "lucide-react";
+import { Menu, X, Instagram, Facebook } from "lucide-react";
 import { SITE, whatsappLink, DEVIS_MESSAGE } from "@/lib/siteConfig";
 import { PRINCE_PALACE_LOGO } from "@/lib/dishImages";
 
@@ -13,50 +13,6 @@ const NAV = [
   { to: "/faq", label: "FAQ" },
   { to: "/contact", label: "Contact" },
 ];
-
-function CookieButton() {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="fixed bottom-4 right-4 z-[60]">
-      {open && (
-        <div className="mb-3 w-64 rounded-2xl border border-primary/25 bg-card p-4 text-xs text-muted-foreground shadow-large">
-          <p className="mb-3 leading-relaxed">
-            Nous utilisons des cookies de mesure d'audience pour améliorer votre expérience.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                localStorage.setItem("pp-cookies", "all");
-                setOpen(false);
-              }}
-              className="flex-1 rounded-full bg-primary py-2 text-[11px] font-bold uppercase tracking-wider text-primary-foreground"
-            >
-              Tout accepter
-            </button>
-            <button
-              onClick={() => {
-                localStorage.setItem("pp-cookies", "essential");
-                setOpen(false);
-              }}
-              className="flex-1 rounded-full border border-primary/40 py-2 text-[11px] uppercase tracking-wider text-primary"
-            >
-              Refuser
-            </button>
-          </div>
-        </div>
-      )}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Paramètres cookies"
-        className="flex items-center gap-2 rounded-full border border-primary/30 bg-background/90 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground backdrop-blur hover:text-primary"
-      >
-        <Cookie className="h-3.5 w-3.5" />
-        Cookies
-      </button>
-    </div>
-  );
-}
 
 export function SiteLayout() {
   const [open, setOpen] = useState(false);
@@ -246,8 +202,6 @@ export function SiteLayout() {
           </div>
         </div>
       </footer>
-
-      <CookieButton />
     </div>
   );
 }
