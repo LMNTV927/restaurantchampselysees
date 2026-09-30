@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Copy, QrCode, MoreHorizontal, Eye, EyeOff, Edit2, Trash2, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -174,7 +174,7 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
               const isExpanded = expandedIds.has(link.id);
 
               return (
-                <>
+                <Fragment key={link.id}>
                   <motion.tr
                     key={link.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -330,7 +330,7 @@ export function LinksTable({ links, onLinksChange }: LinksTableProps) {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               );
             })}
           </TableBody>
