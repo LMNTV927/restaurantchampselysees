@@ -42,7 +42,7 @@ import {
 import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
 import { useMonthlyData } from "@/hooks/useMonthlyData";
 import { usePDFReport } from "@/hooks/usePDFReport";
-import { getCurrentMonthInParis, getCurrentYearInParis } from "@/lib/dateUtils";
+import { getCurrentMonthInParis } from "@/lib/dateUtils";
 import { getChannelHsl } from "@/lib/channelColors";
 import { toast } from "sonner";
 
@@ -122,23 +122,24 @@ export function DataSection() {
     setSelectedMonth(month);
   };
 
-  const currentYear = getCurrentYearInParis();
-  const months = [
-    { value: `${currentYear}-09`, label: `Septembre ${currentYear}` },
-    { value: `${currentYear}-08`, label: `Août ${currentYear}` },
-    { value: `${currentYear}-07`, label: `Juillet ${currentYear}` },
-    { value: `${currentYear}-06`, label: `Juin ${currentYear}` },
-    { value: `${currentYear}-05`, label: `Mai ${currentYear}` },
-    { value: `${currentYear}-04`, label: `Avril ${currentYear}` },
-    { value: `${currentYear}-03`, label: `Mars ${currentYear}` },
-    { value: `${currentYear}-02`, label: `Février ${currentYear}` },
-    { value: `${currentYear}-01`, label: `Janvier ${currentYear}` },
-  ];
+  const [currentYear, currentMonthNumber] = currentMonth.split('-').map(Number);
+  const months = Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(Date.UTC(currentYear, currentMonthNumber - 1 - index, 1));
+    const monthName = new Intl.DateTimeFormat('fr-FR', {
+      month: 'long',
+      timeZone: 'Europe/Paris',
+    }).format(date);
+
+    return {
+      value: `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`,
+      label: `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${date.getUTCFullYear()}`,
+    };
+  });
 
   // Obtenir le nom du mois sélectionné
   const getSelectedMonthLabel = () => {
     const month = months.find(m => m.value === selectedMonth);
-    return month ? month.label.split(' ')[0] : 'Septembre'; // Retourne juste le nom du mois
+    return month ? month.label.split(' ')[0] : '';
   };
 
   const handleExportCSV = () => {
