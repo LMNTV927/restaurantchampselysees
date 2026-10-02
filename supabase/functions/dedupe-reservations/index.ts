@@ -80,23 +80,17 @@ const handler = async (req: Request): Promise<Response> => {
       for (const r of cluster) {
         if (r.id === keep.id) continue;
 
-        // Un commentaire est un travail humain : on ne masque jamais une ligne commentée.
+        // Aucun commentaire perdu : on le recopie sur la réservation conservée.
         if (hasNotes(r)) {
-          if (r.is_duplicate) toRestore.push(r.id);
-          continue;
+          const existing = (noteMerges.get(keep.id) ?? keep.notes ?? "").trim();
+          const incoming = String(r.notes).trim();
+          if (!existing) noteMerges.set(keep.id, incoming);
+          else if (!existing.includes(incoming)) noteMerges.set(keep.id, `${existing}\n${incoming}`);
         }
 
         if (!r.is_duplicate || r.duplicate_of !== keep.id) {
-          // Filet de sécurité : aucun commentaire ne peut être perdu lors d'un masquage.
-          if (hasNotes(r)) {
-            const existing = (noteMerges.get(keep.id) ?? keep.notes ?? "").trim();
-            const incoming = String(r.notes).trim();
-            if (!existing) noteMerges.set(keep.id, incoming);
-            else if (!existing.includes(incoming)) noteMerges.set(keep.id, `${existing}\n${incoming}`);
-          }
           toMarkDuplicate.push({ id: r.id, duplicate_of: keep.id });
         }
-
       }
     };
 
@@ -132,15 +126,6 @@ const handler = async (req: Request): Promise<Response> => {
         .eq("id", item.id);
     }
 
-    // Auto-réparation : toute réservation commentée masquée (même passée) est restaurée.
-    const { data: hiddenWithNotes } = await supabase
-      .from("reservations")
-      .select("id, notes")
-      .eq("is_duplicate", true)
-      .not("notes", "is", null);
-    for (const r of hiddenWithNotes || []) {
-      if (hasNotes(r)) toRestore.push(r.id);
-    }
 
     if (toRestore.length > 0) {
       await supabase
