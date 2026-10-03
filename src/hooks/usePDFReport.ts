@@ -460,8 +460,11 @@ export const usePDFReport = () => {
 
       let yPosition = 75;
       executiveSummary.forEach(line => {
-        doc.text(line, 20, yPosition);
-        yPosition += 6;
+        const wrapped: string[] = doc.splitTextToSize(line, 170);
+        wrapped.forEach(wrappedLine => {
+          doc.text(wrappedLine, 20, yPosition);
+          yPosition += 6;
+        });
       });
 
       // KPIs de la période
@@ -558,7 +561,13 @@ export const usePDFReport = () => {
         );
       }
 
-      const fileName = `prince-palace-rapport-${periodLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`;
+      const fileSlug = periodLabel
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const fileName = `prince-palace-rapport-${fileSlug}.pdf`;
       doc.save(fileName);
 
       return { success: true, fileName };
