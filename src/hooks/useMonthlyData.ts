@@ -42,9 +42,7 @@ const toAnalyticsRows = (reservations: ReservationData[]): AnalyticsReservationR
     guests_count: r.guests_count,
   }));
 
-export const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
-  const { start, end, prevStart } = getMonthRanges(selectedMonth);
-
+const fetchRangeData = async (start: string, end: string, prevStart: string): Promise<MonthlyData> => {
   const [channelsRes, statsRes, prevStatsRes, reservationsRes, prevReservationsRes] = await Promise.all([
     supabase.from('channels').select('id, name, slug, description, is_active').eq('is_active', true),
     supabase.from('channel_stats').select('channel_id, clicks').gte('date', start).lt('date', end),
