@@ -10,7 +10,7 @@ import {
   type AnalyticsReservationRow,
 } from '@/lib/analyticsAggregation';
 
-interface ReservationData {
+export interface ReservationData {
   id: string;
   customer_name: string;
   customer_email: string | null;
@@ -27,7 +27,7 @@ interface ReservationData {
   utm_campaign: string | null;
 }
 
-interface MonthlyData {
+export interface MonthlyData {
   channels: ChannelData[];
   kpis: ChannelsKPIs;
   reservations: ReservationData[];
@@ -42,7 +42,7 @@ const toAnalyticsRows = (reservations: ReservationData[]): AnalyticsReservationR
     guests_count: r.guests_count,
   }));
 
-const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
+export const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
   const { start, end, prevStart } = getMonthRanges(selectedMonth);
 
   const [channelsRes, statsRes, prevStatsRes, reservationsRes, prevReservationsRes] = await Promise.all([

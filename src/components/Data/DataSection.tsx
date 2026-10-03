@@ -40,8 +40,8 @@ import {
   Cell,
 } from "recharts";
 import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
-import { useMonthlyData } from "@/hooks/useMonthlyData";
-import { usePDFReport } from "@/hooks/usePDFReport";
+import { useMonthlyData, fetchMonthlyData } from "@/hooks/useMonthlyData";
+import { usePDFReport, formatMonthLabel, type PeriodMonthData } from "@/hooks/usePDFReport";
 import { getCurrentMonthInParis } from "@/lib/dateUtils";
 import { getChannelHsl } from "@/lib/channelColors";
 import { toast } from "sonner";
@@ -51,7 +51,8 @@ export function DataSection() {
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const { channels: currentChannels, kpis: currentKpis, loading: currentLoading } = useRealtimeChannelsData();
   const { data: monthlyData, loading: monthlyLoading } = useMonthlyData(selectedMonth);
-  const { generateMonthlyReport } = usePDFReport();
+  const { generateMonthlyReport, generatePeriodReport } = usePDFReport();
+  const [reportPeriod, setReportPeriod] = useState<"month" | "quarter" | "semester" | "year">("month");
 
   const isCurrentMonth = selectedMonth === currentMonth;
   const channels = monthlyData?.channels || currentChannels;
@@ -159,27 +160,50 @@ export function DataSection() {
     document.body.removeChild(link);
   };
 
+  const getPeriodMonths = (): string[] => {
+    const count = reportPeriod === "quarter" ? 3 : reportPeriod === "semester" ? 6 : 12;
+    const [year, month] = selectedMonth.split('-').map(Number);
+    return Array.from({ length: count }, (_, index) => {
+      const date = new Date(Date.UTC(year, month - 1 - index, 1));
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+    }).reverse();
+  };
+
   const handleGeneratePDF = () => {
     // Créer une promesse pour la génération du PDF
-    const generatePDFPromise = () => {
-      return new Promise((resolve, reject) => {
-        try {
-          // Use current data for current month, monthly data for historical months
-          const reportChannels = channels;
-          const reportKpis = kpis;
-          const reportReservations = monthlyReservations;
-          
-          const result = generateMonthlyReport(reportChannels, reportKpis, selectedMonth, reportReservations);
-          
-          if (result.success) {
-            resolve(result.fileName);
-          } else {
-            reject(new Error(result.error || "Erreur inconnue"));
-          }
-        } catch (error) {
-          reject(error);
-        }
-      });
+    const generatePDFPromise = async () => {
+      if (reportPeriod === "month") {
+        const result = generateMonthlyReport(channels, kpis, selectedMonth, monthlyReservations);
+        if (result.success) return result.fileName;
+        throw new Error(result.error || "Erreur inconnue");
+      }
+
+      const periodMonthValues = getPeriodMonths();
+      const periodData: PeriodMonthData[] = await Promise.all(
+        periodMonthValues.map(async (monthValue) => {
+          const data = await fetchMonthlyData(monthValue);
+          return {
+            month: monthValue,
+            label: formatMonthLabel(monthValue),
+            channels: data.channels,
+            kpis: data.kpis,
+            reservations: data.reservations,
+          };
+        })
+      );
+
+      const periodNames = {
+        quarter: "Trimestre",
+        semester: "6 mois",
+        year: "1 an",
+      } as const;
+      const firstLabel = periodData[0]?.label || "";
+      const lastLabel = periodData[periodData.length - 1]?.label || "";
+      const periodLabel = `${periodNames[reportPeriod]} (${firstLabel} - ${lastLabel})`;
+
+      const result = generatePeriodReport(periodLabel, periodData);
+      if (result.success) return result.fileName;
+      throw new Error(result.error || "Erreur inconnue");
     };
     
     // Utiliser toast.promise pour gérer automatiquement les états
@@ -224,6 +248,18 @@ export function DataSection() {
             </Select>
             
             <div className="flex gap-2">
+              <Select value={reportPeriod} onValueChange={(value) => setReportPeriod(value as typeof reportPeriod)}>
+                <SelectTrigger className="w-32 sm:w-36 premium-input">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover/95 backdrop-blur-sm">
+                  <SelectItem value="month">Mois</SelectItem>
+                  <SelectItem value="quarter">Trimestre</SelectItem>
+                  <SelectItem value="semester">6 mois</SelectItem>
+                  <SelectItem value="year">1 an</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Button 
                 onClick={handleExportCSV}
                 variant="outline" 

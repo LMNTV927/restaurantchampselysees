@@ -40,6 +40,24 @@ interface ReservationData {
 }
 
 
+export const formatMonthLabel = (monthValue: string): string => {
+  const [year, month] = monthValue.split('-').map(Number);
+  if (!year || !month) return monthValue;
+  const name = new Intl.DateTimeFormat('fr-FR', {
+    month: 'long',
+    timeZone: 'Europe/Paris',
+  }).format(new Date(Date.UTC(year, month - 1, 1)));
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${year}`;
+};
+
+export interface PeriodMonthData {
+  month: string;
+  label: string;
+  channels: ChannelData[];
+  kpis: KPIData;
+  reservations: ReservationData[];
+}
+
 export const usePDFReport = () => {
   const generateMonthlyReport = (
     channels: ChannelData[], 
@@ -49,21 +67,7 @@ export const usePDFReport = () => {
   ) => {
     try {
       const doc = new jsPDF();
-      // Generate months dynamically for current year
-      const currentYear = new Date().getFullYear();
-      const monthNames: { [key: string]: string } = {
-        [`${currentYear}-09`]: `Septembre ${currentYear}`,
-        [`${currentYear}-08`]: `Août ${currentYear}`,
-        [`${currentYear}-07`]: `Juillet ${currentYear}`,
-        [`${currentYear}-06`]: `Juin ${currentYear}`,
-        [`${currentYear}-05`]: `Mai ${currentYear}`,
-        [`${currentYear}-04`]: `Avril ${currentYear}`,
-        [`${currentYear}-03`]: `Mars ${currentYear}`,
-        [`${currentYear}-02`]: `Février ${currentYear}`,
-        [`${currentYear}-01`]: `Janvier ${currentYear}`,
-      };
-      
-      const monthLabel = monthNames[selectedMonth] || selectedMonth;
+      const monthLabel = formatMonthLabel(selectedMonth);
       const currentDate = new Date().toLocaleDateString('fr-FR', {
         day: 'numeric',
         month: 'long', 
@@ -385,5 +389,193 @@ export const usePDFReport = () => {
     }
   };
 
-  return { generateMonthlyReport };
+  const generatePeriodReport = (periodLabel: string, periodMonths: PeriodMonthData[]) => {
+    try {
+      const doc = new jsPDF();
+      const currentDate = new Date().toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      // Totaux sur la période
+      const totalClicks = periodMonths.reduce((sum, m) => sum + m.kpis.totalClicks, 0);
+      const totalReservations = periodMonths.reduce((sum, m) => sum + m.kpis.totalReservations, 0);
+      const totalCovers = periodMonths.reduce((sum, m) => sum + m.kpis.totalCovers, 0);
+      const conversion = totalClicks > 0 ? (totalReservations / totalClicks) * 100 : 0;
+      const allReservations = periodMonths.flatMap(m => m.reservations);
+      const effectiveReservations = allReservations.filter(r => r.status === 'show');
+      const effectiveCovers = effectiveReservations.reduce((sum, r) => sum + r.guests_count, 0);
+
+      // Agrégation par canal sur toute la période
+      const channelMap = new Map<string, ChannelData>();
+      periodMonths.forEach(m => {
+        m.channels.forEach(c => {
+          const existing = channelMap.get(c.name);
+          if (existing) {
+            existing.clicks += c.clicks;
+            existing.reservations += c.reservations;
+            existing.covers += c.covers;
+          } else {
+            channelMap.set(c.name, { ...c });
+          }
+        });
+      });
+      const channels = Array.from(channelMap.values())
+        .map(c => ({ ...c, conversion: c.clicks > 0 ? (c.reservations / c.clicks) * 100 : 0 }))
+        .sort((a, b) => b.reservations - a.reservations);
+
+      // Header
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text('PRINCE PALACE', 20, 25);
+
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'normal');
+      doc.text(`Rapport - ${periodLabel}`, 20, 35);
+
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Généré le ${currentDate}`, 20, 45);
+
+      doc.setDrawColor(200);
+      doc.line(20, 50, 190, 50);
+
+      // Résumé exécutif
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0);
+      doc.text('RÉSUMÉ EXÉCUTIF', 20, 65);
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(50);
+
+      const executiveSummary = [
+        `Ce rapport présente les performances commerciales de Prince Palace sur la période : ${periodLabel}.`,
+        `L'analyse porte sur ${channels.length} canaux de distribution actifs, représentant un total de`,
+        `${totalClicks.toLocaleString()} clics générés, ${totalReservations} réservations confirmées`,
+        `et ${totalCovers} couverts servis. Le taux de conversion global s'établit à ${conversion.toFixed(1)}%.`
+      ];
+
+      let yPosition = 75;
+      executiveSummary.forEach(line => {
+        const wrapped: string[] = doc.splitTextToSize(line, 170);
+        wrapped.forEach(wrappedLine => {
+          doc.text(wrappedLine, 20, yPosition);
+          yPosition += 6;
+        });
+      });
+
+      // KPIs de la période
+      yPosition += 10;
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0);
+      doc.text('INDICATEURS CLÉS DE PERFORMANCE', 20, yPosition);
+
+      autoTable(doc, {
+        startY: yPosition + 10,
+        head: [['Métrique', 'Valeur']],
+        body: [
+          ['Clics Totaux', totalClicks.toLocaleString()],
+          ['Réservations Totales', totalReservations.toString()],
+          ['Couverts Totaux', totalCovers.toString()],
+          ['Taux de Conversion', `${conversion.toFixed(1)}%`],
+          ['Réservations Effectives (présentations réelles)', effectiveReservations.length.toString()],
+          ['Couverts Effectifs', effectiveCovers.toString()],
+        ],
+        theme: 'grid',
+        styles: { fontSize: 10, cellPadding: 5 },
+        headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+        columnStyles: { 0: { fontStyle: 'bold' }, 1: { halign: 'center' } }
+      });
+
+      // Tableau par mois
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0);
+      doc.text('DÉTAIL PAR MOIS', 20, yPosition);
+
+      autoTable(doc, {
+        startY: yPosition + 10,
+        head: [['Mois', 'Clics', 'Réservations', 'Couverts', 'Conversion']],
+        body: periodMonths.map(m => [
+          m.label,
+          m.kpis.totalClicks.toLocaleString(),
+          m.kpis.totalReservations.toString(),
+          m.kpis.totalCovers.toString(),
+          `${m.kpis.conversion.toFixed(1)}%`
+        ]),
+        theme: 'striped',
+        styles: { fontSize: 10, cellPadding: 5 },
+        headStyles: { fillColor: [52, 73, 94], textColor: 255, fontStyle: 'bold' },
+        columnStyles: {
+          0: { fontStyle: 'bold' },
+          1: { halign: 'center' },
+          2: { halign: 'center' },
+          3: { halign: 'center' },
+          4: { halign: 'center' }
+        }
+      });
+
+      // Performance par canal
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0);
+      doc.text('PERFORMANCE PAR CANAL DE DISTRIBUTION', 20, yPosition);
+
+      autoTable(doc, {
+        startY: yPosition + 10,
+        head: [['Canal', 'Clics', 'Résa.', 'Couv.', 'Conv.']],
+        body: channels.map(c => [
+          c.name,
+          c.clicks.toLocaleString(),
+          c.reservations.toString(),
+          c.covers.toString(),
+          `${c.conversion.toFixed(1)}%`
+        ]),
+        theme: 'striped',
+        styles: { fontSize: 9, cellPadding: 4 },
+        headStyles: { fillColor: [52, 73, 94], textColor: 255, fontStyle: 'bold' },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 50 },
+          1: { halign: 'center' },
+          2: { halign: 'center' },
+          3: { halign: 'center' },
+          4: { halign: 'center' }
+        }
+      });
+
+      // Footer
+      for (let i = 1; i <= doc.getNumberOfPages(); i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(120);
+        doc.text(
+          `Prince Palace - Rapport confidentiel - Page ${i}/${doc.getNumberOfPages()}`,
+          20,
+          doc.internal.pageSize.height - 10
+        );
+      }
+
+      const fileSlug = periodLabel
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const fileName = `prince-palace-rapport-${fileSlug}.pdf`;
+      doc.save(fileName);
+
+      return { success: true, fileName };
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
+    }
+  };
+
+  return { generateMonthlyReport, generatePeriodReport };
 };
