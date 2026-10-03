@@ -431,7 +431,7 @@ export function DataSection() {
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3">
-                          <p className="font-semibold">Jour {label}</p>
+                          <p className="font-semibold">{isPeriodMode ? label : `Jour ${label}`}</p>
                           <p className="text-sm text-muted-foreground">
                             Réservations: <span className="font-medium text-foreground">{payload[0]?.value}</span>
                           </p>
@@ -480,7 +480,7 @@ export function DataSection() {
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3">
-                          <p className="font-semibold">Jour {label}</p>
+                          <p className="font-semibold">{isPeriodMode ? label : `Jour ${label}`}</p>
                           <p className="text-sm text-muted-foreground">
                             Couverts: <span className="font-medium text-foreground">{payload[0]?.value}</span>
                           </p>
