@@ -160,27 +160,50 @@ export function DataSection() {
     document.body.removeChild(link);
   };
 
+  const getPeriodMonths = (): string[] => {
+    const count = reportPeriod === "quarter" ? 3 : reportPeriod === "semester" ? 6 : 12;
+    const [year, month] = selectedMonth.split('-').map(Number);
+    return Array.from({ length: count }, (_, index) => {
+      const date = new Date(Date.UTC(year, month - 1 - index, 1));
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+    }).reverse();
+  };
+
   const handleGeneratePDF = () => {
     // Créer une promesse pour la génération du PDF
-    const generatePDFPromise = () => {
-      return new Promise((resolve, reject) => {
-        try {
-          // Use current data for current month, monthly data for historical months
-          const reportChannels = channels;
-          const reportKpis = kpis;
-          const reportReservations = monthlyReservations;
-          
-          const result = generateMonthlyReport(reportChannels, reportKpis, selectedMonth, reportReservations);
-          
-          if (result.success) {
-            resolve(result.fileName);
-          } else {
-            reject(new Error(result.error || "Erreur inconnue"));
-          }
-        } catch (error) {
-          reject(error);
-        }
-      });
+    const generatePDFPromise = async () => {
+      if (reportPeriod === "month") {
+        const result = generateMonthlyReport(channels, kpis, selectedMonth, monthlyReservations);
+        if (result.success) return result.fileName;
+        throw new Error(result.error || "Erreur inconnue");
+      }
+
+      const periodMonthValues = getPeriodMonths();
+      const periodData: PeriodMonthData[] = await Promise.all(
+        periodMonthValues.map(async (monthValue) => {
+          const data = await fetchMonthlyData(monthValue);
+          return {
+            month: monthValue,
+            label: formatMonthLabel(monthValue),
+            channels: data.channels,
+            kpis: data.kpis,
+            reservations: data.reservations,
+          };
+        })
+      );
+
+      const periodNames = {
+        quarter: "Trimestre",
+        semester: "6 mois",
+        year: "1 an",
+      } as const;
+      const firstLabel = periodData[0]?.label || "";
+      const lastLabel = periodData[periodData.length - 1]?.label || "";
+      const periodLabel = `${periodNames[reportPeriod]} (${firstLabel} - ${lastLabel})`;
+
+      const result = generatePeriodReport(periodLabel, periodData);
+      if (result.success) return result.fileName;
+      throw new Error(result.error || "Erreur inconnue");
     };
     
     // Utiliser toast.promise pour gérer automatiquement les états
