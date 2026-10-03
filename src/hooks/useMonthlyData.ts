@@ -10,7 +10,7 @@ import {
   type AnalyticsReservationRow,
 } from '@/lib/analyticsAggregation';
 
-interface ReservationData {
+export interface ReservationData {
   id: string;
   customer_name: string;
   customer_email: string | null;
@@ -27,7 +27,7 @@ interface ReservationData {
   utm_campaign: string | null;
 }
 
-interface MonthlyData {
+export interface MonthlyData {
   channels: ChannelData[];
   kpis: ChannelsKPIs;
   reservations: ReservationData[];
