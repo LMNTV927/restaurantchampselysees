@@ -58,7 +58,7 @@ export default function Anniversaire() {
         "Comment organiser un anniversaire au restaurant à Paris : choix de la date, gâteau, groupe, privatisation et fin de soirée en ambiance club aux Champs-Élysées.",
       author: { "@type": "Organization", name: "Prince Palace" },
       publisher: { "@type": "Organization", name: "Prince Palace" },
-      mainEntityOfPage: `${SITE.url}/anniversaire-restaurant-paris`,
+      mainEntityOfPage: "https://restaurantchampselysees.fr/anniversaire-restaurant-paris",
     },
     {
       "@context": "https://schema.org",
