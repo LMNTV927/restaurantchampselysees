@@ -40,7 +40,7 @@ import {
   Cell,
 } from "recharts";
 import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
-import { useMonthlyData, fetchMonthlyData } from "@/hooks/useMonthlyData";
+import { useMonthlyData, usePeriodData, fetchMonthlyData, periodMonthCount, type ReportPeriod } from "@/hooks/useMonthlyData";
 import { usePDFReport, formatMonthLabel, type PeriodMonthData } from "@/hooks/usePDFReport";
 import { getCurrentMonthInParis } from "@/lib/dateUtils";
 import { getChannelHsl } from "@/lib/channelColors";
@@ -52,13 +52,21 @@ export function DataSection() {
   const { channels: currentChannels, kpis: currentKpis, loading: currentLoading } = useRealtimeChannelsData();
   const { data: monthlyData, loading: monthlyLoading } = useMonthlyData(selectedMonth);
   const { generateMonthlyReport, generatePeriodReport } = usePDFReport();
-  const [reportPeriod, setReportPeriod] = useState<"month" | "quarter" | "semester" | "year">("month");
+  const [reportPeriod, setReportPeriod] = useState<ReportPeriod>("month");
+  const { data: periodData, loading: periodLoading } = usePeriodData(selectedMonth, reportPeriod);
 
   const isCurrentMonth = selectedMonth === currentMonth;
-  const channels = monthlyData?.channels || currentChannels;
-  const kpis = monthlyData?.kpis || currentKpis;
-  const monthlyReservations = monthlyData?.reservations || [];
-  const loading = isCurrentMonth ? currentLoading : monthlyLoading;
+  const isPeriodMode = reportPeriod !== "month";
+  const channels = isPeriodMode
+    ? (periodData?.channels || [])
+    : (monthlyData?.channels || currentChannels);
+  const kpis = isPeriodMode
+    ? (periodData?.kpis || { totalClicks: 0, totalReservations: 0, totalCovers: 0, conversion: 0, evolution: null })
+    : (monthlyData?.kpis || currentKpis);
+  const monthlyReservations = isPeriodMode
+    ? (periodData?.reservations || [])
+    : (monthlyData?.reservations || []);
+  const loading = isPeriodMode ? periodLoading : (isCurrentMonth ? currentLoading : monthlyLoading);
 
   // Configuration pour les graphiques
   const chartConfig = {
