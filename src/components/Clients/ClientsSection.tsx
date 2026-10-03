@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { getDaysAgoInParis } from "@/lib/dateUtils";
+import {
   Table,
   TableBody,
   TableCell,
@@ -65,7 +72,34 @@ const buildClients = (reservations: ReservationData[]): ClientRow[] => {
   );
 };
 
-const exportClientsPDF = (clients: ClientRow[]) => {
+type ClientPeriod = "month" | "3months" | "6months" | "all";
+
+const PERIOD_LABELS: Record<ClientPeriod, string> = {
+  month: "Ce mois-ci",
+  "3months": "3 derniers mois",
+  "6months": "6 derniers mois",
+  all: "Tous les clients",
+};
+
+const getPeriodCutoff = (period: ClientPeriod): string | null => {
+  switch (period) {
+    case "month":
+      return getDaysAgoInParis(30);
+    case "3months":
+      return getDaysAgoInParis(90);
+    case "6months":
+      return getDaysAgoInParis(180);
+    case "all":
+      return null;
+  }
+};
+
+const exportClientsPDF = (clients: ClientRow[], period: ClientPeriod) => {
+  const cutoff = getPeriodCutoff(period);
+  const filtered = cutoff
+    ? clients.filter((c) => c.latest.reservationDate >= cutoff)
+    : clients;
+
   const doc = new jsPDF();
   doc.setFontSize(18);
   doc.setFont(undefined, "bold");
@@ -73,11 +107,11 @@ const exportClientsPDF = (clients: ClientRow[]) => {
   doc.text("PRINCE PALACE", 14, 20);
   doc.setFontSize(13);
   doc.setFont(undefined, "normal");
-  doc.text("Liste des clients", 14, 30);
+  doc.text(`Liste des clients — ${PERIOD_LABELS[period]}`, 14, 30);
   doc.setFontSize(9);
   doc.setTextColor(100);
   doc.text(
-    `Généré le ${new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} — ${clients.length} client(s)`,
+    `Généré le ${new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} — ${filtered.length} client(s)`,
     14,
     38
   );
@@ -85,7 +119,7 @@ const exportClientsPDF = (clients: ClientRow[]) => {
   autoTable(doc, {
     startY: 45,
     head: [["Nom", "Email", "Téléphone", "Réservations"]],
-    body: clients.map((c) => [
+    body: filtered.map((c) => [
       c.name || "—",
       c.email || "—",
       c.phone || "—",
@@ -109,7 +143,9 @@ const exportClientsPDF = (clients: ClientRow[]) => {
     );
   }
 
-  doc.save(`prince-palace-clients-${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(
+    `prince-palace-clients-${period}-${new Date().toISOString().slice(0, 10)}.pdf`
+  );
 };
 
 export function ClientsSection() {
@@ -144,10 +180,28 @@ export function ClientsSection() {
             className="pl-9"
           />
         </div>
-        <Button onClick={() => exportClientsPDF(clients)} variant="outline" size="sm">
-          <Download className="mr-2 h-4 w-4" />
-          Export PDF
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Download className="mr-2 h-4 w-4" />
+              Export PDF
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => exportClientsPDF(clients, "month")}>
+              Ce mois-ci
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportClientsPDF(clients, "3months")}>
+              3 derniers mois
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportClientsPDF(clients, "6months")}>
+              6 derniers mois
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportClientsPDF(clients, "all")}>
+              Tous les clients
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="premium-card rounded-xl overflow-hidden">
