@@ -248,6 +248,18 @@ export function DataSection() {
             </Select>
             
             <div className="flex gap-2">
+              <Select value={reportPeriod} onValueChange={(value) => setReportPeriod(value as typeof reportPeriod)}>
+                <SelectTrigger className="w-32 sm:w-36 premium-input">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover/95 backdrop-blur-sm">
+                  <SelectItem value="month">Mois</SelectItem>
+                  <SelectItem value="quarter">Trimestre</SelectItem>
+                  <SelectItem value="semester">6 mois</SelectItem>
+                  <SelectItem value="year">1 an</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Button 
                 onClick={handleExportCSV}
                 variant="outline" 
