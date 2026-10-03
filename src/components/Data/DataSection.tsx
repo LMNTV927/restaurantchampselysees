@@ -40,8 +40,8 @@ import {
   Cell,
 } from "recharts";
 import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
-import { useMonthlyData } from "@/hooks/useMonthlyData";
-import { usePDFReport } from "@/hooks/usePDFReport";
+import { useMonthlyData, fetchMonthlyData } from "@/hooks/useMonthlyData";
+import { usePDFReport, formatMonthLabel, type PeriodMonthData } from "@/hooks/usePDFReport";
 import { getCurrentMonthInParis } from "@/lib/dateUtils";
 import { getChannelHsl } from "@/lib/channelColors";
 import { toast } from "sonner";
@@ -51,7 +51,8 @@ export function DataSection() {
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const { channels: currentChannels, kpis: currentKpis, loading: currentLoading } = useRealtimeChannelsData();
   const { data: monthlyData, loading: monthlyLoading } = useMonthlyData(selectedMonth);
-  const { generateMonthlyReport } = usePDFReport();
+  const { generateMonthlyReport, generatePeriodReport } = usePDFReport();
+  const [reportPeriod, setReportPeriod] = useState<"month" | "quarter" | "semester" | "year">("month");
 
   const isCurrentMonth = selectedMonth === currentMonth;
   const channels = monthlyData?.channels || currentChannels;
