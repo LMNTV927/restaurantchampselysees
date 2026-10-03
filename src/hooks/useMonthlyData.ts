@@ -52,10 +52,12 @@ export const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyDa
     supabase.from('reservations').select('*, channels(name)')
       .gte('reservation_date', start).lt('reservation_date', end)
       .eq('is_duplicate', false)
+      .neq('status', 'cancelled')
       .order('reservation_date', { ascending: true }),
     supabase.from('reservations').select('channel_id, source, guests_count, channels(name)')
       .gte('reservation_date', prevStart).lt('reservation_date', start)
-      .eq('is_duplicate', false),
+      .eq('is_duplicate', false)
+      .neq('status', 'cancelled'),
   ]);
 
   if (channelsRes.error) throw channelsRes.error;

@@ -67,9 +67,9 @@ const fetchChannelsAndStats = async (): Promise<ChannelsResult> => {
     supabase.from('channel_stats').select('channel_id, clicks').gte('date', start).lt('date', end),
     supabase.from('channel_stats').select('channel_id, clicks').gte('date', prevStart).lt('date', start),
     supabase.from('reservations').select('channel_id, source, utm_campaign, guests_count, channels(name)')
-      .gte('reservation_date', start).lt('reservation_date', end).eq('is_duplicate', false),
+      .gte('reservation_date', start).lt('reservation_date', end).eq('is_duplicate', false).neq('status', 'cancelled'),
     supabase.from('reservations').select('channel_id, source, guests_count, channels(name)')
-      .gte('reservation_date', prevStart).lt('reservation_date', start).eq('is_duplicate', false),
+      .gte('reservation_date', prevStart).lt('reservation_date', start).eq('is_duplicate', false).neq('status', 'cancelled'),
   ]);
 
   if (channelsRes.error) throw channelsRes.error;
