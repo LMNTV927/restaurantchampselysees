@@ -111,15 +111,14 @@ export function ReservationsSection() {
     const currentMonth = getCurrentMonthInParis();
     
     // Calculate date strings for filtering (avoid timezone issues)
-    const today = new Date(todayString + 'T00:00:00');
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const nextWeek = new Date(today);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    
-    // Format dates as YYYY-MM-DD for string comparison
-    const tomorrowString = tomorrow.toISOString().split('T')[0];
-    const nextWeekString = nextWeek.toISOString().split('T')[0];
+    // Pure UTC date arithmetic on the YYYY-MM-DD string (no timezone shift)
+    const addDays = (base: string, n: number) => {
+      const d = new Date(base + 'T00:00:00Z');
+      d.setUTCDate(d.getUTCDate() + n);
+      return d.toISOString().slice(0, 10);
+    };
+    const tomorrowString = addDays(todayString, 1);
+    const nextWeekString = addDays(todayString, 8);
     
     // Use original reservation data for filtering (avoid timezone conversion issues)
     const sourceList = selectedFilter === 'duplicates' ? duplicates : realtimeReservations;
