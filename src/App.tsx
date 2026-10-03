@@ -21,6 +21,7 @@ const CancelReservationPage = lazy(() => import("./pages/CancelReservationPage")
 const SiteLayout = lazy(() => import("./components/Site/SiteLayout").then((m) => ({ default: m.SiteLayout })));
 const Home = lazy(() => import("./pages/site/Home"));
 const Evenementiel = lazy(() => import("./pages/site/Evenementiel"));
+const Anniversaire = lazy(() => import("./pages/site/Anniversaire"));
 const Restaurant = lazy(() => import("./pages/site/Restaurant"));
 const Galerie = lazy(() => import("./pages/site/Galerie"));
 const Avis = lazy(() => import("./pages/site/Avis"));
@@ -63,7 +64,8 @@ const App = () => (
               <Route path="/login" element={<LoginRoute />} />
               <Route element={<SiteLayout />}>
                 <Route path="/" element={<Home />} />
-                <Route path="/evenementiel" element={<Evenementiel />} />
+<Route path="/evenementiel" element={<Evenementiel />} />
+                <Route path="/anniversaire-restaurant-paris" element={<Anniversaire />} />
                 <Route path="/restaurant" element={<Restaurant />} />
                 <Route path="/galerie" element={<Galerie />} />
                 <Route path="/avis" element={<Avis />} />

@@ -163,6 +163,11 @@ export function SiteLayout() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link to="/anniversaire-restaurant-paris" className="hover:underline">
+                  Anniversaire au restaurant
+                </Link>
+              </li>
             </ul>
           </div>
 
