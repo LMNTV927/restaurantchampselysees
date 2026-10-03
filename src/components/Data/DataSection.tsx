@@ -457,12 +457,12 @@ export function DataSection() {
         {/* Graphique Couverts mensuels */}
         <Card className="premium-card p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg font-playfair font-semibold">Couverts de {getSelectedMonthLabel()}</h3>
+            <h3 className="text-base sm:text-lg font-playfair font-semibold">Couverts — {getPeriodLabel()}</h3>
             <Users className="h-5 w-5 text-primary" />
           </div>
           <ChartContainer config={chartConfig} className="h-48 sm:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="day" 
