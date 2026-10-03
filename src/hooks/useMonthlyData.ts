@@ -42,7 +42,7 @@ const toAnalyticsRows = (reservations: ReservationData[]): AnalyticsReservationR
     guests_count: r.guests_count,
   }));
 
-const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
+export const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
   const { start, end, prevStart } = getMonthRanges(selectedMonth);
 
   const [channelsRes, statsRes, prevStatsRes, reservationsRes, prevReservationsRes] = await Promise.all([
