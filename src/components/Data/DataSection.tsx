@@ -127,6 +127,46 @@ export function DataSection() {
 
   const dailyData = getDailyData();
 
+  // En mode période (trimestre / 6 mois / 1 an) : agrégation par mois
+  const getPeriodChartData = () => {
+    const count = periodMonthCount(reportPeriod);
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const periodMonths = Array.from({ length: count }, (_, index) => {
+      const date = new Date(Date.UTC(year, month - count + index, 1));
+      return {
+        value: `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`,
+        label: new Intl.DateTimeFormat('fr-FR', { month: 'short', timeZone: 'UTC' }).format(date),
+      };
+    });
+
+    const byMonth = new Map(periodMonths.map((m) => [m.value, { day: m.label, reservations: 0, covers: 0 }]));
+    monthlyReservations.forEach((reservation) => {
+      const key = reservation.reservation_date.slice(0, 7);
+      const existing = byMonth.get(key);
+      if (existing) {
+        existing.reservations += 1;
+        existing.covers += reservation.guests_count || 0;
+      }
+    });
+    return Array.from(byMonth.values());
+  };
+
+  const chartData = isPeriodMode ? getPeriodChartData() : dailyData;
+
+  const periodNames = { quarter: "Trimestre", semester: "6 mois", year: "1 an" } as const;
+  const getPeriodLabel = () => {
+    if (!isPeriodMode) return getSelectedMonthLabel();
+    const count = periodMonthCount(reportPeriod);
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const fmt = (d: Date) => {
+      const name = new Intl.DateTimeFormat('fr-FR', { month: 'long', timeZone: 'UTC' }).format(d);
+      return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${d.getUTCFullYear()}`;
+    };
+    const first = fmt(new Date(Date.UTC(year, month - count, 1)));
+    const last = fmt(new Date(Date.UTC(year, month - 1, 1)));
+    return `${periodNames[reportPeriod]} (${first} - ${last})`;
+  };
+
   const handleMonthChange = (month: string) => {
     setSelectedMonth(month);
   };
