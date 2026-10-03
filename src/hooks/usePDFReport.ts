@@ -40,6 +40,24 @@ interface ReservationData {
 }
 
 
+export const formatMonthLabel = (monthValue: string): string => {
+  const [year, month] = monthValue.split('-').map(Number);
+  if (!year || !month) return monthValue;
+  const name = new Intl.DateTimeFormat('fr-FR', {
+    month: 'long',
+    timeZone: 'Europe/Paris',
+  }).format(new Date(Date.UTC(year, month - 1, 1)));
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${year}`;
+};
+
+export interface PeriodMonthData {
+  month: string;
+  label: string;
+  channels: ChannelData[];
+  kpis: KPIData;
+  reservations: ReservationData[];
+}
+
 export const usePDFReport = () => {
   const generateMonthlyReport = (
     channels: ChannelData[], 
