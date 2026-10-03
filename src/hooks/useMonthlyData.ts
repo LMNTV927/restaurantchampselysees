@@ -42,9 +42,7 @@ const toAnalyticsRows = (reservations: ReservationData[]): AnalyticsReservationR
     guests_count: r.guests_count,
   }));
 
-export const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyData> => {
-  const { start, end, prevStart } = getMonthRanges(selectedMonth);
-
+const fetchRangeData = async (start: string, end: string, prevStart: string): Promise<MonthlyData> => {
   const [channelsRes, statsRes, prevStatsRes, reservationsRes, prevReservationsRes] = await Promise.all([
     supabase.from('channels').select('id, name, slug, description, is_active').eq('is_active', true),
     supabase.from('channel_stats').select('channel_id, clicks').gte('date', start).lt('date', end),
@@ -98,6 +96,59 @@ export const fetchMonthlyData = async (selectedMonth: string): Promise<MonthlyDa
     reservations,
   };
 };
+
+export const fetchMonthlyData = (selectedMonth: string): Promise<MonthlyData> => {
+  const { start, end, prevStart } = getMonthRanges(selectedMonth);
+  return fetchRangeData(start, end, prevStart);
+};
+
+export type ReportPeriod = 'month' | 'quarter' | 'semester' | 'year';
+
+export const periodMonthCount = (period: ReportPeriod): number =>
+  period === 'quarter' ? 3 : period === 'semester' ? 6 : 12;
+
+const fmtMonthStart = (d: Date): string =>
+  `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-01`;
+
+/** Données agrégées sur une période de N mois terminant au mois sélectionné */
+export const fetchPeriodData = (selectedMonth: string, period: ReportPeriod): Promise<MonthlyData> => {
+  const count = periodMonthCount(period);
+  const [year, month] = selectedMonth.split('-').map(Number);
+  const start = fmtMonthStart(new Date(Date.UTC(year, month - count, 1)));
+  const end = fmtMonthStart(new Date(Date.UTC(year, month, 1)));
+  const prevStart = fmtMonthStart(new Date(Date.UTC(year, month - 2 * count, 1)));
+  return fetchRangeData(start, end, prevStart);
+};
+
+export function usePeriodData(selectedMonth: string, period: ReportPeriod) {
+  const queryClient = useQueryClient();
+
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['period-data', selectedMonth, period],
+    queryFn: () => fetchPeriodData(selectedMonth, period),
+    staleTime: 60000,
+    enabled: !!selectedMonth && period !== 'month',
+  });
+
+  useEffect(() => {
+    const sub = supabase
+      .channel('period-data-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['period-data'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'channel_stats' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['period-data'] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+  }, [queryClient]);
+
+  return {
+    data: data || null,
+    loading,
+  };
+}
 
 export function useMonthlyData(selectedMonth: string) {
   const queryClient = useQueryClient();

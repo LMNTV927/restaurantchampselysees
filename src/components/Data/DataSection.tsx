@@ -40,7 +40,7 @@ import {
   Cell,
 } from "recharts";
 import { useRealtimeChannelsData } from "@/hooks/useRealtimeChannelsData";
-import { useMonthlyData, fetchMonthlyData } from "@/hooks/useMonthlyData";
+import { useMonthlyData, usePeriodData, fetchMonthlyData, periodMonthCount, type ReportPeriod } from "@/hooks/useMonthlyData";
 import { usePDFReport, formatMonthLabel, type PeriodMonthData } from "@/hooks/usePDFReport";
 import { getCurrentMonthInParis } from "@/lib/dateUtils";
 import { getChannelHsl } from "@/lib/channelColors";
@@ -52,13 +52,21 @@ export function DataSection() {
   const { channels: currentChannels, kpis: currentKpis, loading: currentLoading } = useRealtimeChannelsData();
   const { data: monthlyData, loading: monthlyLoading } = useMonthlyData(selectedMonth);
   const { generateMonthlyReport, generatePeriodReport } = usePDFReport();
-  const [reportPeriod, setReportPeriod] = useState<"month" | "quarter" | "semester" | "year">("month");
+  const [reportPeriod, setReportPeriod] = useState<ReportPeriod>("month");
+  const { data: periodData, loading: periodLoading } = usePeriodData(selectedMonth, reportPeriod);
 
   const isCurrentMonth = selectedMonth === currentMonth;
-  const channels = monthlyData?.channels || currentChannels;
-  const kpis = monthlyData?.kpis || currentKpis;
-  const monthlyReservations = monthlyData?.reservations || [];
-  const loading = isCurrentMonth ? currentLoading : monthlyLoading;
+  const isPeriodMode = reportPeriod !== "month";
+  const channels = isPeriodMode
+    ? (periodData?.channels || [])
+    : (monthlyData?.channels || currentChannels);
+  const kpis = isPeriodMode
+    ? (periodData?.kpis || { totalClicks: 0, totalReservations: 0, totalCovers: 0, conversion: 0, evolution: null })
+    : (monthlyData?.kpis || currentKpis);
+  const monthlyReservations = isPeriodMode
+    ? (periodData?.reservations || [])
+    : (monthlyData?.reservations || []);
+  const loading = isPeriodMode ? periodLoading : (isCurrentMonth ? currentLoading : monthlyLoading);
 
   // Configuration pour les graphiques
   const chartConfig = {
@@ -119,6 +127,46 @@ export function DataSection() {
 
   const dailyData = getDailyData();
 
+  // En mode période (trimestre / 6 mois / 1 an) : agrégation par mois
+  const getPeriodChartData = () => {
+    const count = periodMonthCount(reportPeriod);
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const periodMonths = Array.from({ length: count }, (_, index) => {
+      const date = new Date(Date.UTC(year, month - count + index, 1));
+      return {
+        value: `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`,
+        label: new Intl.DateTimeFormat('fr-FR', { month: 'short', timeZone: 'UTC' }).format(date),
+      };
+    });
+
+    const byMonth = new Map(periodMonths.map((m) => [m.value, { day: m.label, reservations: 0, covers: 0 }]));
+    monthlyReservations.forEach((reservation) => {
+      const key = reservation.reservation_date.slice(0, 7);
+      const existing = byMonth.get(key);
+      if (existing) {
+        existing.reservations += 1;
+        existing.covers += reservation.guests_count || 0;
+      }
+    });
+    return Array.from(byMonth.values());
+  };
+
+  const chartData = isPeriodMode ? getPeriodChartData() : dailyData;
+
+  const periodNames = { quarter: "Trimestre", semester: "6 mois", year: "1 an" } as const;
+  const getPeriodLabel = () => {
+    if (!isPeriodMode) return getSelectedMonthLabel();
+    const count = periodMonthCount(reportPeriod);
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const fmt = (d: Date) => {
+      const name = new Intl.DateTimeFormat('fr-FR', { month: 'long', timeZone: 'UTC' }).format(d);
+      return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${d.getUTCFullYear()}`;
+    };
+    const first = fmt(new Date(Date.UTC(year, month - count, 1)));
+    const last = fmt(new Date(Date.UTC(year, month - 1, 1)));
+    return `${periodNames[reportPeriod]} (${first} - ${last})`;
+  };
+
   const handleMonthChange = (month: string) => {
     setSelectedMonth(month);
   };
@@ -154,7 +202,7 @@ export function DataSection() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `prince-palace-${selectedMonth}.csv`);
+    link.setAttribute("download", `prince-palace-${isPeriodMode ? reportPeriod + '-' : ''}${selectedMonth}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -360,12 +408,12 @@ export function DataSection() {
         {/* Graphique Réservations mensuelles */}
         <Card className="premium-card p-3 sm:p-4 lg:p-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-6">
-            <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold">Réservations de {getSelectedMonthLabel()}</h3>
+            <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold">Réservations — {getPeriodLabel()}</h3>
             <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
           <ChartContainer config={chartConfig} className="h-40 sm:h-48 lg:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="day" 
@@ -383,7 +431,7 @@ export function DataSection() {
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3">
-                          <p className="font-semibold">Jour {label}</p>
+                          <p className="font-semibold">{isPeriodMode ? label : `Jour ${label}`}</p>
                           <p className="text-sm text-muted-foreground">
                             Réservations: <span className="font-medium text-foreground">{payload[0]?.value}</span>
                           </p>
@@ -409,12 +457,12 @@ export function DataSection() {
         {/* Graphique Couverts mensuels */}
         <Card className="premium-card p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg font-playfair font-semibold">Couverts de {getSelectedMonthLabel()}</h3>
+            <h3 className="text-base sm:text-lg font-playfair font-semibold">Couverts — {getPeriodLabel()}</h3>
             <Users className="h-5 w-5 text-primary" />
           </div>
           <ChartContainer config={chartConfig} className="h-48 sm:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="day" 
@@ -432,7 +480,7 @@ export function DataSection() {
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg p-3">
-                          <p className="font-semibold">Jour {label}</p>
+                          <p className="font-semibold">{isPeriodMode ? label : `Jour ${label}`}</p>
                           <p className="text-sm text-muted-foreground">
                             Couverts: <span className="font-medium text-foreground">{payload[0]?.value}</span>
                           </p>
