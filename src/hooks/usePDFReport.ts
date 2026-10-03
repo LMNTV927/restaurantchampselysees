@@ -49,21 +49,7 @@ export const usePDFReport = () => {
   ) => {
     try {
       const doc = new jsPDF();
-      // Generate months dynamically for current year
-      const currentYear = new Date().getFullYear();
-      const monthNames: { [key: string]: string } = {
-        [`${currentYear}-09`]: `Septembre ${currentYear}`,
-        [`${currentYear}-08`]: `Août ${currentYear}`,
-        [`${currentYear}-07`]: `Juillet ${currentYear}`,
-        [`${currentYear}-06`]: `Juin ${currentYear}`,
-        [`${currentYear}-05`]: `Mai ${currentYear}`,
-        [`${currentYear}-04`]: `Avril ${currentYear}`,
-        [`${currentYear}-03`]: `Mars ${currentYear}`,
-        [`${currentYear}-02`]: `Février ${currentYear}`,
-        [`${currentYear}-01`]: `Janvier ${currentYear}`,
-      };
-      
-      const monthLabel = monthNames[selectedMonth] || selectedMonth;
+      const monthLabel = formatMonthLabel(selectedMonth);
       const currentDate = new Date().toLocaleDateString('fr-FR', {
         day: 'numeric',
         month: 'long', 
