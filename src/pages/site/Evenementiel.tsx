@@ -1,5 +1,11 @@
 import { Link } from "react-router-dom";
 import { Cake, Glasses, Users, Building2, Crown, PartyPopper, Check } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { eventVenueSchema } from "@/lib/structuredData";
 import { Seo } from "@/components/Site/Seo";
 import { HeroSection } from "@/components/Site/HeroSection";
@@ -100,17 +106,47 @@ const formules = [
   },
 ];
 
+const faqEvent = [
+  {
+    q: "Combien coûte la privatisation d'un restaurant à Paris ?",
+    a: "Le tarif dépend de la date, du nombre d'invités et de la formule (dîner assis ou cocktail). Indiquez-nous votre projet par WhatsApp ou par téléphone : nous vous envoyons une proposition chiffrée détaillée, sans engagement.",
+  },
+  {
+    q: "À partir de combien de personnes peut-on privatiser ?",
+    a: "Un espace réservé est possible dès 10 personnes. La privatisation partielle convient de 50 à 150 invités, et la privatisation totale de l'établissement accueille jusqu'à 500 personnes.",
+  },
+  {
+    q: "Peut-on organiser un anniversaire ou une soirée privée ?",
+    a: "Oui, c'est l'une de nos spécialités : table décorée, arrivée en fanfare, gâteau et bouteilles présentées. Nous organisons aussi des EVJF, EVG, dîners d'entreprise et afterworks.",
+  },
+  {
+    q: "Jusqu'à quelle heure peut durer un événement ?",
+    a: "Le service démarre à 17h et les événements peuvent se prolonger jusqu'à 5h du matin, avec la possibilité de prolonger en ambiance club avec DJ à partir de minuit.",
+  },
+];
+
 export default function Evenementiel() {
-  const jsonLd = eventVenueSchema({
-    description:
-      "Lieu événementiel à Paris 8 : soirées privées, anniversaires, EVJF, cocktails d'entreprise et privatisation jusqu'à 500 personnes.",
-  });
+  const jsonLd = [
+    eventVenueSchema({
+      description:
+        "Privatisation d'un restaurant à Paris 8, aux Champs-Élysées : soirées privées, anniversaires, EVJF, cocktails d'entreprise et privatisation jusqu'à 500 personnes.",
+    }),
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqEvent.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
+    },
+  ];
 
   return (
     <>
       <Seo
-        title="Événementiel Paris 8 | Privatisation Champs-Élysées — Prince Palace"
-        description="Soirée privée, anniversaire, EVJF, team building ou privatisation aux Champs-Élysées : jusqu'à 500 personnes. Devis événementiel sur mesure à Paris 8."
+        title="Privatiser un restaurant à Paris | Privatisation Champs-Élysées"
+        description="Privatisation de restaurant à Paris 8, sur les Champs-Élysées : anniversaire, soirée privée, EVJF, dîner de groupe ou d'entreprise, de 10 à 500 personnes. Devis gratuit sur mesure."
         path="/evenementiel"
         jsonLd={jsonLd}
       />
@@ -118,14 +154,15 @@ export default function Evenementiel() {
       <HeroSection image={eventSoiree} alt="Soirée privée organisée au Prince Palace à Paris" priority>
         <div className="max-w-2xl">
           <p className="uppercase tracking-[0.35em] text-primary text-xs sm:text-sm mb-5">
-            Événementiel Paris
+            Privatisation restaurant Paris
           </p>
           <h1 className="font-playfair text-4xl sm:text-5xl lg:text-6xl leading-tight mb-6">
-            Organisez votre événement privé aux Champs-Élysées
+            Privatisez un restaurant aux Champs-Élysées
           </h1>
           <p className="text-base sm:text-lg text-foreground/80 leading-relaxed mb-8">
-            De la tablée d'amis à la privatisation complète jusqu'à 500 personnes, nous construisons
-            votre soirée sur mesure, dans un cadre noir et or au cœur du 8e arrondissement.
+            Anniversaire, soirée privée, dîner de groupe ou d'entreprise : de la tablée d'amis à la
+            privatisation complète jusqu'à 500 personnes, nous construisons votre événement sur
+            mesure, dans un cadre noir et or au cœur du 8e arrondissement de Paris.
           </p>
           <a
             href={whatsappLink(DEVIS_MESSAGE)}
@@ -214,12 +251,12 @@ export default function Evenementiel() {
       <section className="bg-card/40 border-y border-primary/10">
         <div className="container py-20 sm:py-28">
           <Reveal className="max-w-2xl mb-14">
-            <p className="uppercase tracking-[0.3em] text-primary text-xs mb-4">Nos formules</p>
-            <h2 className="font-playfair text-3xl sm:text-4xl mb-5">Trois façons de nous privatiser</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Les tarifs dépendent de la date, du nombre d'invités et de la formule choisie. Nous vous
-              répondons avec une proposition chiffrée détaillée.
-            </p>
+          <p className="uppercase tracking-[0.3em] text-primary text-xs mb-4">Nos formules</p>
+          <h2 className="font-playfair text-3xl sm:text-4xl mb-5">Trois façons de privatiser le restaurant</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Les tarifs de privatisation dépendent de la date, du nombre d'invités et de la formule
+            choisie. Nous vous répondons avec une proposition chiffrée détaillée et sans engagement.
+          </p>
           </Reveal>
           <div className="grid gap-6 lg:grid-cols-3">
             {formules.map((f, i) => (
@@ -279,6 +316,27 @@ export default function Evenementiel() {
               Réserver une table
             </a>
           </div>
+        </Reveal>
+      </section>
+
+      <section className="container py-20 sm:py-28">
+        <Reveal className="max-w-2xl mb-14">
+          <p className="uppercase tracking-[0.3em] text-primary text-xs mb-4">Questions fréquentes</p>
+          <h2 className="font-playfair text-3xl sm:text-4xl">Privatiser un restaurant à Paris : vos questions</h2>
+        </Reveal>
+        <Reveal className="max-w-3xl">
+          <Accordion type="single" collapsible className="w-full">
+            {faqEvent.map((item, i) => (
+              <AccordionItem key={i} value={`event-faq-${i}`} className="border-primary/15">
+                <AccordionTrigger className="text-left font-playfair text-lg">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </Reveal>
       </section>
 
