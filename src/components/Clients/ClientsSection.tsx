@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   Table,
   TableBody,
@@ -62,6 +65,53 @@ const buildClients = (reservations: ReservationData[]): ClientRow[] => {
   );
 };
 
+const exportClientsPDF = (clients: ClientRow[]) => {
+  const doc = new jsPDF();
+  doc.setFontSize(18);
+  doc.setFont(undefined, "bold");
+  doc.setTextColor(0);
+  doc.text("PRINCE PALACE", 14, 20);
+  doc.setFontSize(13);
+  doc.setFont(undefined, "normal");
+  doc.text("Liste des clients", 14, 30);
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text(
+    `Généré le ${new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} — ${clients.length} client(s)`,
+    14,
+    38
+  );
+
+  autoTable(doc, {
+    startY: 45,
+    head: [["Nom", "Email", "Téléphone", "Réservations"]],
+    body: clients.map((c) => [
+      c.name || "—",
+      c.email || "—",
+      c.phone || "—",
+      c.reservationCount.toString(),
+    ]),
+    theme: "striped",
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
+    columnStyles: { 3: { halign: "center" } },
+  });
+
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+    doc.text(
+      `Prince Palace - Liste des clients - Page ${i}/${pages}`,
+      14,
+      doc.internal.pageSize.height - 10
+    );
+  }
+
+  doc.save(`prince-palace-clients-${new Date().toISOString().slice(0, 10)}.pdf`);
+};
+
 export function ClientsSection() {
   const { reservations } = useRealtimeReservations();
   const [search, setSearch] = useState("");
@@ -84,14 +134,20 @@ export function ClientsSection() {
 
   return (
     <div className="space-y-4">
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher un client…"
-          className="pl-9"
-        />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un client…"
+            className="pl-9"
+          />
+        </div>
+        <Button onClick={() => exportClientsPDF(clients)} variant="outline" size="sm">
+          <Download className="mr-2 h-4 w-4" />
+          Export PDF
+        </Button>
       </div>
 
       <div className="premium-card rounded-xl overflow-hidden">
