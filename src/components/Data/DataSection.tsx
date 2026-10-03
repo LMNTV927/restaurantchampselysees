@@ -202,7 +202,7 @@ export function DataSection() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `prince-palace-${selectedMonth}.csv`);
+    link.setAttribute("download", `prince-palace-${isPeriodMode ? reportPeriod + '-' : ''}${selectedMonth}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -408,12 +408,12 @@ export function DataSection() {
         {/* Graphique Réservations mensuelles */}
         <Card className="premium-card p-3 sm:p-4 lg:p-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-6">
-            <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold">Réservations de {getSelectedMonthLabel()}</h3>
+            <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold">Réservations — {getPeriodLabel()}</h3>
             <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
           <ChartContainer config={chartConfig} className="h-40 sm:h-48 lg:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="day" 
