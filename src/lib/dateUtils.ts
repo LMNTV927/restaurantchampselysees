@@ -73,9 +73,7 @@ export function formatDateInParis(date: Date): string {
  * Get current month in YYYY-MM format (Paris timezone)
  */
 export function getCurrentMonthInParis(): string {
-  const now = new Date();
-  const parisTime = new Date(now.toLocaleString('en-US', { timeZone: PARIS_TIMEZONE }));
-  return parisTime.toISOString().slice(0, 7);
+  return getTodayInParis().slice(0, 7);
 }
 
 /**
