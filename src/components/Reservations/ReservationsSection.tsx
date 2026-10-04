@@ -164,12 +164,13 @@ export function ReservationsSection() {
 
   // Calculate KPIs based on filtered reservations
   const getFilteredKPIs = () => {
-    const reservationsForTotals =
+    const reservationsForTotals = (
       selectedFilter === "past" && !selectedPastDateString
         ? currentMonthPastReservations
         : selectedFilter === "past" && selectedPastDateString
           ? allPastReservations
-          : reservations;
+          : reservations
+    ).filter((r) => r.status !== "cancelled");
     const totalReservations = reservationsForTotals.length;
     const totalCovers = reservationsForTotals.reduce((sum, r) => sum + r.partySize, 0);
 
