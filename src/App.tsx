@@ -22,6 +22,7 @@ const SiteLayout = lazy(() => import("./components/Site/SiteLayout").then((m) =>
 const Home = lazy(() => import("./pages/site/Home"));
 const Evenementiel = lazy(() => import("./pages/site/Evenementiel"));
 const Anniversaire = lazy(() => import("./pages/site/Anniversaire"));
+const Afterwork = lazy(() => import("./pages/site/Afterwork"));
 const Restaurant = lazy(() => import("./pages/site/Restaurant"));
 const Galerie = lazy(() => import("./pages/site/Galerie"));
 const Avis = lazy(() => import("./pages/site/Avis"));
@@ -66,6 +67,7 @@ const App = () => (
                 <Route path="/" element={<Home />} />
 <Route path="/evenementiel" element={<Evenementiel />} />
                 <Route path="/anniversaire-restaurant-paris" element={<Anniversaire />} />
+                <Route path="/afterwork-paris-champs-elysees" element={<Afterwork />} />
                 <Route path="/restaurant" element={<Restaurant />} />
                 <Route path="/galerie" element={<Galerie />} />
                 <Route path="/avis" element={<Avis />} />

@@ -168,6 +168,11 @@ export function SiteLayout() {
                   Anniversaire au restaurant
                 </Link>
               </li>
+              <li>
+                <Link to="/afterwork-paris-champs-elysees" className="hover:underline">
+                  Afterwork à Paris
+                </Link>
+              </li>
             </ul>
           </div>
 
