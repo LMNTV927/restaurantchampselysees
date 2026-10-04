@@ -79,7 +79,8 @@ const fetchReservations = async (): Promise<ReservationsResult> => {
       .from('reservations')
       .select('reservation_date, guests_count')
       .eq('reservation_date', yesterday)
-      .eq('is_duplicate', false),
+      .eq('is_duplicate', false)
+      .neq('status', 'cancelled'),
   ]);
 
   if (allRes.error) throw allRes.error;
@@ -89,7 +90,7 @@ const fetchReservations = async (): Promise<ReservationsResult> => {
   const reservations = allMapped.filter(r => !r.isDuplicate);
   const duplicates = allMapped.filter(r => r.isDuplicate);
 
-  const todayFiltered = reservations.filter(r => isReservationToday(r.reservationDate));
+  const todayFiltered = reservations.filter(r => isReservationToday(r.reservationDate) && r.status !== 'cancelled');
   const todayReservations = todayFiltered.length;
   const todayCovers = todayFiltered.reduce((s, r) => s + r.guestsCount, 0);
   const totalCapacity = 500;
