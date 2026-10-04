@@ -63,18 +63,21 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
       .from('reservations')
       .select('guests_count, status, created_at, customer_name, channels(name)')
       .eq('reservation_date', today)
-      .eq('is_duplicate', false),
+      .eq('is_duplicate', false)
+      .neq('status', 'cancelled'),
     supabase
       .from('reservations')
       .select('guests_count')
       .eq('reservation_date', yesterday)
-      .eq('is_duplicate', false),
+      .eq('is_duplicate', false)
+      .neq('status', 'cancelled'),
     supabase
       .from('reservations')
       .select('reservation_date, guests_count, created_at')
       .gte('reservation_date', monthStart)
       .lte('reservation_date', today)
-      .eq('is_duplicate', false),
+      .eq('is_duplicate', false)
+      .neq('status', 'cancelled'),
   ]);
 
 
