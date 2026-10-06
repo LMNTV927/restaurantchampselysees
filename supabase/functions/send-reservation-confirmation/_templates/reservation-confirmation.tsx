@@ -119,6 +119,12 @@ export const ReservationConfirmationEmail = ({
               <Text style={label}>Heure</Text>
               <Text style={{ ...value, textDecoration: isCancellation ? 'line-through' : 'none' }}>{reservationTime}</Text>
             </td></tr>
+            {!isCancellation && (
+              <tr><td align="center" style={detailRow}>
+                <Text style={label}>Durée</Text>
+                <Text style={value}>Créneau de 3 heures</Text>
+              </td></tr>
+            )}
             <tr><td align="center" style={detailRow}>
               <Text style={label}>Couverts</Text>
               <Text style={{ ...value, textDecoration: isCancellation ? 'line-through' : 'none' }}>{guestsCount} personne{guestsCount > 1 ? 's' : ''}</Text>
@@ -181,6 +187,17 @@ export const ReservationConfirmationEmail = ({
               </table>
             </td></tr>
           </table>
+
+          {/* Infos horaires & club */}
+          {!isCancellation && (
+            <table cellPadding="0" cellSpacing="0" width="100%" style={disclaimerSection}>
+              <tr><td align="center" style={{ paddingTop: '16px' }}>
+                <Text style={infoText}>🕐 Restauration : Lundi–Mercredi 17h00–00h00 · Jeudi–Dimanche 17h00–05h00</Text>
+                <Text style={infoText}>🎭 Le club ouvre à partir de 1h du matin.</Text>
+                <Text style={infoText}>La réservation ne donne pas accès automatiquement à la partie club.</Text>
+              </td></tr>
+            </table>
+          )}
 
           {/* Footer */}
           <table cellPadding="0" cellSpacing="0" width="100%" style={footer}>
@@ -395,6 +412,14 @@ const legalLink = {
   color: '#7a7268',
   textDecoration: 'underline' as const,
   textUnderlineOffset: '2px',
+};
+
+const infoText = {
+  fontSize: '11.5px',
+  color: '#7a7268',
+  lineHeight: '1.7',
+  margin: '0 0 6px',
+  textAlign: 'center' as const,
 };
 
 const disclaimerSection = {
