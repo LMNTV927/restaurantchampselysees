@@ -5,6 +5,9 @@
 - Ajouter en bas du mail les horaires de la partie restauration du Prince Palace :
   - **Du lundi au mercredi : 17h00–00h00**
   - **Du jeudi au dimanche : 17h00–05h00**
+- Ajouter en bas du mail les mentions sur la partie club :
+  - **La partie club ouvre à partir de 1h du matin.**
+  - **Une réservation (restaurant) ne donne pas accès automatiquement à la partie club.**
 - Conserver le style noir et or existant, avec une présentation sobre adaptée aux mobiles.
 
 ## Mise en œuvre
