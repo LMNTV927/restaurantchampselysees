@@ -35,6 +35,7 @@ const EmailPreviewPage = () => {
             {[
               { label: 'Date', value: 'Vendredi 7 mars 2026' },
               { label: 'Heure', value: '20:30' },
+              { label: 'Durée', value: 'Créneau de 3 heures' },
               { label: 'Couverts', value: '4 personnes' },
             ].map((item, i) => (
               <tr key={i}><td align="center" style={{ padding: '16px 0', borderBottom: '1px solid rgba(201,168,76,0.08)' }}>
@@ -88,6 +89,15 @@ const EmailPreviewPage = () => {
               <p style={{ fontSize: 12.5, color: '#7a7268', lineHeight: 1.6, margin: 0 }}>59 Rue de Ponthieu, 75008 Paris</p>
               <a href="tel:0159133268" style={{ color: '#c9a84c', fontWeight: 500, textDecoration: 'none', fontSize: 13, marginTop: 8, display: 'inline-block' }}>01 59 13 32 68</a>
             </div>
+          </td></tr></tbody>
+        </table>
+
+        {/* Infos horaires & club */}
+        <table cellPadding={0} cellSpacing={0} width="100%" style={{ backgroundColor: '#111111', padding: '0 28px 18px', borderLeft: '1px solid rgba(201,168,76,0.12)', borderRight: '1px solid rgba(201,168,76,0.12)', borderBottom: '1px solid rgba(201,168,76,0.08)' }}>
+          <tbody><tr><td align="center" style={{ paddingTop: 16 }}>
+            <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: '0 0 6px', textAlign: 'center' }}>🕐 Restauration : Lundi–Mercredi 17h00–00h00 · Jeudi–Dimanche 17h00–05h00</p>
+            <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: '0 0 6px', textAlign: 'center' }}>🎭 Le club ouvre à partir de 1h du matin.</p>
+            <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: 0, textAlign: 'center' }}>La réservation ne donne pas accès automatiquement à la partie club.</p>
           </td></tr></tbody>
         </table>
 
