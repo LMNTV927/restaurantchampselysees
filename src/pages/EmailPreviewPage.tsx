@@ -35,7 +35,6 @@ const EmailPreviewPage = () => {
             {[
               { label: 'Date', value: 'Vendredi 7 mars 2026' },
               { label: 'Heure', value: '20:30' },
-              { label: 'Durée', value: 'Créneau de 3 heures' },
               { label: 'Couverts', value: '4 personnes' },
             ].map((item, i) => (
               <tr key={i}><td align="center" style={{ padding: '16px 0', borderBottom: '1px solid rgba(201,168,76,0.08)' }}>
@@ -95,7 +94,9 @@ const EmailPreviewPage = () => {
         {/* Infos horaires & club */}
         <table cellPadding={0} cellSpacing={0} width="100%" style={{ backgroundColor: '#111111', padding: '0 28px 18px', borderLeft: '1px solid rgba(201,168,76,0.12)', borderRight: '1px solid rgba(201,168,76,0.12)', borderBottom: '1px solid rgba(201,168,76,0.08)' }}>
           <tbody><tr><td align="center" style={{ paddingTop: 16 }}>
-            <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: '0 0 6px', textAlign: 'center' }}>🕐 Restauration : Lundi–Mercredi 17h00–00h00 · Jeudi–Dimanche 17h00–05h00</p>
+            <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: '0 0 6px', textAlign: 'center' }}>🕐 Votre réservation correspond à un créneau de 3 heures.</p>
+            <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: '0 0 6px', textAlign: 'center' }}>🕡 À partir de 22h, l'accès au restaurant se fait par le 59 Rue de Ponthieu.</p>
+            <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: '0 0 6px', textAlign: 'center' }}>🕙 Restauration : Lundi–Mercredi 17h00–00h00 · Jeudi–Dimanche 17h00–05h00</p>
             <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: '0 0 6px', textAlign: 'center' }}>🎭 Le club ouvre à partir de 1h du matin.</p>
             <p style={{ fontSize: 11.5, color: '#7a7268', lineHeight: 1.7, margin: 0, textAlign: 'center' }}>La réservation ne donne pas accès automatiquement à la partie club.</p>
           </td></tr></tbody>

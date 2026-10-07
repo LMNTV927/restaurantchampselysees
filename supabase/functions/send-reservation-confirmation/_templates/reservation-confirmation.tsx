@@ -119,12 +119,6 @@ export const ReservationConfirmationEmail = ({
               <Text style={label}>Heure</Text>
               <Text style={{ ...value, textDecoration: isCancellation ? 'line-through' : 'none' }}>{reservationTime}</Text>
             </td></tr>
-            {!isCancellation && (
-              <tr><td align="center" style={detailRow}>
-                <Text style={label}>Durée</Text>
-                <Text style={value}>Créneau de 3 heures</Text>
-              </td></tr>
-            )}
             <tr><td align="center" style={detailRow}>
               <Text style={label}>Couverts</Text>
               <Text style={{ ...value, textDecoration: isCancellation ? 'line-through' : 'none' }}>{guestsCount} personne{guestsCount > 1 ? 's' : ''}</Text>
@@ -192,7 +186,9 @@ export const ReservationConfirmationEmail = ({
           {!isCancellation && (
             <table cellPadding="0" cellSpacing="0" width="100%" style={disclaimerSection}>
               <tr><td align="center" style={{ paddingTop: '16px' }}>
-                <Text style={infoText}>🕐 Restauration : Lundi–Mercredi 17h00–00h00 · Jeudi–Dimanche 17h00–05h00</Text>
+                <Text style={infoText}>🕐 Votre réservation correspond à un créneau de 3 heures.</Text>
+                <Text style={infoText}>🕡 À partir de 22h, l'accès au restaurant se fait par le 59 Rue de Ponthieu.</Text>
+                <Text style={infoText}>🕙 Restauration : Lundi–Mercredi 17h00–00h00 · Jeudi–Dimanche 17h00–05h00</Text>
                 <Text style={infoText}>🎭 Le club ouvre à partir de 1h du matin.</Text>
                 <Text style={infoText}>La réservation ne donne pas accès automatiquement à la partie club.</Text>
               </td></tr>
