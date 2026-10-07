@@ -151,7 +151,7 @@ export default function Privatisation() {
           </h2>
           <p className="text-muted-foreground leading-relaxed mb-4">
             La journée commence par un dîner servi dès 17h, avec réservations par créneaux de
-            30 minutes pour适配 les horaires de vos invités. Après le dessert, la table se
+            30 minutes pour épouser les horaires de vos invités. Après le dessert, la table se
             transforme en piste : le DJ prend le relais à partir de minuit et l'ambiance club
             s'installe jusqu'à 5h du matin.
           </p>

@@ -173,6 +173,11 @@ export function SiteLayout() {
                   Afterwork à Paris
                 </Link>
               </li>
+              <li>
+                <Link to="/privatisation-restaurant-paris" className="hover:underline">
+                  Privatisation restaurant Paris
+                </Link>
+              </li>
             </ul>
           </div>
 
