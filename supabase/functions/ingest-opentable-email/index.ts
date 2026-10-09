@@ -152,10 +152,9 @@ serve(async (req) => {
         return json({ ok: true, action: "kept", externalId, notesKept: 1 });
       }
       const updateRecord = { status: "cancelled" };
-      const storedNotes = "x";
       const { error } = await supabase.from("reservations").update(updateRecord).eq("id", existing.id);
       if (error) return json({ error: error.message }, 500);
-      return json({ ok: true, action: "updated", externalId, notesKept: storedNotes ? 1 : 0 });
+      return json({ ok: true, action: "updated", externalId, notesKept: 1 });
     }
 
     const { error } = await supabase.from("reservations").insert(record);
