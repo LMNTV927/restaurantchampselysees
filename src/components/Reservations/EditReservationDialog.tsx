@@ -125,6 +125,7 @@ export function EditReservationDialog({ reservation, onUpdated }: EditReservatio
           guests_count: values.guestsCount,
           source: values.source?.trim() || null,
           notes: values.notes || null,
+          dedupe_ignored: true,
         })
         .eq('id', reservation.id);
 

@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
-import { useGoogleCalendarAutoSync } from "@/hooks/useGoogleCalendarAutoSync";
 import { useYahooOpenTableAutoSync } from "@/hooks/useYahooOpenTableAutoSync";
 import { useAuth } from "@/hooks/useAuth";
 import { AddReservationDialog } from "./AddReservationDialog";
@@ -46,7 +45,6 @@ export function ReservationsSection() {
   const { toast } = useToast();
   const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
-  useGoogleCalendarAutoSync();
   useYahooOpenTableAutoSync();
 
 

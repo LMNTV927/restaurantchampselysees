@@ -358,7 +358,8 @@ serve(async (req) => {
           .from("reservations")
           .update({ status: "cancelled" })
           .eq("source", GOOGLE_SOURCE)
-          .eq("external_id", ev.id);
+          .eq("external_id", ev.id)
+          .not("status", "in", "(show,no_show)");
         updated++;
         continue;
       }
@@ -398,24 +399,9 @@ serve(async (req) => {
         .maybeSingle();
 
       if (existing) {
-        const storedNotes = typeof existing.notes === "string" ? existing.notes.trim() : "";
-        const incomingNotes = typeof payload.notes === "string" ? payload.notes.trim() : "";
-        const updatePatch = {
-          customer_name: payload.customer_name,
-          reservation_date: payload.reservation_date,
-          reservation_time: payload.reservation_time,
-          guests_count: payload.guests_count,
-          ...(!storedNotes && incomingNotes ? { notes: payload.notes } : {}),
-        };
-
-        if (storedNotes) notesKept++;
-
-        const { error } = await supabase
-          .from("reservations")
-          .update(updatePatch)
-          .eq("id", existing.id);
-        if (error) console.error("Update failed:", error.message);
-        else updated++;
+        // Never overwrite manual edits on existing reservations.
+        notesKept++;
+        skipped++;
       } else {
         const { error } = await supabase.from("reservations").insert(payload);
         if (error) console.error("Insert failed:", error.message);
