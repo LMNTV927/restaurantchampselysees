@@ -95,7 +95,7 @@ serve(async (req) => {
 
           const { data: existing } = await supabaseAdmin
             .from("reservations")
-            .select("id, reservation_time")
+            .select("id, status")
             .eq("source", THEFORK_SOURCE)
             .eq("external_id", parsed.externalId)
             .maybeSingle();
@@ -113,9 +113,9 @@ serve(async (req) => {
           };
 
           if (existing) {
-            // Never touch notes; only set the time when the e-mail provides one.
-            const patch = parsed.time ? { ...base, reservation_time: parsed.time } : base;
-            const { error } = await supabaseAdmin.from("reservations").update(patch).eq("id", existing.id);
+            // Never overwrite manual edits: only apply a cancellation.
+            if (!parsed.cancelled || ["cancelled", "show", "no_show"].includes(existing.status ?? "")) { skipped += 1; continue; }
+            const { error } = await supabaseAdmin.from("reservations").update({ status: "cancelled" }).eq("id", existing.id);
             if (error) { console.error("thefork update", error.message); skipped += 1; continue; }
             updated += 1;
           } else {
@@ -172,7 +172,7 @@ serve(async (req) => {
 
       const { data: existing } = await supabaseAdmin
         .from("reservations")
-        .select("id, notes")
+        .select("id, notes, status")
         .eq("source", OPENTABLE_SOURCE)
         .eq("external_id", externalId)
         .maybeSingle();
@@ -192,15 +192,13 @@ serve(async (req) => {
       };
 
       if (existing) {
-        const storedNotes = typeof existing.notes === "string" ? existing.notes.trim() : "";
-        const incomingNotes = typeof parsed.notes === "string" ? parsed.notes.trim() : "";
-        const { notes: _drop, ...withoutNotes } = record;
-        const patch = {
-          ...withoutNotes,
-          ...(!storedNotes && incomingNotes ? { notes: parsed.notes } : {}),
-        };
-        if (storedNotes) notesKept += 1;
-
+        // Never overwrite manual edits: only apply a cancellation.
+        if (!parsed.cancelled || ["cancelled", "show", "no_show"].includes(existing.status ?? "")) {
+          notesKept += 1;
+          skipped += 1;
+          continue;
+        }
+        const patch = { status: "cancelled" };
         const { error } = await supabaseAdmin
           .from("reservations")
           .update(patch)

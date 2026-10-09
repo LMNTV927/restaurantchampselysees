@@ -127,7 +127,7 @@ serve(async (req) => {
 
     const { data: existing } = await supabase
       .from("reservations")
-      .select("id, notes")
+      .select("id, notes, status")
       .eq("source", OPENTABLE_SOURCE)
       .eq("external_id", externalId)
       .maybeSingle();
@@ -147,14 +147,12 @@ serve(async (req) => {
     };
 
     if (existing) {
-      const storedNotes = typeof existing.notes === "string" ? existing.notes.trim() : "";
-      const incomingNotes = typeof parsed.notes === "string" ? parsed.notes.trim() : "";
-      const { notes: _incomingRecordNotes, ...recordWithoutNotes } = record;
-      const updateRecord = {
-        ...recordWithoutNotes,
-        ...(!storedNotes && incomingNotes ? { notes: parsed.notes } : {}),
-      };
-
+      // Never overwrite manual edits: only apply a cancellation.
+      if (!parsed.cancelled || ["cancelled", "show", "no_show"].includes(existing.status ?? "")) {
+        return json({ ok: true, action: "kept", externalId, notesKept: 1 });
+      }
+      const updateRecord = { status: "cancelled" };
+      const storedNotes = "x";
       const { error } = await supabase.from("reservations").update(updateRecord).eq("id", existing.id);
       if (error) return json({ error: error.message }, 500);
       return json({ ok: true, action: "updated", externalId, notesKept: storedNotes ? 1 : 0 });
