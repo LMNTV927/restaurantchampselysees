@@ -24,6 +24,8 @@ const Evenementiel = lazy(() => import("./pages/site/Evenementiel"));
 const Anniversaire = lazy(() => import("./pages/site/Anniversaire"));
 const Afterwork = lazy(() => import("./pages/site/Afterwork"));
 const Privatisation = lazy(() => import("./pages/site/Privatisation"));
+const Evjf = lazy(() => import("./pages/site/Evjf"));
+const SoireeEntreprise = lazy(() => import("./pages/site/SoireeEntreprise"));
 const Restaurant = lazy(() => import("./pages/site/Restaurant"));
 const Galerie = lazy(() => import("./pages/site/Galerie"));
 const Avis = lazy(() => import("./pages/site/Avis"));
@@ -70,6 +72,8 @@ const App = () => (
                 <Route path="/anniversaire-restaurant-paris" element={<Anniversaire />} />
                 <Route path="/afterwork-paris-champs-elysees" element={<Afterwork />} />
                 <Route path="/privatisation-restaurant-paris" element={<Privatisation />} />
+                <Route path="/evjf-paris-champs-elysees" element={<Evjf />} />
+                <Route path="/soiree-entreprise-paris" element={<SoireeEntreprise />} />
                 <Route path="/restaurant" element={<Restaurant />} />
                 <Route path="/galerie" element={<Galerie />} />
                 <Route path="/avis" element={<Avis />} />
