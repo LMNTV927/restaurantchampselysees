@@ -178,6 +178,16 @@ export function SiteLayout() {
                   Privatisation restaurant Paris
                 </Link>
               </li>
+              <li>
+                <Link to="/evjf-paris-champs-elysees" className="hover:underline">
+                  EVJF à Paris
+                </Link>
+              </li>
+              <li>
+                <Link to="/soiree-entreprise-paris" className="hover:underline">
+                  Soirée d'entreprise Paris
+                </Link>
+              </li>
             </ul>
           </div>
 

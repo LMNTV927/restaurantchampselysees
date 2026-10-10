@@ -26,6 +26,16 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://restaurantchampselysees.fr/evjf-paris-champs-elysees</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://restaurantchampselysees.fr/soiree-entreprise-paris</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://restaurantchampselysees.fr/restaurant</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
