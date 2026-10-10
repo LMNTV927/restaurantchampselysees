@@ -19,10 +19,13 @@ const upsertMeta = (selector: string, attr: "name" | "property", key: string, co
   el.setAttribute("content", content);
 };
 
+const REFERENCE_ORIGIN = "https://restaurantchampselysees.fr";
+
 export function Seo({ title, description, path, image, jsonLd, noindex }: SeoProps) {
   useEffect(() => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const url = `${origin}${path}`;
+    // Domaine de référence unique : les variantes (lovable.app, prévisualisation) pointent vers le .fr
+    const url = `${REFERENCE_ORIGIN}${path}`;
 
     document.title = title;
     upsertMeta('meta[name="description"]', "name", "description", description);
