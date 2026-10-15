@@ -28,6 +28,7 @@ const Evjf = lazy(() => import("./pages/site/Evjf"));
 const SoireeEntreprise = lazy(() => import("./pages/site/SoireeEntreprise"));
 const SeminaireEntreprise = lazy(() => import("./pages/site/SeminaireEntreprise"));
 const RepasAffaires = lazy(() => import("./pages/site/RepasAffaires"));
+const CocktailDinatoire = lazy(() => import("./pages/site/CocktailDinatoire"));
 const Restaurant = lazy(() => import("./pages/site/Restaurant"));
 const Galerie = lazy(() => import("./pages/site/Galerie"));
 const Avis = lazy(() => import("./pages/site/Avis"));
@@ -78,6 +79,7 @@ const App = () => (
                 <Route path="/soiree-entreprise-paris" element={<SoireeEntreprise />} />
                 <Route path="/seminaire-entreprise-restaurant-paris" element={<SeminaireEntreprise />} />
                 <Route path="/repas-affaires-restaurant-paris" element={<RepasAffaires />} />
+                <Route path="/cocktail-dinatoire-paris" element={<CocktailDinatoire />} />
                 <Route path="/restaurant" element={<Restaurant />} />
                 <Route path="/galerie" element={<Galerie />} />
                 <Route path="/avis" element={<Avis />} />
