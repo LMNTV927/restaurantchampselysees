@@ -226,6 +226,7 @@ export type Database = {
         Args: { channel_slug: string; covers_count: number }
         Returns: undefined
       }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "serveur"
