@@ -184,6 +184,7 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
           reservationDate: dateLong,
           reservationTime: bookingData.time,
           guestsCount: bookingData.guestsCount,
+          modificationToken,
         }
       }).then(({ error }) => {
         if (error) console.error('SMS sending error:', error);
@@ -199,11 +200,10 @@ export function BookingForm({ channelId, onSuccess }: BookingFormProps) {
           guestsCount: bookingData.guestsCount,
           notes: bookingData.notes,
           source: channelData?.name,
+          modificationToken,
         }
       }).catch(err => console.error('Large reservation alert error:', err));
 
-      // Détection de doublons (marquage uniquement, aucune suppression)
-      supabase.functions.invoke('dedupe-reservations').catch(() => {});
       
     } catch (error) {
       console.error('Unexpected error:', error);

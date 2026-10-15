@@ -100,6 +100,7 @@ export default function CancelReservationPage() {
           reservationTime: reservation.reservation_time,
           guestsCount: reservation.guests_count,
           type: 'cancellation',
+          modificationToken: token,
         }
       });
 

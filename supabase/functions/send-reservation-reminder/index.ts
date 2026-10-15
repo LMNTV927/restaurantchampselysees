@@ -1,3 +1,4 @@
+import { isStaff, unauthorized, guardReservationBody } from "../_shared/guard.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -105,6 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (!(await isStaff(req))) return unauthorized(corsHeaders);
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

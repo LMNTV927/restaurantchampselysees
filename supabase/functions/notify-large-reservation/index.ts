@@ -1,3 +1,4 @@
+import { isStaff, unauthorized, guardReservationBody } from "../_shared/guard.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -14,6 +15,8 @@ serve(async (req) => {
   }
 
   try {
+    const body = await guardReservationBody(req);
+    if (!body) return unauthorized(corsHeaders);
     const {
       customerName,
       customerPhone,
@@ -22,7 +25,7 @@ serve(async (req) => {
       guestsCount,
       notes,
       source,
-    } = await req.json();
+    } = body;
 
     const guests = Number(guestsCount) || 0;
     const haystack = `${notes ?? ''} ${source ?? ''}`.toLowerCase();
