@@ -1,3 +1,4 @@
+import { isStaff, unauthorized, guardReservationBody } from "../_shared/guard.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -11,7 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { customerName, customerPhone, restaurantName, reservationDate, reservationTime, guestsCount, type } = await req.json();
+    const input = await guardReservationBody(req);
+    if (!input) return unauthorized(corsHeaders);
+    const { customerName, customerPhone, restaurantName, reservationDate, reservationTime, guestsCount, type } = input;
 
     if (!customerPhone) {
       return new Response(JSON.stringify({ error: 'Phone number is required' }), {

@@ -8,6 +8,13 @@
       "when": 1790169241972,
       "tag": "0000_add_dedupe_ignored_to_reservations",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792091841720,
+      "tag": "0001_lock_down_staff_access",
+      "breakpoints": true
     }
   ]
 }

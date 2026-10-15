@@ -124,6 +124,7 @@ export default function ModifyReservationPage() {
           reservationTime: time,
           guestsCount,
           type: 'modification',
+          modificationToken: token,
         }
       });
 
