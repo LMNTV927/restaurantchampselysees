@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const body = await guardReservationBody(req);
-    if (!body) return unauthorized(corsHeaders);
-    const { customerName, customerPhone, restaurantName, reservationDate, reservationTime, guestsCount, type } = body;
+    const input = await guardReservationBody(req);
+    if (!input) return unauthorized(corsHeaders);
+    const { customerName, customerPhone, restaurantName, reservationDate, reservationTime, guestsCount, type } = input;
 
     if (!customerPhone) {
       return new Response(JSON.stringify({ error: 'Phone number is required' }), {
