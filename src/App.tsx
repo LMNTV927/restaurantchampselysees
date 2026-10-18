@@ -60,10 +60,6 @@ function LoginRoute() {
   return <LoginPage />;
 }
 
-// Liens courts (bio Instagram) : redirection vers le lien de réservation, paramètres conservés.
-const ShortLink = ({ to }: { to: string }) => (
-  <Navigate to={`${to}${window.location.search}`} replace />
-);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -96,8 +92,6 @@ const App = () => (
               </Route>
               <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/book/:slug" element={<BookingPage />} />
-              <Route path="/r" element={<ShortLink to="/book/insta-restaurant" />} />
-              <Route path="/l" element={<ShortLink to="/book/insta-lounge" />} />
               <Route path="/reservation/modify/:token" element={<ModifyReservationPage />} />
               <Route path="/reservation/cancel/:token" element={<CancelReservationPage />} />
               <Route path="/email-preview" element={<EmailPreviewPage />} />
