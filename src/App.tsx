@@ -30,6 +30,7 @@ const SeminaireEntreprise = lazy(() => import("./pages/site/SeminaireEntreprise"
 const RepasAffaires = lazy(() => import("./pages/site/RepasAffaires"));
 const CocktailDinatoire = lazy(() => import("./pages/site/CocktailDinatoire"));
 const DinerGroupe = lazy(() => import("./pages/site/DinerGroupe"));
+const LancementProduit = lazy(() => import("./pages/site/LancementProduit"));
 const Restaurant = lazy(() => import("./pages/site/Restaurant"));
 const Galerie = lazy(() => import("./pages/site/Galerie"));
 const Avis = lazy(() => import("./pages/site/Avis"));
@@ -83,6 +84,7 @@ const App = () => (
                 <Route path="/repas-affaires-restaurant-paris" element={<RepasAffaires />} />
                 <Route path="/cocktail-dinatoire-paris" element={<CocktailDinatoire />} />
                 <Route path="/diner-groupe-restaurant-paris" element={<DinerGroupe />} />
+                <Route path="/lancement-produit-restaurant-paris" element={<LancementProduit />} />
                 <Route path="/restaurant" element={<Restaurant />} />
                 <Route path="/galerie" element={<Galerie />} />
                 <Route path="/avis" element={<Avis />} />
