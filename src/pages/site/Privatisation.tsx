@@ -186,6 +186,18 @@ export default function Privatisation() {
             formule de restauration, budget — avant toute confirmation. Pour les petits
             groupes (moins de 10 personnes), la réservation en ligne suffit.
           </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Pour le 31 décembre, découvrez le programme du{" "}
+            <a
+              href="https://princepalace.fr/reveillon-saint-sylvestre-champs-elysees/"
+              target="_blank"
+              rel="noopener"
+              className="text-primary hover:underline"
+            >
+              réveillon de la Saint-Sylvestre au Prince Palace
+            </a>
+            .
+          </p>
         </Reveal>
       </article>
 

@@ -305,6 +305,18 @@ export default function Evenementiel() {
             Lumière tamisée, matières profondes, touches dorées : une atmosphère lounge qui met en
             valeur vos photos et vos vidéos de soirée.
           </p>
+          <p className="text-muted-foreground leading-relaxed mb-8">
+            Vous préparez la fin d'année ? Retrouvez toutes les informations sur notre{" "}
+            <a
+              href="https://princepalace.fr/reveillon-saint-sylvestre-champs-elysees/"
+              target="_blank"
+              rel="noopener"
+              className="text-primary hover:underline"
+            >
+              réveillon de la Saint-Sylvestre aux Champs-Élysées
+            </a>
+            .
+          </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link to="/galerie" className="premium-button border border-primary/50 text-primary px-7 py-3 text-center">
               Voir la galerie
