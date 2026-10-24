@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, getCurrentMonthInParis } from '@/lib/dateUtils';
 import { useYahooOpenTableAutoSync } from './useYahooOpenTableAutoSync';
+import { useGoogleCalendarAutoSync } from './useGoogleCalendarAutoSync';
 
 export interface DashboardKPIs {
   reservations: number;
@@ -157,6 +158,7 @@ export function useRealtimeDashboard() {
   const queryClient = useQueryClient();
 
   // Google Agenda auto-sync (every 5 min, no manual action needed)
+  useGoogleCalendarAutoSync();
 
   // Yahoo OpenTable auto-sync (every 5 min) — relevé des confirmations OpenTable dans la boîte Yahoo
   useYahooOpenTableAutoSync();
