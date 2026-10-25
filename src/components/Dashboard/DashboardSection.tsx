@@ -18,6 +18,9 @@ const formatShortDay = (date: string): string =>
     month: "short",
   }).format(new Date(`${date}T12:00:00`));
 
+const formatUpcomingTime = (time: string): string =>
+  /^\d{2}:\d{2}/.test(time ?? "") ? time.slice(0, 5) : (time || "heure à confirmer");
+
 const formatTakenTime = (createdAt: string): string =>
   new Intl.DateTimeFormat("fr-FR", {
     timeZone: "Europe/Paris",
@@ -384,7 +387,7 @@ export function DashboardSection() {
                 <div className="flex items-start sm:items-center gap-3 min-w-0">
                   <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
                     <Clock className="h-3 w-3" />
-                    {r.reservationTime.slice(0, 5)}
+                    {formatUpcomingTime(r.reservationTime)}
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <p className="font-medium text-foreground truncate">

@@ -21,6 +21,8 @@ export interface UpcomingDayCount {
   covers: number;
 }
 
+const hasKnownTime = (time: string): boolean => /^\d{2}:\d{2}/.test(time ?? '');
+
 const mapRow = (r: any): UpcomingReservation => ({
   id: r.id,
   customerName: r.customer_name,
@@ -40,12 +42,21 @@ const fetchSelectedDay = async (day: string): Promise<UpcomingReservation[]> => 
     .select('id, customer_name, customer_phone, customer_email, guests_count, reservation_date, reservation_time, status, notes, is_duplicate, channels(name)')
     .eq('reservation_date', day)
     .eq('is_duplicate', false)
-    .neq('status', 'cancelled')
-    .order('reservation_time', { ascending: true });
+    .neq('status', 'cancelled');
 
   if (error) throw error;
 
-  return (data || []).map(mapRow);
+  // Tri par heure connue d'abord (HH:MM croissant) ; les horaires "À confirmer"
+  // (import TheFork sans heure précise) sont placés à la fin plutôt que de casser le tri.
+  const mapped = (data || []).map(mapRow);
+  return mapped.sort((a, b) => {
+    const aKnown = hasKnownTime(a.reservationTime);
+    const bKnown = hasKnownTime(b.reservationTime);
+    if (aKnown && !bKnown) return -1;
+    if (!aKnown && bKnown) return 1;
+    if (!aKnown && !bKnown) return 0;
+    return a.reservationTime.localeCompare(b.reservationTime);
+  });
 };
 
 const fetchNext7Summary = async (): Promise<UpcomingDayCount[]> => {
