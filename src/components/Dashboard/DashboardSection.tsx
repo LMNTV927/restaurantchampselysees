@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Users, Clock, MapPin, Activity, AlertTriangle } from "lucide-react";
+import { Calendar, Users, Clock, MapPin, Activity, AlertTriangle, CalendarClock } from "lucide-react";
 import { KPICard } from "@/components/UI/KPICard";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,15 @@ import { StatusBadge } from "@/components/UI/StatusBadge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useRealtimeDashboard } from "@/hooks/useRealtimeDashboard";
 import { useReservationsTaken } from "@/hooks/useReservationsTaken";
+import { useUpcomingReservations } from "@/hooks/useUpcomingReservations";
 import { getTodayInParis, getCurrentMonthNameInParis } from "@/lib/dateUtils";
+
+const formatShortDay = (date: string): string =>
+  new Intl.DateTimeFormat("fr-FR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${date}T12:00:00`));
 
 const formatTakenTime = (createdAt: string): string =>
   new Intl.DateTimeFormat("fr-FR", {
@@ -36,6 +44,8 @@ export function DashboardSection() {
   const today = getTodayInParis();
   const [takenDay, setTakenDay] = useState(today);
   const { reservations: takenReservations, count: takenCount, loading: takenLoading } = useReservationsTaken(takenDay);
+  const [upcomingDay, setUpcomingDay] = useState(today);
+  const { reservations: upcomingReservations, count: upcomingCount, covers: upcomingCovers, next7, loading: upcomingLoading } = useUpcomingReservations(upcomingDay);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -291,6 +301,108 @@ export function DashboardSection() {
             ))}
             {!takenLoading && takenReservations.length === 0 && (
               <p className="text-sm text-muted-foreground py-2">Aucune réservation prise ce jour-là</p>
+            )}
+          </div>
+        </Card>
+      </motion.div>
+
+      {/* Réservations à venir */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
+        <Card className="premium-card">
+          <div className="p-3 sm:p-4 lg:p-6 border-b border-border/50">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <CalendarClock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <h3 className="text-sm sm:text-base lg:text-lg font-playfair font-semibold">
+                Réservations à venir
+              </h3>
+              <div className="flex items-center gap-2 ml-auto">
+                <input
+                  type="date"
+                  value={upcomingDay}
+                  min={today}
+                  onChange={(e) => setUpcomingDay(e.target.value || today)}
+                  className="h-9 rounded-md border border-border bg-background px-2 text-xs sm:text-sm text-foreground"
+                  aria-label="Choisir le jour à venir"
+                />
+                {upcomingDay !== today && (
+                  <button
+                    type="button"
+                    onClick={() => setUpcomingDay(today)}
+                    className="h-9 rounded-md border border-border px-2.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+                  >
+                    Aujourd'hui
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Aperçu rapide des 7 prochains jours */}
+            <div className="flex gap-2 overflow-x-auto mt-4 pb-1">
+              {next7.map((d) => {
+                const isActive = d.date === upcomingDay;
+                return (
+                  <button
+                    key={d.date}
+                    type="button"
+                    onClick={() => setUpcomingDay(d.date)}
+                    className={`shrink-0 rounded-xl border px-3 py-2 text-left transition-colors ${
+                      isActive
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:bg-muted/30"
+                    }`}
+                  >
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      {d.date === today ? "Aujourd'hui" : formatShortDay(d.date)}
+                    </p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {d.count} résa{d.count > 1 ? "s" : ""} · {d.covers} cv.
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="text-sm text-muted-foreground mt-3">
+              {upcomingLoading
+                ? "Chargement…"
+                : upcomingCount === 0
+                  ? `Aucune réservation prévue le ${formatShortDay(upcomingDay)}`
+                  : `${upcomingCount} réservation${upcomingCount > 1 ? "s" : ""} · ${upcomingCovers} couvert${upcomingCovers > 1 ? "s" : ""} prévu${upcomingCovers > 1 ? "s" : ""} le ${formatShortDay(upcomingDay)}`}
+            </p>
+          </div>
+
+          <div className="p-3 sm:p-4 lg:p-6 space-y-2 sm:space-y-3">
+            {upcomingReservations.map((r) => (
+              <div
+                key={r.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 p-4 bg-muted/20 rounded-2xl hover:bg-muted/30 transition-all duration-300"
+              >
+                <div className="flex items-start sm:items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                    <Clock className="h-3 w-3" />
+                    {r.reservationTime.slice(0, 5)}
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="font-medium text-foreground truncate">
+                      {r.customerName} · {r.guestsCount} couvert{r.guestsCount > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {r.channelName ? `via ${r.channelName}` : "via Web"}
+                      {r.notes ? ` · ${r.notes}` : ""}
+                    </p>
+                  </div>
+                </div>
+                <div className="shrink-0">
+                  <StatusBadge status={r.status} />
+                </div>
+              </div>
+            ))}
+            {!upcomingLoading && upcomingReservations.length === 0 && (
+              <p className="text-sm text-muted-foreground py-2">Aucune réservation à venir ce jour-là</p>
             )}
           </div>
         </Card>

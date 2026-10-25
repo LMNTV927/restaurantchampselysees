@@ -36,6 +36,16 @@ export function getDaysAgoInParis(daysAgo: number): string {
 }
 
 /**
+ * Get a date N days from today (in the future) in Paris timezone
+ */
+export function getDaysFromNowInParis(daysAhead: number): string {
+  const now = new Date();
+  const parisTime = new Date(now.toLocaleString('en-US', { timeZone: PARIS_TIMEZONE }));
+  parisTime.setDate(parisTime.getDate() + daysAhead);
+  return parisTime.toLocaleDateString('sv-SE');
+}
+
+/**
  * Check if a reservation date matches today (regardless of time)
  * This ensures we show all reservations for the current day from midnight to midnight
  */
