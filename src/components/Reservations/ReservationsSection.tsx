@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, Calendar, Clock, Users, MapPin, History, Trash2, Info } from "lucide-react";
+import { Calendar as CalendarIcon, Calendar, CalendarClock, Clock, Users, MapPin, History, Trash2, Info } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/UI/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimeReservations } from "@/hooks/useRealtimeReservations";
 import { useYahooOpenTableAutoSync } from "@/hooks/useYahooOpenTableAutoSync";
+import { useUpcomingReservations } from "@/hooks/useUpcomingReservations";
 import { useAuth } from "@/hooks/useAuth";
 import { AddReservationDialog } from "./AddReservationDialog";
 
@@ -24,6 +25,16 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { getTodayInParis, getCurrentTimeInParis, getCurrentMonthInParis, createDateTimeInParis } from "@/lib/dateUtils";
 import { getChannelColor } from "@/lib/channelColors";
 import { cn } from "@/lib/utils";
+
+const formatShortDay = (date: string): string =>
+  new Intl.DateTimeFormat("fr-FR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${date}T12:00:00`));
+
+const formatUpcomingTime = (time: string): string =>
+  /^\d{2}:\d{2}/.test(time ?? "") ? time.slice(0, 5) : (time || "heure à confirmer");
 
 type ReservationStatus = "confirmed" | "show" | "no_show" | "cancelled";
 
@@ -46,6 +57,9 @@ export function ReservationsSection() {
   const { reservations: realtimeReservations, duplicates, kpis, loading, updateReservationStatus, updateReservationNotes, deleteReservation, restoreReservation, refetch } = useRealtimeReservations();
   const { role } = useAuth();
   useYahooOpenTableAutoSync();
+
+  const [upcomingDay, setUpcomingDay] = useState(getTodayInParis());
+  const { reservations: upcomingReservations, count: upcomingCount, covers: upcomingCovers, next7, loading: upcomingLoading } = useUpcomingReservations(upcomingDay);
 
 
 
