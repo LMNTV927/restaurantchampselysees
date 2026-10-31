@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllRows } from '@/lib/fetchAllRows';
 import { getTodayInParis, getDaysAgoInParis, getTimeAgoInParis, getCurrentMonthInParis } from '@/lib/dateUtils';
 import { useYahooOpenTableAutoSync } from './useYahooOpenTableAutoSync';
 import { useGoogleCalendarAutoSync } from './useGoogleCalendarAutoSync';
@@ -59,25 +60,31 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   const monthStart = `${currentMonth}-01`;
 
   const [todayRes, yesterdayRes, monthlyRes] = await Promise.all([
-    supabase
+    fetchAllRows<any>((from, to) => supabase
       .from('reservations')
-      .select('guests_count, status, created_at, customer_name, channels(name)')
+      .select('guests_count, status, created_at, customer_name, channels(name), id')
       .eq('reservation_date', today)
       .eq('is_duplicate', false)
-      .neq('status', 'cancelled'),
-    supabase
+      .neq('status', 'cancelled')
+      .order('id', { ascending: true })
+      .range(from, to)),
+    fetchAllRows<any>((from, to) => supabase
       .from('reservations')
-      .select('guests_count')
+      .select('guests_count, id')
       .eq('reservation_date', yesterday)
       .eq('is_duplicate', false)
-      .neq('status', 'cancelled'),
-    supabase
+      .neq('status', 'cancelled')
+      .order('id', { ascending: true })
+      .range(from, to)),
+    fetchAllRows<any>((from, to) => supabase
       .from('reservations')
-      .select('reservation_date, guests_count, created_at')
+      .select('reservation_date, guests_count, created_at, id')
       .gte('reservation_date', monthStart)
       .lte('reservation_date', today)
       .eq('is_duplicate', false)
-      .neq('status', 'cancelled'),
+      .neq('status', 'cancelled')
+      .order('id', { ascending: true })
+      .range(from, to)),
   ]);
 
 

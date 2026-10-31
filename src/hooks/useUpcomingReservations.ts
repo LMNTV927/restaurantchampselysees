@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllRows } from '@/lib/fetchAllRows';
 import { getTodayInParis, getDaysFromNowInParis } from '@/lib/dateUtils';
 
 export interface UpcomingReservation {
@@ -37,12 +38,14 @@ const mapRow = (r: any): UpcomingReservation => ({
 });
 
 const fetchSelectedDay = async (day: string): Promise<UpcomingReservation[]> => {
-  const { data, error } = await supabase
+  const { data, error } = await fetchAllRows<any>((from, to) => supabase
     .from('reservations')
     .select('id, customer_name, customer_phone, customer_email, guests_count, reservation_date, reservation_time, status, notes, is_duplicate, channels(name)')
     .eq('reservation_date', day)
     .eq('is_duplicate', false)
-    .neq('status', 'cancelled');
+    .neq('status', 'cancelled')
+    .order('id', { ascending: true })
+    .range(from, to));
 
   if (error) throw error;
 
@@ -63,13 +66,15 @@ const fetchNext7Summary = async (): Promise<UpcomingDayCount[]> => {
   const today = getTodayInParis();
   const horizonEnd = getDaysFromNowInParis(6);
 
-  const { data, error } = await supabase
+  const { data, error } = await fetchAllRows<any>((from, to) => supabase
     .from('reservations')
     .select('reservation_date, guests_count')
     .gte('reservation_date', today)
     .lte('reservation_date', horizonEnd)
     .eq('is_duplicate', false)
-    .neq('status', 'cancelled');
+    .neq('status', 'cancelled')
+    .order('id', { ascending: true })
+    .range(from, to));
 
   if (error) throw error;
 

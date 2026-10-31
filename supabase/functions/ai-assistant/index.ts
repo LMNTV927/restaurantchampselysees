@@ -1,3 +1,4 @@
+import { fetchAll } from "../_shared/fetchAll.ts";
 import { isStaff, unauthorized, guardReservationBody } from "../_shared/guard.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -28,11 +29,11 @@ serve(async (req) => {
     // Fetch recent reservations (last 90 days)
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-    const { data: reservations } = await supabase
+    const { data: reservations } = await fetchAll((from, to) => supabase
       .from("reservations")
       .select("*")
       .gte("reservation_date", ninetyDaysAgo.toISOString().split("T")[0])
-      .order("reservation_date", { ascending: false });
+      .order("reservation_date", { ascending: false }).order("id", { ascending: true }).range(from, to));
 
     // Fetch channel stats (last 90 days)
     const { data: channelStats } = await supabase
