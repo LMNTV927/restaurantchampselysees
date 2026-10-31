@@ -1,3 +1,4 @@
+import { fetchAll } from "../_shared/fetchAll.ts";
 import { isStaff, unauthorized, guardReservationBody } from "../_shared/guard.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
@@ -106,13 +107,13 @@ const handler = async (req: Request): Promise<Response> => {
     const threeHoursAgoMinutes = (parisHour * 60 + parisMinute) - 180;
 
     // Fetch eligible reservations: confirmed, not yet sent, today or before
-    const { data: reservations, error } = await supabase
+    const { data: reservations, error } = await fetchAll((from, to) => supabase
       .from('reservations')
       .select('id, customer_name, customer_email, reservation_date, reservation_time')
       .eq('status', 'confirmed')
       .eq('followup_sent', false)
       .not('customer_email', 'is', null)
-      .lte('reservation_date', parisDate);
+      .lte('reservation_date', parisDate).order('id', { ascending: true }).range(from, to));
 
     if (error) throw error;
 

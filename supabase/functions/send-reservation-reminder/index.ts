@@ -1,3 +1,4 @@
+import { fetchAll } from "../_shared/fetchAll.ts";
 import { isStaff, unauthorized, guardReservationBody } from "../_shared/guard.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
@@ -132,14 +133,14 @@ const handler = async (req: Request): Promise<Response> => {
     const startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const endDate = new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-    const { data: reservations, error } = await supabase
+    const { data: reservations, error } = await fetchAll((from, to) => supabase
       .from("reservations")
       .select("id, customer_name, customer_phone, customer_email, reservation_date, reservation_time, guests_count, created_at, modification_token")
       .eq("status", "confirmed")
       .eq("reminder_sent", false)
       .eq("is_duplicate", false)
       .gte("reservation_date", startDate)
-      .lte("reservation_date", endDate);
+      .lte("reservation_date", endDate).order("id", { ascending: true }).range(from, to));
 
     if (error) throw error;
 

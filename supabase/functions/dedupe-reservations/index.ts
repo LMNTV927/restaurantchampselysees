@@ -1,3 +1,4 @@
+import { fetchAll } from "../_shared/fetchAll.ts";
 import { isStaff, unauthorized, guardReservationBody } from "../_shared/guard.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -37,11 +38,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     const today = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-    const { data: reservations, error } = await supabase
+    const { data: reservations, error } = await fetchAll((from, to) => supabase
       .from("reservations")
       .select("id, customer_phone, customer_name, reservation_date, reservation_time, created_at, is_duplicate, duplicate_of, status, notes, dedupe_ignored")
       .neq("status", "cancelled")
-      .gte("reservation_date", today);
+      .gte("reservation_date", today).order("id", { ascending: true }).range(from, to));
 
     if (error) throw error;
 
