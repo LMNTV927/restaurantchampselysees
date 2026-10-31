@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllRows } from '@/lib/fetchAllRows';
 
 export interface ReservationTaken {
   id: string;
@@ -28,13 +29,15 @@ const fetchReservationsTaken = async (day: string): Promise<ReservationTaken[]> 
   const rangeStart = `${getShiftedDay(day, -1)}T00:00:00Z`;
   const rangeEnd = `${getShiftedDay(day, 1)}T23:59:59Z`;
 
-  const { data, error } = await supabase
+  const { data, error } = await fetchAllRows<any>((from, to) => supabase
     .from('reservations')
     .select('id, created_at, customer_name, customer_phone, customer_email, guests_count, reservation_date, reservation_time, status, notes, is_duplicate, channels(name)')
     .eq('is_duplicate', false)
     .gte('created_at', rangeStart)
     .lte('created_at', rangeEnd)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: true })
+    .range(from, to));
 
   if (error) throw error;
 

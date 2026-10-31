@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllRows } from '@/lib/fetchAllRows';
 import { getCurrentMonthInParis } from '@/lib/dateUtils';
 import {
   aggregateClicks,
@@ -64,12 +65,12 @@ const fetchChannelsAndStats = async (): Promise<ChannelsResult> => {
 
   const [channelsRes, statsRes, prevStatsRes, reservationsRes, prevReservationsRes] = await Promise.all([
     supabase.from('channels').select('id, name, slug, description, is_active').eq('is_active', true),
-    supabase.from('channel_stats').select('channel_id, clicks').gte('date', start).lt('date', end),
-    supabase.from('channel_stats').select('channel_id, clicks').gte('date', prevStart).lt('date', start),
-    supabase.from('reservations').select('channel_id, source, utm_campaign, guests_count, channels(name)')
-      .gte('reservation_date', start).lt('reservation_date', end).eq('is_duplicate', false).neq('status', 'cancelled'),
-    supabase.from('reservations').select('channel_id, source, guests_count, channels(name)')
-      .gte('reservation_date', prevStart).lt('reservation_date', start).eq('is_duplicate', false).neq('status', 'cancelled'),
+    fetchAllRows<any>((from, to) => supabase.from('channel_stats').select('id, channel_id, clicks').gte('date', start).lt('date', end).order('id', { ascending: true }).range(from, to)),
+    fetchAllRows<any>((from, to) => supabase.from('channel_stats').select('id, channel_id, clicks').gte('date', prevStart).lt('date', start).order('id', { ascending: true }).range(from, to)),
+    fetchAllRows<any>((from, to) => supabase.from('reservations').select('id, channel_id, source, utm_campaign, guests_count, channels(name)')
+      .gte('reservation_date', start).lt('reservation_date', end).eq('is_duplicate', false).neq('status', 'cancelled').order('id', { ascending: true }).range(from, to)),
+    fetchAllRows<any>((from, to) => supabase.from('reservations').select('id, channel_id, source, guests_count, channels(name)')
+      .gte('reservation_date', prevStart).lt('reservation_date', start).eq('is_duplicate', false).neq('status', 'cancelled').order('id', { ascending: true }).range(from, to)),
   ]);
 
   if (channelsRes.error) throw channelsRes.error;
