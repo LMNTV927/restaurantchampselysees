@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fetchAllRows } from './fetchAllRows';
+import { fetchAllRows } from '../src/lib/fetchAllRows';
 
 describe('fetchAllRows', () => {
   it('charge les 1022 réservations, pas seulement 1000', async () => {
