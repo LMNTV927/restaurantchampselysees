@@ -70,11 +70,13 @@ const fetchReservations = async (): Promise<ReservationsResult> => {
   const yesterday = getDaysAgoInParis(1);
 
   const [allRes, yesterdayRes] = await Promise.all([
-    supabase
+    fetchAllRows<any>((from, to) => supabase
       .from('reservations')
       .select('id, customer_name, customer_phone, customer_email, reservation_date, reservation_time, guests_count, notes, status, created_at, source, external_id, utm_campaign, utm_source, is_duplicate, channels(name)')
       .order('reservation_date', { ascending: true })
-      .order('reservation_time', { ascending: true }),
+      .order('reservation_time', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to)),
     supabase
       .from('reservations')
       .select('reservation_date, guests_count')

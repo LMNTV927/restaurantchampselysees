@@ -47,15 +47,19 @@ const fetchRangeData = async (start: string, end: string, prevStart: string): Pr
     supabase.from('channels').select('id, name, slug, description, is_active').eq('is_active', true),
     supabase.from('channel_stats').select('channel_id, clicks').gte('date', start).lt('date', end),
     supabase.from('channel_stats').select('channel_id, clicks').gte('date', prevStart).lt('date', start),
-    supabase.from('reservations').select('*, channels(name)')
+    fetchAllRows<any>((from, to) => supabase.from('reservations').select('*, channels(name)')
       .gte('reservation_date', start).lt('reservation_date', end)
       .eq('is_duplicate', false)
       .neq('status', 'cancelled')
-      .order('reservation_date', { ascending: true }),
-    supabase.from('reservations').select('channel_id, source, guests_count, channels(name)')
+      .order('reservation_date', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to)),
+    fetchAllRows<any>((from, to) => supabase.from('reservations').select('channel_id, source, guests_count, channels(name)')
       .gte('reservation_date', prevStart).lt('reservation_date', start)
       .eq('is_duplicate', false)
-      .neq('status', 'cancelled'),
+      .neq('status', 'cancelled')
+      .order('id', { ascending: true })
+      .range(from, to)),
   ]);
 
   if (channelsRes.error) throw channelsRes.error;
