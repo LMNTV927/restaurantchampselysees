@@ -549,6 +549,46 @@ export const usePDFReport = () => {
         }
       });
 
+      // Détail des réservations (contacts clients) sur toute la période
+      if (allReservations.length > 0) {
+        const sorted = [...allReservations].sort((a, b) =>
+          (a.reservation_date + (a.reservation_time || '')).localeCompare(b.reservation_date + (b.reservation_time || ''))
+        );
+        doc.addPage();
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(0);
+        doc.text('DÉTAIL DES RÉSERVATIONS', 20, 30);
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(50);
+        doc.text(`${sorted.length} réservations enregistrées pour ${periodLabel}`, 20, 45);
+        autoTable(doc, {
+          startY: 55,
+          head: [['Client', 'Téléphone', 'Email', 'Date', 'Heure', 'Couverts', 'Statut', 'Canal']],
+          body: sorted.map(r => [
+            r.customer_name,
+            r.customer_phone,
+            r.customer_email || 'N/A',
+            new Date(r.reservation_date).toLocaleDateString('fr-FR'),
+            r.reservation_time,
+            r.guests_count.toString(),
+            r.status === 'confirmed' ? 'Confirmée' :
+            r.status === 'show' ? 'Présentée' :
+            r.status === 'no_show' ? 'Absent' : 'Annulée',
+            r.channel_name
+          ]),
+          theme: 'striped',
+          styles: { fontSize: 8, cellPadding: 3 },
+          headStyles: { fillColor: [52, 73, 94], textColor: 255, fontStyle: 'bold' },
+          columnStyles: {
+            0: { cellWidth: 25 }, 1: { cellWidth: 20 }, 2: { cellWidth: 30 }, 3: { cellWidth: 18 },
+            4: { cellWidth: 15 }, 5: { cellWidth: 12, halign: 'center' }, 6: { cellWidth: 20 }, 7: { cellWidth: 20 }
+          }
+        });
+      }
+
+
       // Footer
       for (let i = 1; i <= doc.getNumberOfPages(); i++) {
         doc.setPage(i);
