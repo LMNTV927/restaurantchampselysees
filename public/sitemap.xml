@@ -76,6 +76,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://restaurantchampselysees.fr/restaurant-ouvert-tard-paris</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://restaurantchampselysees.fr/restaurant</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
