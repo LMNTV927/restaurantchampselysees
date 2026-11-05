@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { BookingPage } from "./pages/BookingPage";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { RouteRobots } from "./components/Site/RouteRobots";
 
 // Le tunnel de réservation reste dans le bundle principal (chargement instantané).
 // Tout le reste est chargé à la demande.
@@ -73,6 +74,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <RouteRobots />
         <AuthProvider>
           <Suspense fallback={<RouteFallback />}>
             <Routes>
