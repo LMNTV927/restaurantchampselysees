@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
+import { canonicalUrl } from "@/lib/seoRouting";
 
 interface SeoProps {
   title: string;
@@ -9,55 +10,21 @@ interface SeoProps {
   noindex?: boolean;
 }
 
-const upsertMeta = (selector: string, attr: "name" | "property", key: string, content: string) => {
-  let el = document.head.querySelector<HTMLMetaElement>(selector);
-  if (!el) {
-    el = document.createElement("meta");
-    el.setAttribute(attr, key);
-    document.head.appendChild(el);
-  }
-  el.setAttribute("content", content);
-};
-
-const REFERENCE_ORIGIN = "https://restaurantchampselysees.fr";
-
 export function Seo({ title, description, path, image, jsonLd, noindex }: SeoProps) {
-  useEffect(() => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    // Domaine de référence unique : les variantes (lovable.app, prévisualisation) pointent vers le .fr
-    const url = `${REFERENCE_ORIGIN}${path}`;
-
-    document.title = title;
-    upsertMeta('meta[name="description"]', "name", "description", description);
-    upsertMeta('meta[name="robots"]', "name", "robots", noindex ? "noindex, nofollow" : "index, follow");
-    upsertMeta('meta[property="og:title"]', "property", "og:title", title);
-    upsertMeta('meta[property="og:description"]', "property", "og:description", description);
-    upsertMeta('meta[property="og:type"]', "property", "og:type", "website");
-    upsertMeta('meta[property="og:url"]', "property", "og:url", url);
-    upsertMeta('meta[name="twitter:card"]', "name", "twitter:card", "summary_large_image");
-    if (image) {
-      upsertMeta('meta[property="og:image"]', "property", "og:image", `${origin}${image}`);
-    }
-
-    let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.rel = "canonical";
-      document.head.appendChild(canonical);
-    }
-    canonical.href = url;
-
-    let script: HTMLScriptElement | null = null;
-    if (jsonLd) {
-      script = document.createElement("script");
-      script.type = "application/ld+json";
-      script.text = JSON.stringify(jsonLd);
-      document.head.appendChild(script);
-    }
-    return () => {
-      if (script) script.remove();
-    };
-  }, [title, description, path, image, jsonLd, noindex]);
-
-  return null;
+  const url = canonicalUrl(path);
+  return (
+    <Helmet>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <link rel="canonical" href={url} />
+      <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content={url} />
+      <meta name="twitter:card" content="summary_large_image" />
+      {image && <meta property="og:image" content={new URL(image, url).href} />}
+      {jsonLd && <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>}
+    </Helmet>
+  );
 }

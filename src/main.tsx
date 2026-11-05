@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import { captureCampaignParams } from "./lib/campaignTracking";
@@ -27,4 +28,18 @@ window.addEventListener("unhandledrejection", (e) => {
 // Capte utm_campaign / utm_source / gclid dès le premier chargement
 captureCampaignParams();
 
-createRoot(document.getElementById("root")!).render(<App />);
+const root = document.getElementById("root");
+if (root) {
+  createRoot(root).render(
+    <HelmetProvider>
+      <Helmet>
+        <title>Prince Palace | Événementiel & restaurant lounge Champs-Élysées</title>
+        <meta property="og:title" content="Prince Palace | Événementiel & restaurant lounge Champs-Élysées" />
+        <meta property="og:description" content="Soirées privées, anniversaires, cocktails et privatisation aux Champs-Élysées. Restaurant lounge haut de gamme à Paris 8." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+      <App />
+    </HelmetProvider>,
+  );
+}
