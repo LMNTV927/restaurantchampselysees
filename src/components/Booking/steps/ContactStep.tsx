@@ -64,7 +64,7 @@ export function ContactStep({ data, onUpdate }: ContactStepProps) {
         
         <div>
           <Label htmlFor="email" className="text-sm font-medium text-foreground">
-            Adresse email (optionnel)
+            Adresse email
           </Label>
           <Input
             id="email"
