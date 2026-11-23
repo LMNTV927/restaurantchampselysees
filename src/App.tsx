@@ -43,6 +43,7 @@ const LocationSalleSeminaire = lazy(() => import("./pages/site/LocationSalleSemi
 const DinerFinAnneeEntreprise = lazy(() => import("./pages/site/DinerFinAnneeEntreprise"));
 const ArbreDeNoelEntreprise = lazy(() => import("./pages/site/ArbreDeNoelEntreprise"));
 const PotDeDepartEntreprise = lazy(() => import("./pages/site/PotDeDepartEntreprise"));
+const GalaCaritatifEntreprise = lazy(() => import("./pages/site/GalaCaritatifEntreprise"));
 const Restaurant = lazy(() => import("./pages/site/Restaurant"));
 const Galerie = lazy(() => import("./pages/site/Galerie"));
 const Avis = lazy(() => import("./pages/site/Avis"));
@@ -109,6 +110,7 @@ const App = () => (
                 <Route path="/diner-fin-annee-entreprise-paris" element={<DinerFinAnneeEntreprise />} />
                 <Route path="/arbre-de-noel-entreprise-paris" element={<ArbreDeNoelEntreprise />} />
                 <Route path="/pot-de-depart-entreprise-paris" element={<PotDeDepartEntreprise />} />
+                <Route path="/gala-caritatif-entreprise-paris" element={<GalaCaritatifEntreprise />} />
                 <Route path="/restaurant" element={<Restaurant />} />
                 <Route path="/galerie" element={<Galerie />} />
                 <Route path="/avis" element={<Avis />} />
