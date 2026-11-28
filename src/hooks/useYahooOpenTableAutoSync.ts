@@ -32,8 +32,15 @@ export function useYahooOpenTableAutoSync() {
       if (mounted.current) setSyncing(true);
       inFlight = (async () => {
         try {
+          // Pas de session valide (chargement ou session expirée) : on attend la prochaine relève.
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (!sessionData?.session?.access_token) return;
           const { data, error } = await supabase.functions.invoke('sync-yahoo-opentable');
-          if (error) throw error;
+          if (error) {
+            const status = (error as any)?.context?.status;
+            if (status === 401 || status === 403) return;
+            throw error;
+          }
           if ((data as any)?.error) throw new Error((data as any).error);
 
           const now = Date.now();
